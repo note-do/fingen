@@ -65,7 +65,7 @@ Android-приложение учёта доходов и расходов. Па
 - Обработчики нажатий, которые раньше были `@OnClick`, используют `utils/DebouncingOnClickListener` (защита от двойного нажатия, как у ButterKnife). Новые обработчики, которые открывают экран или сохраняют данные, тоже оборачивать.
 - В `AndroidManifest.xml` у `<application>` убран `tools:node="replace"`: компоненты библиотек (WorkManager и др.) попадают в итоговый манифест от самих библиотек.
 - Однократная очистка задач старого android-job: `FGApplication.cancelLegacyJobs()` через `JobScheduler`, флаг `PREF_ANDROID_JOB_MIGRATED`. Можно удалить, когда у пользователей не останется версий с android-job.
-- Тесты: `app/src/androidTest`: `SmsParserTest`, `AccountsDAOTest`, `TransactionsDAOTest`, `DbSnapshot` (снимок `_id` до теста и откат после — тесты не оставляют данных), `DbSnapshotTest`, `dropbox/DropboxClientTest` (хранение credential и миграция V3, без сети). Юнит-тестов в `app/src/test` пока нет.
+- Тесты: `app/src/androidTest`: `SmsParserTest`, `AccountsDAOTest`, `TransactionsDAOTest`, `DbSnapshot` (снимок `_id` до теста и откат после — тесты не оставляют данных), `DbSnapshotTest`, `dropbox/DropboxClientTest` (хранение credential и миграция V3, без сети), `db/DatabaseMigrationTest` + `MigrationTestHelper` (миграции на отдельных файлах БД из SQL-фикстур `androidTest/assets/migrations/fingen_v<N>.sql`, пока 34 → 35). Юнит-тестов в `app/src/test` пока нет.
 - Тесты ДАО — проверка сохранения счетов и транзакций; при падении NPE в `DBHelper.updateFullNames` или `createItem` смотреть `SearchString` и закрытие транзакции.
 
 ## Роль оркестратора
