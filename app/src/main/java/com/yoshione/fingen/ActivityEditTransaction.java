@@ -125,9 +125,7 @@ import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
-import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
+import com.yoshione.fingen.utils.HelpSequence;
 
 import static com.yoshione.fingen.utils.RequestCodes.REQUEST_CODE_SELECT_MODEL;
 import static com.yoshione.fingen.utils.RequestCodes.REQUEST_CODE_SELECT_MODEL_FOR_PRODUCT;
@@ -147,7 +145,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     private static final int ERR_EXRATE_ZERO = 1;
     private static final int ERR_EXRATE_ONE = 2;
     private static final int ERR_EMPTY_SRC_ACCOUNT = 3;
-    private static final String SHOWCASE_ID = "Edit transaction showcase";
     //</editor-fold>
 
     //<editor-fold desc="Bind views" defaultstate="collapsed">
@@ -2037,16 +2034,9 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     public boolean showHelp() {
         super.showHelp();
 
-        MaterialShowcaseView.resetSingleUse(this, SHOWCASE_ID);
 
-        ShowcaseConfig config = new ShowcaseConfig();
-        config.setDelay(500); // half second between each showcase view
+        HelpSequence sequence = new HelpSequence(this);
 
-        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(this, SHOWCASE_ID);
-
-        sequence.setConfig(config);
-
-        String gotIt = getResources().getString(R.string.act_next);
         //+Вводный экран
         //+дата/время Нажмите, чтобы изменить дату или время транзакции
         //Счет Выберите из списка счет
@@ -2057,23 +2047,11 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         //Курс
         //Комментарий
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(new View(this)).setDismissText(gotIt)
-                .setContentText(getString(R.string.hlp_tr_editor_intro))
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .build());
+        sequence.add(findViewById(android.R.id.content), R.string.hlp_tr_editor_intro);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(edDate).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_tr_editor_date)
-                .build());
+        sequence.add(edDate, R.string.hlp_tr_editor_date);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(edTime).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_tr_editor_time)
-                .build());
+        sequence.add(edTime, R.string.hlp_tr_editor_time);
 
         String accountHint = "";
         switch (transaction.getTransactionType()) {
@@ -2085,11 +2063,7 @@ public class ActivityEditTransaction extends ToolbarActivity implements
                 accountHint = getString(R.string.hlp_tr_editor_account_outcome_or_transfer);
                 break;
         }
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(textViewAccount).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(accountHint)
-                .build());
+        sequence.add(textViewAccount, accountHint);
 
         String payeeHint = "";
         switch (transaction.getTransactionType()) {
@@ -2103,49 +2077,25 @@ public class ActivityEditTransaction extends ToolbarActivity implements
                 payeeHint = getString(R.string.hlp_tr_editor_dest_account);
                 break;
         }
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(viewPager).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(payeeHint)
-                .build());
+        sequence.add(viewPager, payeeHint);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(edCategory).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(getString(R.string.hlp_tr_editor_category))
-                .build());
+        sequence.add(edCategory, getString(R.string.hlp_tr_editor_category));
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(amountEditor).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(getString(R.string.hlp_tr_editor_amount))
-                .build());
+        sequence.add(amountEditor, getString(R.string.hlp_tr_editor_amount));
 
         switch (transaction.getTransactionType()) {
             case Transaction.TRANSACTION_TYPE_INCOME:
             case Transaction.TRANSACTION_TYPE_EXPENSE:
-                sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                        .setTarget(amountEditor.btnAmountSign).setDismissText(gotIt).withRectangleShape()
-                        .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                        .setContentText(getString(R.string.hlp_tr_editor_amount_sign))
-                        .build());
+                sequence.add(amountEditor.btnAmountSign, getString(R.string.hlp_tr_editor_amount_sign));
                 break;
         }
 
         //Если мы в режиме перевода между счетами с разными валютами, показываем хинт для суммы в валюте
         //счета назначения и курса
         if (destAmountEditor.getVisibility() == View.VISIBLE) {
-            sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                    .setTarget(destAmountEditor).setDismissText(gotIt).withRectangleShape()
-                    .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                    .setContentText(getString(R.string.hlp_tr_editor_amount_dest_account))
-                    .build());
+            sequence.add(destAmountEditor, getString(R.string.hlp_tr_editor_amount_dest_account));
 
-            sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                    .setTarget(edExchangeRate).setDismissText(gotIt).withRectangleShape()
-                    .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                    .setContentText(getString(R.string.hlp_tr_editor_exchange_rate))
-                    .build());
+            sequence.add(edExchangeRate, getString(R.string.hlp_tr_editor_exchange_rate));
         }
 
         sequence.start();

@@ -34,9 +34,7 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
-import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
+import com.yoshione.fingen.utils.HelpSequence;
 
 public class ActivityEditAccount extends ToolbarActivity {
 
@@ -74,7 +72,6 @@ public class ActivityEditAccount extends ToolbarActivity {
     TextInputLayout mTextInputLayoutCabbage;
     //</editor-fold>
 
-    private static final String SHOWCASE_ID = "Edit account showcase";
 
     Account account;
 
@@ -393,17 +390,9 @@ public class ActivityEditAccount extends ToolbarActivity {
     public boolean showHelp() {
         super.showHelp();
 
-        MaterialShowcaseView.resetSingleUse(this, SHOWCASE_ID);
 
-        ShowcaseConfig config = new ShowcaseConfig();
-        config.setDelay(500); // half second between each showcase view
-        config.setMaskColor(ContextCompat.getColor(this, R.color.ColorPrimary));
+        HelpSequence sequence = new HelpSequence(this);
 
-        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(this, SHOWCASE_ID);
-
-        sequence.setConfig(config);
-
-        String gotIt = getResources().getString(R.string.act_next);
 
         /*
         hlp_account_editor_intro
@@ -416,57 +405,25 @@ public class ActivityEditAccount extends ToolbarActivity {
         hlp_account_editor_closed
         */
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(new View(this)).setDismissText(gotIt)
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(getString(R.string.hlp_account_editor_intro))
-                .build());
+        sequence.add(findViewById(android.R.id.content), getString(R.string.hlp_account_editor_intro));
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(editTextName).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_name)
-                .build());
+        sequence.add(editTextName, R.string.hlp_account_editor_name);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(editTextType).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_type)
-                .build());
+        sequence.add(editTextType, R.string.hlp_account_editor_type);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(editTextCabbage).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_currency)
-                .build());
+        sequence.add(editTextCabbage, R.string.hlp_account_editor_currency);
 
         if (editTextEmitent.getVisibility() == View.VISIBLE) {
-            sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                    .setTarget(editTextEmitent).setDismissText(gotIt).withRectangleShape()
-                    .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                    .setContentText(R.string.hlp_account_editor_emitent)
-                    .build());
+            sequence.add(editTextEmitent, R.string.hlp_account_editor_emitent);
         }
 
         if (editTextLast4Digits.getVisibility() == View.VISIBLE) {
-            sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                    .setTarget(editTextLast4Digits).setDismissText(gotIt).withRectangleShape()
-                    .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                    .setContentText(R.string.hlp_account_editor_last4digits)
-                    .build());
+            sequence.add(editTextLast4Digits, R.string.hlp_account_editor_last4digits);
         }
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(amountEditorStartBalance).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_start_balance)
-                .build());
+        sequence.add(amountEditorStartBalance, R.string.hlp_account_editor_start_balance);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(checkboxAccountClosed).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_closed)
-                .build());
+        sequence.add(checkboxAccountClosed, R.string.hlp_account_editor_closed);
 
         sequence.start();
 

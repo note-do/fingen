@@ -89,7 +89,7 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import ca.barrenechea.widget.recyclerview.decoration.StickyHeaderDecoration;
+import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -173,7 +173,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     AdapterFilters adapterF;
     private int contextMenuTarget = -1;
     private boolean isInSelectionMode;
-    private StickyHeaderDecoration stickyHeaderDecoration;
+    private StickyRecyclerHeadersDecoration stickyHeaderDecoration;
     FabMenuController mFabMenuController;
     private volatile boolean loading;
     private final int visibleThreshold = 10;
@@ -223,7 +223,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         adapterF = new AdapterFilters(getActivity(), this, this::editFilter);
         adapterF.setHasStableIds(true);
 
-        stickyHeaderDecoration = new StickyHeaderDecoration(adapterT);
+        stickyHeaderDecoration = new StickyRecyclerHeadersDecoration(adapterT);
 
         final LinearLayoutManager linearLayoutManager = new FgLinearLayoutManager(getActivity());
 
@@ -952,7 +952,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     @Override
     public void loadData(long itemID) {
 //        Debug.startMethodTracing("TransactionsLoadData");
-        stickyHeaderDecoration.clearHeaderCache();
+        stickyHeaderDecoration.invalidateHeaders();
         setAccountSetFilter();
 
         if (recyclerView == null) return;

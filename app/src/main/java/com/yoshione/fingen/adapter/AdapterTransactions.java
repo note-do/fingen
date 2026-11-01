@@ -28,14 +28,14 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import ca.barrenechea.widget.recyclerview.decoration.StickyHeaderAdapter;
+import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter;
 
 /**
  * Created by slv on 10.09.2015.
  * a
  */
 public class AdapterTransactions extends RecyclerView.Adapter implements FastScroller.SectionIndexer,
-        StickyHeaderAdapter<AdapterTransactions.HeaderViewHolder>, ITransactionClickListener {
+        StickyRecyclerHeadersAdapter<AdapterTransactions.HeaderViewHolder>, ITransactionClickListener {
 //    private static final String TAG = "AdapterTransactions";
 
     private int lastYear;
