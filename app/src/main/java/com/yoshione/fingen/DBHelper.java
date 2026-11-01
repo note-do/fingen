@@ -872,11 +872,12 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
             if (cursor.moveToFirst()) {
                 while (!cursor.isAfterLast()) {
                     cv.clear();
+                    String source = cursor.getString(1) == null ? "" : cursor.getString(1);
                     if (useFullName) {
-                        cv.put(C_FULL_NAME, cursor.getString(1));
+                        cv.put(C_FULL_NAME, source);
                     }
-                    translit = Translit.toTranslit(cursor.getString(1).toLowerCase());
-                    if (!cursor.getString(2).equals(translit)) {
+                    translit = Translit.toTranslit(source.toLowerCase());
+                    if (!translit.equals(cursor.getString(2))) {
                         cv.put(C_SEARCH_STRING, translit);
                     }
                     if (cv.size() != 0) {
