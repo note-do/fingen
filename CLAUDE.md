@@ -19,7 +19,7 @@ Android-приложение учёта доходов и расходов. Па
 - ProGuard/R8: `proguard-android-optimize.txt` и `-dontoptimize` в `app/proguard-rules.pro` — поведение release прежнее. Оптимизации выключены, release-сборка не проверялась.
 
 ### Библиотеки (актуальные)
-- UI: AppCompat-тема (`Theme.AppCompat`, MaterialComponents не используется), `NavigationView` + `DrawerLayout` (drawer), `androidx.preference` (настройки), `FlipView` собственный (`widgets/FlipView`).
+- UI: Material 1.14.0 (`com.google.android.material`) и `coordinatorlayout` 1.1.0 (явно); тема AppCompat сохранена (`Theme.AppCompat`, MaterialComponents не используется; используются AppBarLayout, FloatingActionButton, NavigationView, TabLayout, TextInputLayout — работают на AppCompat-теме), `NavigationView` + `DrawerLayout` (drawer), `androidx.preference` (настройки), `FlipView` собственный (`widgets/FlipView`).
 - Привязка views: ViewBinding (`*Binding`, `getContentRoot()` в `ToolbarActivity`). ButterKnife удалён. Views из `<include>` и динамические layout берутся через `findViewById`.
 - Права: PermissionsDispatcher 4.9.2 (`@RuntimePermissions`).
 - DI: Dagger 2.16 (`di/`).
