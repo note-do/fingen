@@ -4,8 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
-import android.os.Build;
-import android.os.Environment;
 
 import android.util.Log;
 
@@ -41,50 +39,6 @@ import java.util.zip.ZipOutputStream;
 public class FileUtils {
     private static final String TAG = "FileUtils";
     private static final int BUFFER_SIZE = 1024;
-    private static final String FG_Ext_Storage_Folder = "Fingen";
-    private static final String FG_Backup_Folder = "Backup";
-
-    private static boolean isExtStorageEnabled() {
-        return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-    }
-
-    private static boolean checkFolder(String pathToFolder) {
-        boolean success;
-
-        if (isExtStorageEnabled()) {
-            File folder = new File(pathToFolder);
-
-            success = folder.exists() || folder.mkdir();
-        } else {
-            success = false;
-        }
-
-        return success;
-    }
-
-    private static String getExtFingenFolder() {
-        String path = Environment.getExternalStorageDirectory().toString() + "/" + FG_Ext_Storage_Folder + "/";
-
-        if (checkFolder(path)) {
-            return path;
-        } else {
-            return "";
-        }
-    }
-
-    public static String getExtFingenBackupFolder() {
-        String path = getExtFingenFolder();
-        if (!path.isEmpty()) {
-            path = path + FG_Backup_Folder + "/";
-            if (checkFolder(path)) {
-                return path;
-            } else {
-                return "";
-            }
-        } else {
-            return "";
-        }
-    }
 
     public static File zip(String[] files, String zipFile) throws IOException {
         BufferedInputStream origin;

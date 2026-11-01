@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.yoshione.fingen.DBHelper;
-import com.yoshione.fingen.utils.FileUtils;
+import com.yoshione.fingen.utils.BackupFolder;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -196,30 +196,28 @@ final class MigrationTestHelper {
         return result;
     }
 
-    /** Names of files in the external backup folder (DBHelper.onUpgrade writes a zip there). */
+    /** Names of files in the backup cache folder (DBHelper.onUpgrade writes a zip there). */
     static Set<String> listBackups() {
         Set<String> result = new HashSet<>();
-        String path = FileUtils.getExtFingenBackupFolder();
-        if (!path.isEmpty()) {
-            String[] names = new File(path).list();
-            if (names != null) {
-                result.addAll(Arrays.asList(names));
-            }
+        String[] names = backupCacheDir().list();
+        if (names != null) {
+            result.addAll(Arrays.asList(names));
         }
         return result;
     }
 
     /** Deletes backup files that appeared after the "before" listing. */
     static void deleteNewBackups(Set<String> before) {
-        String path = FileUtils.getExtFingenBackupFolder();
-        if (path.isEmpty()) {
-            return;
-        }
+        File dir = backupCacheDir();
         for (String name : listBackups()) {
             if (!before.contains(name)) {
-                new File(path, name).delete();
+                new File(dir, name).delete();
             }
         }
+    }
+
+    private static File backupCacheDir() {
+        return BackupFolder.getCacheDir(InstrumentationRegistry.getInstrumentation().getTargetContext());
     }
 
     static void deleteTestDatabases(Context context) {
