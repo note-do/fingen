@@ -41,6 +41,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -384,7 +385,7 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
         mBarChart.setData(data);
         mBarChart.fitScreen();
         mBarChart.animateY(1000);
-        mBarChart.highlightValues(null);
+        mBarChart.highlightValues(Collections.<Highlight>emptyList());
 
         List<Highlight> highlighted = mBarChart.getHighlighted();
         if (highlighted == null || highlighted.isEmpty()) {

@@ -51,6 +51,7 @@ import com.yoshione.fingen.utils.ScreenUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -403,7 +404,7 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
                 @Override
                 public void run() {
                     if (mPieChart != null) {
-                        mPieChart.highlightValues(null);
+                        mPieChart.highlightValues(Collections.<Highlight>emptyList());
                     }
                 }
             }, 1000);

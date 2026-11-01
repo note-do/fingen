@@ -34,7 +34,8 @@ Android-приложение учёта доходов и расходов. Па
 - Лицензии: `licensesdialog` 2.2.0 (`ActivityAbout`, `.show()`; `showAppCompat` в 2.x удалён), список — `res/raw/license.xml` (синхронизировать с зависимостями `app/build.gradle`).
 - Выбор цвета: skydoves `colorpickerview` 2.5.0 (Maven Central, `ColorPickerDialog.Builder`).
 - CSV импорт и экспорт: Storage Access Framework (`ACTION_OPEN_DOCUMENT` / `ACTION_CREATE_DOCUMENT`), файл передаётся в `CsvImporter` через временную копию в `getCacheDir()`. Бэкапы пока на `File` и `READ/WRITE_EXTERNAL_STORAGE` — пункт 10.
-- Прочее: `fastscroll` (JitPack, `@aar`), `airmapview`, `MPAndroidChart` — заброшенные, см. «Миграция в процессе».
+- Прочее: `fastscroll` (JitPack, `@aar`), `airmapview` — заброшенные, см. «Миграция в процессе».
+- Графики отчётов: MPAndroidChart v4.0.1 (`com.github.PhilJay.MPAndroidChart:MPChartLib`, JitPack; API Kotlin: `Easing.INSTANCE`, `ColorTemplate.INSTANCE`, `highlightValues` не принимает null). Подписи баров — `IndexAxisValueFormatter`, пары доход/расход смещены вручную (±0,2, ширина 0,4). Правило ProGuard `-keep class com.github.mikephil.charting.** { *; }` оставлено (consumer rules в aar нет).
 - БД: `android.database.sqlite` (framework SQLite). requery удалён.
 
 ### Удалено (не возвращать)
@@ -48,7 +49,7 @@ Android-приложение учёта доходов и расходов. Па
 
 ### Миграция в процессе (план)
 - Google Drive — отдельная фича позже.
-- Заменить заброшенные библиотеки: airmapview → play-services-maps, MPAndroidChart → v3.
+- Заменить заброшенные библиотеки: airmapview → play-services-maps.
 - RxJava 2 → 3, Dagger и RxAndroid до актуальных, commons-lang3 и bcprov (CVE), junit.
 - БД: тесты миграций с фикстурами версий 16, 21, 23, 30, 34 → 35; проверить `legacy_alter_table` (ALTER TABLE RENAME) и `journal_mode`.
 - Совместимость бэкапов: читать старые зашифрованные (WinZip AES, PBKDF2-SHA1) и незашифрованные бэкапы.

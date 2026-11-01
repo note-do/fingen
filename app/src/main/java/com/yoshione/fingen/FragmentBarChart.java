@@ -40,6 +40,7 @@ import com.yoshione.fingen.utils.ParcelableHelper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -397,7 +398,7 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
         mBarChart.setData(data);
         mBarChart.fitScreen();
         mBarChart.animateY(1000);
-        mBarChart.highlightValues(null);
+        mBarChart.highlightValues(Collections.<Highlight>emptyList());
 
         List<Highlight> highlighted = mBarChart.getHighlighted();
         if (highlighted == null || highlighted.isEmpty()) {
