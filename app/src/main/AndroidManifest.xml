@@ -13,7 +13,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
-    <uses-permission android:name="com.android.vending.BILLING"/>
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
     <uses-permission android:name="com.yoshione.fingen.gcm.permission.C2D_MESSAGE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -227,10 +226,6 @@
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityTransactions"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeLight"/>
-        <activity
-            android:name=".ActivityPro"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity

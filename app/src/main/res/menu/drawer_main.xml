@@ -26,10 +26,6 @@
 
     <group android:checkableBehavior="none">
         <item
-            android:id="@+id/drawer_pro"
-            android:icon="@drawable/ic_drawer_pro"
-            android:title="@string/ent_pro_features" />
-        <item
             android:id="@+id/drawer_settings"
             android:icon="@drawable/ic_drawer_settings"
             android:title="@string/ent_settings" />

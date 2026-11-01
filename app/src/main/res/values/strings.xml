@@ -278,10 +278,6 @@
     <string name="ttl_email_body" formatted="false">Write your question</string>
 
     <!-- 1. General -->
-    <!-- Titles -->
-    <string name="ttl_billing_error" formatted="false">Server connection error (code %s)</string>
-
-    <!-- 1. General -->
     <!-- Messages -->
     <string name="msg_set_date" formatted="false">Specify date</string>
 
@@ -1806,18 +1802,6 @@
     <!-- Titles -->
     <string name="ttl_no_chart_data" formatted="false">No chart data available</string>
 
-    <!-- 23. In-app purchases -->
-    <!-- Entities -->
-    <string name="ent_pro_features" formatted="false">PRO features</string>
-
-    <!-- 23. In-app purchases -->
-    <!-- Messages -->
-    <string name="msg_inapp_purchases_not_avaliable" formatted="false">PRO features are not avaliable</string>
-
-    <!-- 23. In-app purchases -->
-    <!-- Messages -->
-    <string name="msg_thanks_for_purchase_reports" formatted="false">Thank you for your purchase! To build graphical reports, go to the "Transactions" tab, pull up the bottom panel and click Charting. Reports are based on the transactions displayed in the list, taking into account all of the filters.</string>
-
     <!-- 24. Senders -->
     <!-- Entities -->
     <string name="ent_sender" formatted="false">SMS sender</string>
@@ -1901,10 +1885,6 @@
     <!-- 25. Sync -->
     <!-- Titles -->
     <string name="ttl_sync_iap_summary" formatted="false">Allows to keep records on different devices</string>
-
-    <!-- 25. Sync -->
-    <!-- Titles -->
-    <string name="ttl_purchased" formatted="false">Purchased</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->

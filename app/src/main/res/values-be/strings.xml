@@ -278,10 +278,6 @@
     <string name="ttl_email_body" formatted="false">Напишите свой вопрос</string>
 
     <!-- 1. General -->
-    <!-- Titles -->
-    <string name="ttl_billing_error" formatted="false">При соединении с сервером произошла ошибка (код %s)</string>
-
-    <!-- 1. General -->
     <!-- Messages -->
     <string name="msg_set_date" formatted="false">Укажите дату</string>
 
@@ -1806,18 +1802,6 @@
     <!-- Titles -->
     <string name="ttl_no_chart_data" formatted="false">Нет данных</string>
 
-    <!-- 23. In-app purchases -->
-    <!-- Entities -->
-    <string name="ent_pro_features" formatted="false">Функции PRO</string>
-
-    <!-- 23. In-app purchases -->
-    <!-- Messages -->
-    <string name="msg_inapp_purchases_not_avaliable" formatted="false">Функции PRO не доступны. Возможно на устройстве нет учетной записи Google.</string>
-
-    <!-- 23. In-app purchases -->
-    <!-- Messages -->
-    <string name="msg_thanks_for_purchase_reports" formatted="false">Спасибо за покупку! Для построения графических отчетов перейдите на вкладку "Транзакции", потяните вверх нижнюю панель и нажмите на кнопку построения графиков. Отчеты строятся по отображенным в списке транзакциям, с учетом всех фильтров.</string>
-
     <!-- 24. Senders -->
     <!-- Entities -->
     <string name="ent_sender" formatted="false">Отправитель смс</string>
@@ -1901,10 +1885,6 @@
     <!-- 25. Sync -->
     <!-- Titles -->
     <string name="ttl_sync_iap_summary" formatted="false">Позволяет вести учет на разных устройствах</string>
-
-    <!-- 25. Sync -->
-    <!-- Titles -->
-    <string name="ttl_purchased" formatted="false">Приобретено</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->

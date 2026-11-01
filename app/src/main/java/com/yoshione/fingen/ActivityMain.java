@@ -539,11 +539,6 @@ public class ActivityMain extends ToolbarActivity {
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
-                            case R.id.drawer_pro: {
-                                intent = new Intent(ActivityMain.this, ActivityPro.class);
-                                startActivityForResult(intent, RequestCodes.REQUEST_CODE_OPEN_PRO);
-                                break;
-                            }
                             case R.id.drawer_settings: {
                                 intent = new Intent(ActivityMain.this, ActivitySettings.class);
                                 ActivityMain.this.startActivityForResult(intent, RequestCodes.REQUEST_CODE_OPEN_PREFERENCES);
