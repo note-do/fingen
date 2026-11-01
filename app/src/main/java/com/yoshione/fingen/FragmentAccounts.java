@@ -33,6 +33,7 @@ import com.yoshione.fingen.dao.AccountsDAO;
 import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.CreditsDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.databinding.FragmentAccountsBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
 import com.yoshione.fingen.filters.FilterListHelper;
@@ -64,7 +65,6 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
 import dagger.Lazy;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -80,21 +80,13 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     private static final int CONTEXT_MENU_ACCOUNTS = 0;
     private static final int CONTEXT_MENU_SETS = 1;
     public AdapterAccounts adapter;
-    @BindView(R.id.layoutSummaryTable)
     TableLayout mLayoutSumTable;
-    @BindView(R.id.sliding_layout_accounts)
     SlidingUpPanelLayout mSlidingUpPanelLayout;
-    @BindView(R.id.recycler_view_accounts_sets)
     ContextMenuRecyclerView mRecyclerViewAccountsSets;
-    @BindView(R.id.buttonAddAccountSet)
     Button mButtonAddAccountSet;
-    @BindView(R.id.buttonAddAccount)
     Button mButtonAddAccount;
-    @BindView(R.id.imageViewPullMe)
     ImageView mImageViewPullMe;
-    @BindView(R.id.textview_pull_to_create_account)
     TextView mTextViewPullToCreateAccount;
-    @BindView(R.id.layout_pull_me)
     LinearLayout mLayoutPullMe;
     AdapterAccountsSets mAdapterAccountsSets;
     private AccountEventListener mAccountEventListener;
@@ -141,6 +133,16 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
+
+        FragmentAccountsBinding binding = FragmentAccountsBinding.bind(view);
+        mLayoutSumTable = view.findViewById(R.id.layoutSummaryTable);
+        mSlidingUpPanelLayout = binding.slidingLayoutAccounts;
+        mRecyclerViewAccountsSets = binding.recyclerViewAccountsSets;
+        mButtonAddAccountSet = binding.buttonAddAccountSet;
+        mButtonAddAccount = binding.buttonAddAccount;
+        mImageViewPullMe = binding.imageViewPullMe;
+        mTextViewPullToCreateAccount = binding.textviewPullToCreateAccount;
+        mLayoutPullMe = binding.layoutPullMe;
 
         FGApplication.getAppComponent().inject(this);
 

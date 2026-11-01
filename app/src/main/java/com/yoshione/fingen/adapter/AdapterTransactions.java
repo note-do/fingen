@@ -12,6 +12,7 @@ import com.l4digital.fastscroll.FastScroller;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.adapter.viewholders.TransactionViewHolder;
 import com.yoshione.fingen.adapter.viewholders.TransactionViewHolderParams;
+import com.yoshione.fingen.databinding.HeaderItemBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.ILoadMoreFinish;
 import com.yoshione.fingen.interfaces.IOnLoadMore;
@@ -26,8 +27,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter;
 
 /**
@@ -336,12 +335,12 @@ public class AdapterTransactions extends RecyclerView.Adapter implements FastScr
     class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         public Transaction transaction;
-        @BindView(R.id.text)
         TextView text;
 
         HeaderViewHolder(View v) {
             super(v);
-            ButterKnife.bind(this, v);
+            HeaderItemBinding binding = HeaderItemBinding.bind(v);
+            text = binding.text;
         }
 
         void bindHeader(String s) {

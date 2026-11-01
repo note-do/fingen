@@ -13,13 +13,11 @@ import android.widget.TextView;
 
 import com.yoshione.fingen.FGApplication;
 import com.yoshione.fingen.R;
+import com.yoshione.fingen.databinding.ListItemSkuBinding;
 import com.yoshione.fingen.iab.models.ReportsItem;
 
 import java.util.List;
 import java.util.Objects;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by slv on 21.01.2016.
@@ -92,18 +90,18 @@ public class AdapterSku extends RecyclerView.Adapter {
     }
 
     class SkuDetailsItemViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.imageViewSkuIcon)
         ImageView imageViewIcon;
-        @BindView(R.id.textViewSkuTitle)
         TextView textViewSkuTitle;
-        @BindView(R.id.textViewSkuDescription)
         TextView textViewSkuDescription;
-        @BindView(R.id.textViewSkuPrice)
         TextView textViewSkuPrice;
 
         SkuDetailsItemViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ListItemSkuBinding binding = ListItemSkuBinding.bind(itemView);
+            imageViewIcon = binding.imageViewSkuIcon;
+            textViewSkuTitle = binding.textViewSkuTitle;
+            textViewSkuDescription = binding.textViewSkuDescription;
+            textViewSkuPrice = binding.textViewSkuPrice;
         }
     }
 }

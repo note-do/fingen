@@ -11,15 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.yoshione.fingen.databinding.ListItemSmsBinding;
 import com.yoshione.fingen.managers.SmsManager;
 import com.yoshione.fingen.model.Sms;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.utils.DateTimeFormatter;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by Leonid on 21.11.2015.
@@ -91,14 +89,17 @@ public class AdapterSms extends RecyclerView.Adapter {
 
     class SmsViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.sender)TextView textViewSender;
-        @BindView(R.id.date)TextView textViewDate;
-        @BindView(R.id.body)TextView textViewBody;
+        TextView textViewSender;
+        TextView textViewDate;
+        TextView textViewBody;
 
 
         SmsViewHolder(View v) {
             super(v);
-            ButterKnife.bind(this,v);
+            ListItemSmsBinding binding = ListItemSmsBinding.bind(v);
+            textViewSender = binding.sender;
+            textViewDate = binding.date;
+            textViewBody = binding.body;
 
             v.setOnClickListener(new View.OnClickListener() {
                 @Override

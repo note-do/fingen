@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import com.yoshione.fingen.adapter.AdapterAbstractModel;
 import com.yoshione.fingen.dao.AbstractDAO;
 import com.yoshione.fingen.dao.BaseDAO;
+import com.yoshione.fingen.databinding.FragmentModelListBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.managers.DebtsManager;
 import com.yoshione.fingen.managers.FilterManager;
@@ -49,47 +50,29 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 /**
  * Created by slv on 07.12.2015.
  */
 public class FragmentModelList extends Fragment {
 
-    @BindView(R.id.recycler_view)
     ContextMenuRecyclerView mRecyclerView;
-    @BindView(R.id.buttonAddAccountMarker)
     FloatingActionButton mButtonAddAccountMarker;
-    @BindView(R.id.buttonAddCabbageMarker)
     FloatingActionButton mButtonAddCabbageMarker;
-    @BindView(R.id.buttonAddTrTypeMarker)
     FloatingActionButton mButtonAddTrTypeMarker;
-    @BindView(R.id.buttonAddPayeeMarker)
     FloatingActionButton mButtonAddPayeeMarker;
-    @BindView(R.id.buttonAddIgnoreMarker)
     FloatingActionButton mButtonAddIgnoreMarker;
-    @BindView(R.id.fabBGLayout)
     View mFabBGLayout;
-    @BindView(R.id.buttonAddAccountMarkerLayout)
     LinearLayout mButtonAddAccountMarkerLayout;
-    @BindView(R.id.buttonAddCabbageMarkerLayout)
     LinearLayout mButtonAddCabbageMarkerLayout;
-    @BindView(R.id.buttonAddTrTypeMarkerLayout)
     LinearLayout mButtonAddTrTypeMarkerLayout;
-    @BindView(R.id.buttonAddPayeeMarkerLayout)
     LinearLayout mButtonAddPayeeMarkerLayout;
-    @BindView(R.id.buttonAddIgnoreMarkerLayout)
     LinearLayout mButtonAddIgnoreMarkerLayout;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton mFabMenuButtonRoot;
-    @BindView(R.id.fabMenuButtonRootLayout)
     LinearLayout mFabMenuButtonRootLayout;
     private IAbstractModel mInputModel;
     private ModelListEventListener mModelListEventListener;
     private AdapterAbstractModel adapter;
-    Unbinder unbinder;
+    private FragmentModelListBinding mBinding;
     FabMenuController mFabMenuController;
 
     void setmFilter(String mFilter) {
@@ -117,7 +100,21 @@ public class FragmentModelList extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_model_list, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentModelListBinding.bind(view);
+        mRecyclerView = mBinding.recyclerView;
+        mButtonAddAccountMarker = mBinding.buttonAddAccountMarker;
+        mButtonAddCabbageMarker = mBinding.buttonAddCabbageMarker;
+        mButtonAddTrTypeMarker = mBinding.buttonAddTrTypeMarker;
+        mButtonAddPayeeMarker = mBinding.buttonAddPayeeMarker;
+        mButtonAddIgnoreMarker = mBinding.buttonAddIgnoreMarker;
+        mFabBGLayout = mBinding.fabBGLayout;
+        mButtonAddAccountMarkerLayout = mBinding.buttonAddAccountMarkerLayout;
+        mButtonAddCabbageMarkerLayout = mBinding.buttonAddCabbageMarkerLayout;
+        mButtonAddTrTypeMarkerLayout = mBinding.buttonAddTrTypeMarkerLayout;
+        mButtonAddPayeeMarkerLayout = mBinding.buttonAddPayeeMarkerLayout;
+        mButtonAddIgnoreMarkerLayout = mBinding.buttonAddIgnoreMarkerLayout;
+        mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+        mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
 
         mInputModel = getArguments().getParcelable("model");
 
@@ -414,7 +411,7 @@ public class FragmentModelList extends Fragment {
 
     @Override
     public void onDestroyView() {
-        unbinder.unbind();
+        mBinding = null;
         super.onDestroyView();
     }
 

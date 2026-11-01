@@ -37,6 +37,7 @@ import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.yoshione.fingen.dao.AbstractDAO;
 import com.yoshione.fingen.dao.BaseDAO;
+import com.yoshione.fingen.databinding.FragmentPieChartBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.managers.AbstractModelManager;
 import com.yoshione.fingen.utils.BaseNode;
@@ -51,10 +52,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 /**
  * Created by Leonid on 16.08.2015.
  * a
@@ -62,16 +59,11 @@ import butterknife.Unbinder;
 public class FragmentPieChart extends Fragment implements OnChartValueSelectedListener {
 
     public static final String TAG = "FragmentPieChart";
-    @BindView(R.id.pieChart)
     PieChart mPieChart;
-    Unbinder unbinder;
-    @BindView(R.id.fab)
+    private FragmentPieChartBinding mBinding;
     FloatingActionButton mFab;
-    @BindView(R.id.textViewSelected)
     TextView mTextViewSelected;
-    @BindView(R.id.imageViewColor)
     ImageView mImageViewColor;
-    @BindView(R.id.fabLayout)
     LinearLayout mFabLayout;
     private FgLargeValuesFormatter largeValuesFormatter;
     private NormalValuesFormatter mormalValuesFormatter;
@@ -87,7 +79,12 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
     public View onCreateView(@NonNull final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_pie_chart, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentPieChartBinding.bind(view);
+        mPieChart = mBinding.pieChart;
+        mFab = mBinding.fab;
+        mTextViewSelected = mBinding.textViewSelected;
+        mImageViewColor = mBinding.imageViewColor;
+        mFabLayout = mBinding.fabLayout;
 
         mFab.setOnClickListener(new EntityChartFabOnClickListener(mPieChart, getActivity()));
 
@@ -168,7 +165,7 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     private void setupPieChart() {

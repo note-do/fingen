@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.SimpleDebtsDAO;
+import com.yoshione.fingen.databinding.FragmentSimpledebtEditBinding;
 import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.model.SimpleDebt;
 import com.yoshione.fingen.model.Transaction;
@@ -29,22 +30,15 @@ import com.yoshione.fingen.widgets.AmountEditor;
 
 import java.math.BigDecimal;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 /**
  * Created by slv on 04.12.2015.
  *
  */
 public class FragmentSimpleDebtEdit extends DialogFragment {
 
-    @BindView(R.id.edit_text_name)
     EditText editTextName;
-    Unbinder unbinder;
-    @BindView(R.id.checkBoxClosed)
+    private FragmentSimpledebtEditBinding mBinding;
     CheckBox mCheckBoxClosed;
-    @BindView(R.id.amountEditorStartAmount)
     AmountEditor amountEditorStartAmount;
     private SimpleDebt mSimpleDebt;
 
@@ -67,7 +61,10 @@ public class FragmentSimpleDebtEdit extends DialogFragment {
         String title = getArguments().getString("title");
         mSimpleDebt = getArguments().getParcelable("simpleDebt");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_simpledebt_edit, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentSimpledebtEditBinding.bind(view);
+        editTextName = mBinding.editTextName;
+        mCheckBoxClosed = mBinding.checkBoxClosed;
+        amountEditorStartAmount = mBinding.amountEditorStartAmount;
 
         if (mSimpleDebt != null) {
             editTextName.setText(mSimpleDebt.getName());
@@ -161,6 +158,6 @@ public class FragmentSimpleDebtEdit extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 }

@@ -38,6 +38,7 @@ import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.CategoriesDAO;
 import com.yoshione.fingen.dao.CreditsDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.databinding.FragmentBudgetBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
 import com.yoshione.fingen.filters.DateRangeFilter;
@@ -63,10 +64,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 import static android.app.Activity.RESULT_OK;
 
 /**
@@ -76,42 +73,24 @@ import static android.app.Activity.RESULT_OK;
 public class FragmentBudget extends Fragment implements AdapterBudget.IOnItemClickListener {
     private static final String TAG = "FragmentBudget";
     protected Handler handler;
-    @BindView(R.id.recycler_view)
     ContextMenuRecyclerView recyclerView;
     AdapterBudget adapter;
-    @BindView(R.id.recycler_view_summary)
     RecyclerView recyclerViewSummary;
-    @BindView(R.id.layoutSummaryTable)
     TableLayout layoutSumTable;
-    @BindView(R.id.fabAddModel)
     FloatingActionButton fabAddCategory;
-    @BindView(R.id.fabAddDebt)
     FloatingActionButton fabAddDebt;
-    @BindView(R.id.fabCopyBudget)
     FloatingActionButton fabCopyBudget;
-    @BindView(R.id.fabCreateFromFact)
     FloatingActionButton fabCreateFromFact;
-    @BindView(R.id.fabClearBudget)
     FloatingActionButton fabClearBudget;
-    @BindView(R.id.sliding_layout)
     SlidingUpPanelLayout mSlidingUpPanelLayout;
-    @BindView(R.id.imageViewPullMe)
     ImageView mImageViewPullMe;
-    @BindView(R.id.fabBGLayout)
     View mFabBGLayout;
-    @BindView(R.id.fabAddModelLayout)
     LinearLayout mFabAddModelLayout;
-    @BindView(R.id.fabAddDebtLayout)
     LinearLayout mFabAddDebtLayout;
-    @BindView(R.id.fabCopyBudgetLayout)
     LinearLayout mFabCopyBudgetLayout;
-    @BindView(R.id.fabCreateFromFactLayout)
     LinearLayout mFabCreateFromFactLayout;
-    @BindView(R.id.fabClearBudgetLayout)
     LinearLayout mFabClearBudgetLayout;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton mFabMenuButtonRoot;
-    @BindView(R.id.fabMenuButtonRootLayout)
     LinearLayout mFabMenuButtonRootLayout;
     private AdapterBudget adapterSummary;
     private ListSumsByCabbage ioSums;
@@ -120,7 +99,7 @@ public class FragmentBudget extends Fragment implements AdapterBudget.IOnItemCli
     private boolean isUpdating = false;
     private int mYear;
     private int mMonth;
-    private Unbinder unbinder;
+    private FragmentBudgetBinding mBinding;
     FabMenuController mFabMenuController;
 
     public static FragmentBudget newInstance(int year, int month) {
@@ -146,7 +125,25 @@ public class FragmentBudget extends Fragment implements AdapterBudget.IOnItemCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_budget, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentBudgetBinding.bind(view);
+        recyclerView = mBinding.recyclerView;
+        recyclerViewSummary = mBinding.recyclerViewSummary;
+        layoutSumTable = view.findViewById(R.id.layoutSummaryTable);
+        fabAddCategory = mBinding.fabAddModel;
+        fabAddDebt = mBinding.fabAddDebt;
+        fabCopyBudget = mBinding.fabCopyBudget;
+        fabCreateFromFact = mBinding.fabCreateFromFact;
+        fabClearBudget = mBinding.fabClearBudget;
+        mSlidingUpPanelLayout = mBinding.slidingLayout;
+        mImageViewPullMe = mBinding.imageViewPullMe;
+        mFabBGLayout = mBinding.fabBGLayout;
+        mFabAddModelLayout = mBinding.fabAddModelLayout;
+        mFabAddDebtLayout = mBinding.fabAddDebtLayout;
+        mFabCopyBudgetLayout = mBinding.fabCopyBudgetLayout;
+        mFabCreateFromFactLayout = mBinding.fabCreateFromFactLayout;
+        mFabClearBudgetLayout = mBinding.fabClearBudgetLayout;
+        mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+        mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
 
         mYear = getArguments().getInt("year", Calendar.getInstance().get(Calendar.YEAR));
         mMonth = getArguments().getInt("month", Calendar.getInstance().get(Calendar.MONTH));
@@ -392,7 +389,7 @@ public class FragmentBudget extends Fragment implements AdapterBudget.IOnItemCli
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     private void updateData() throws Exception {

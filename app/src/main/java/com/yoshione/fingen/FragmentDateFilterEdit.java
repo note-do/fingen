@@ -1,6 +1,5 @@
 package com.yoshione.fingen;
 
-
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
@@ -11,10 +10,6 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 import static com.yoshione.fingen.filters.DateRangeFilter.DATE_RANGE_DAY;
 import static com.yoshione.fingen.filters.DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT;
 import static com.yoshione.fingen.filters.DateRangeFilter.DATE_RANGE_MODIFIER_CURRENTAND_LAST;
@@ -22,6 +17,7 @@ import static com.yoshione.fingen.filters.DateRangeFilter.DATE_RANGE_MODIFIER_LA
 import static com.yoshione.fingen.filters.DateRangeFilter.DATE_RANGE_MONTH;
 import static com.yoshione.fingen.filters.DateRangeFilter.DATE_RANGE_WEEK;
 import static com.yoshione.fingen.filters.DateRangeFilter.DATE_RANGE_YEAR;
+import com.yoshione.fingen.databinding.FragmentDateFilterSettingsBinding;
 
 /**
  * Created by slv on 30.11.2017.
@@ -29,25 +25,16 @@ import static com.yoshione.fingen.filters.DateRangeFilter.DATE_RANGE_YEAR;
  */
 
 public class FragmentDateFilterEdit extends DialogFragment {
-    @BindView(R.id.radioButtonDateRangeCurrent)
     RadioButton mRadioButtonDateRangeCurrent;
-    @BindView(R.id.radioButtonDateRangeLast)
     RadioButton mRadioButtonDateRangePast;
-    @BindView(R.id.radioButtonDateRangeCurrentAndLast)
     RadioButton mRadioButtonDateRangeCurrentAndPast;
-    @BindView(R.id.radioGroupModifier)
     RadioGroup mRadioGroupModifier;
-    @BindView(R.id.radioButtonDateRangeDay)
     RadioButton mRadioButtonDateRangeDay;
-    @BindView(R.id.radioButtonDateRangeWeek)
     RadioButton mRadioButtonDateRangeWeek;
-    @BindView(R.id.radioButtonDateRangeMonth)
     RadioButton mRadioButtonDateRangeMonth;
-    @BindView(R.id.radioButtonDateRangeYear)
     RadioButton mRadioButtonDateRangeYear;
-    @BindView(R.id.radioGroupRange)
     RadioGroup mRadioGroupRange;
-    Unbinder unbinder;
+    private FragmentDateFilterSettingsBinding mBinding;
     IOnComplete mOnComplete;
 
     public void setOnComplete(IOnComplete onComplete) {
@@ -68,7 +55,16 @@ public class FragmentDateFilterEdit extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_date_filter_settings, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentDateFilterSettingsBinding.bind(view);
+        mRadioButtonDateRangeCurrent = mBinding.radioButtonDateRangeCurrent;
+        mRadioButtonDateRangePast = mBinding.radioButtonDateRangeLast;
+        mRadioButtonDateRangeCurrentAndPast = mBinding.radioButtonDateRangeCurrentAndLast;
+        mRadioGroupModifier = mBinding.radioGroupModifier;
+        mRadioButtonDateRangeDay = mBinding.radioButtonDateRangeDay;
+        mRadioButtonDateRangeWeek = mBinding.radioButtonDateRangeWeek;
+        mRadioButtonDateRangeMonth = mBinding.radioButtonDateRangeMonth;
+        mRadioButtonDateRangeYear = mBinding.radioButtonDateRangeYear;
+        mRadioGroupRange = mBinding.radioGroupRange;
 
         switch (getArguments().getInt("modifier")) {
             case DATE_RANGE_MODIFIER_CURRENT:
@@ -119,7 +115,7 @@ public class FragmentDateFilterEdit extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     @Override

@@ -44,6 +44,7 @@ import com.yoshione.fingen.classes.ListSumsByCabbage;
 import com.yoshione.fingen.dao.AccountsDAO;
 import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.databinding.FragmentTransactionsBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
 import com.yoshione.fingen.filters.AmountFilter;
@@ -86,9 +87,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -108,64 +106,35 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     private static final int CONTEXT_MENU_TRANSACTIONS = 0;
 
     //<editor-fold desc="Bind views" defaultstate="collapsed">
-    @BindView(R.id.layoutSummaryTable)
     TableLayout layoutSumTable;
-    @BindView(R.id.switch_all_filters)
     SwitchCompat switchAllFilters;
-    @BindView(R.id.recycler_view_filters)
     ContextMenuRecyclerView recyclerViewFilters;
-    @BindView(R.id.fabGoTop)
     FloatingActionButton mFabGoTop;
-    @BindView(R.id.fabSelectAll)
     FloatingActionButton mFabSelectAll;
-    @BindView(R.id.fabUnselectAll)
     FloatingActionButton mFabUnselectAll;
-    @BindView(R.id.fabEditSelected)
     FloatingActionButton mFabEditSelected;
-    @BindView(R.id.fabExportSelected)
     FloatingActionButton mFabExportSelected;
-    @BindView(R.id.fabDeleteSelected)
     FloatingActionButton mFabDeleteSelected;
-    @BindView(R.id.sliding_layout_transactions)
     SlidingUpPanelLayout mSlidingLayoutTransactions;
-    @BindView(R.id.editTextSearch)
     EditText mEditTextSearch;
-    @BindView(R.id.imageButtonClearSearchString)
     ImageButton mImageButtonClearSearchString;
-    @BindView(R.id.cardViewSearch)
     ConstraintLayout mCardViewSearch;
-    @BindView(R.id.dragView)
     LinearLayout mDragView;
-    @BindView(R.id.textViewSelectedCount)
     TextView mTextViewSelectedCount;
-    @BindView(R.id.imageViewPullMe)
     ImageView mImageViewPullMe;
-    @BindView(R.id.sliding_panel_header)
     View mSlidingPanelHeader;
-    @BindView(R.id.buttonSearch)
     Button mButtonSearch;
-    @BindView(R.id.buttonReports)
     Button mButtonReports;
-    @BindView(R.id.buttonAddFilter)
     Button mButtonAddFilter;
-    @BindView(R.id.buttonClearfilters)
     Button mButtonClearFilters;
-    @BindView(R.id.fabSelectAllLayout)
     LinearLayout mFabSelectAllLayout;
-    @BindView(R.id.fabUnselectAllLayout)
     LinearLayout mFabUnselectAllLayout;
-    @BindView(R.id.fabEditSelectedLayout)
     LinearLayout mFabEditSelectedLayout;
-    @BindView(R.id.fabExportSelectedLayout)
     LinearLayout mFabExportSelectedLayout;
-    @BindView(R.id.fabDeleteSelectedLayout)
     LinearLayout mFabDeleteSelectedLayout;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton mFabMenuButtonRoot;
-    @BindView(R.id.fabMenuButtonRootLayout)
     LinearLayout mFabMenuButtonRootLayout;
-    Unbinder unbinder;
-    @BindView(R.id.fabBGLayout)
+    private FragmentTransactionsBinding mBinding;
     View mFabBGLayout;
     //</editor-fold>
 
@@ -327,7 +296,36 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         }
 
         if (view != null) {
-            unbinder = ButterKnife.bind(this, view);
+            mBinding = FragmentTransactionsBinding.bind(view);
+            layoutSumTable = view.findViewById(R.id.layoutSummaryTable);
+            switchAllFilters = mBinding.switchAllFilters;
+            recyclerViewFilters = mBinding.recyclerViewFilters;
+            mFabGoTop = mBinding.fabGoTop;
+            mFabSelectAll = mBinding.fabSelectAll;
+            mFabUnselectAll = mBinding.fabUnselectAll;
+            mFabEditSelected = mBinding.fabEditSelected;
+            mFabExportSelected = mBinding.fabExportSelected;
+            mFabDeleteSelected = mBinding.fabDeleteSelected;
+            mSlidingLayoutTransactions = mBinding.slidingLayoutTransactions;
+            mEditTextSearch = mBinding.editTextSearch;
+            mImageButtonClearSearchString = mBinding.imageButtonClearSearchString;
+            mCardViewSearch = mBinding.cardViewSearch;
+            mDragView = mBinding.dragView;
+            mTextViewSelectedCount = mBinding.textViewSelectedCount;
+            mImageViewPullMe = mBinding.imageViewPullMe;
+            mSlidingPanelHeader = mBinding.slidingPanelHeader.getRoot();
+            mButtonSearch = mBinding.buttonSearch;
+            mButtonReports = mBinding.buttonReports;
+            mButtonAddFilter = mBinding.buttonAddFilter;
+            mButtonClearFilters = mBinding.buttonClearfilters;
+            mFabSelectAllLayout = mBinding.fabSelectAllLayout;
+            mFabUnselectAllLayout = mBinding.fabUnselectAllLayout;
+            mFabEditSelectedLayout = mBinding.fabEditSelectedLayout;
+            mFabExportSelectedLayout = mBinding.fabExportSelectedLayout;
+            mFabDeleteSelectedLayout = mBinding.fabDeleteSelectedLayout;
+            mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+            mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
+            mFabBGLayout = mBinding.fabBGLayout;
         }
         return view;
     }
@@ -1046,7 +1044,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     private class FabMenuSelectionItemClickListener implements View.OnClickListener {

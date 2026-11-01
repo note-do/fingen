@@ -28,8 +28,6 @@ import com.yoshione.fingen.widgets.ContextMenuRecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -38,7 +36,7 @@ import org.greenrobot.eventbus.ThreadMode;
  * A placeholder fragment containing a simple view.
  */
 public class FragmentSmsList extends Fragment {
-    @BindView(R.id.recycler_view)  ContextMenuRecyclerView mRecyclerView;
+    ContextMenuRecyclerView mRecyclerView;
     private AdapterSms mAdapter;
 //    private List<Sms> mSmsList;
 
@@ -61,7 +59,7 @@ public class FragmentSmsList extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sms_list, container, false);
-        ButterKnife.bind(this,view);
+        mRecyclerView = view.findViewById(R.id.recycler_view);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
 

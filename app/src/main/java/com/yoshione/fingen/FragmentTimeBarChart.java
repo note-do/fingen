@@ -24,6 +24,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.yoshione.fingen.databinding.FragmentBarChartBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AmountFilter;
 import com.yoshione.fingen.filters.DateRangeFilter;
@@ -45,10 +46,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 /**
  * Created by Leonid on 16.08.2015.
  * FragmentTimeBarChart
@@ -57,12 +54,9 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
 
     public static final String TAG = "FragmentBarChart";
     private final boolean mDrawBarLabels = false;
-    @BindView(R.id.barChart)
     HorizontalBarChart mBarChart;
-    Unbinder unbinder;
-    @BindView(R.id.fab)
+    private FragmentBarChartBinding mBinding;
     FloatingActionButton mFab;
-    @BindView(R.id.fabLayout)
     LinearLayout mFabLayout;
     private FgLargeValuesFormatter largeValuesFormatter;
     private NormalValuesFormatter mormalValuesFormatter;
@@ -74,7 +68,10 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
 //        R.layout.fragment_bar_chart
 
         View view = inflater.inflate(R.layout.fragment_bar_chart, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentBarChartBinding.bind(view);
+        mBarChart = mBinding.barChart;
+        mFab = mBinding.fab;
+        mFabLayout = mBinding.fabLayout;
 
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,7 +164,7 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     private void setupBarChart() {

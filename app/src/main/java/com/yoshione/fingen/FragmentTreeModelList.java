@@ -1,6 +1,5 @@
 package com.yoshione.fingen;
 
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,6 +29,7 @@ import com.yoshione.fingen.dao.AbstractDAO;
 import com.yoshione.fingen.dao.BaseDAO;
 import com.yoshione.fingen.dao.CategoriesDAO;
 import com.yoshione.fingen.dao.ProjectsDAO;
+import com.yoshione.fingen.databinding.FragmentTreeModelListBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IAdapterEventsListener;
 import com.yoshione.fingen.interfaces.IUpdateTreeListsEvents;
@@ -59,33 +59,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 /**
  * A simple {@link Fragment} subclass.
  */
 public class FragmentTreeModelList extends Fragment implements OnStartDragListener, IUpdateTreeListsEvents {
 
-    @BindView(R.id.recycler_view)
     ContextMenuRecyclerView mRecyclerView;
 
     AdapterTreeModel adapter;
-    @BindView(R.id.fabAddModel)
     FloatingActionButton fabAddModel;
-    @BindView(R.id.fabAddNestedModel)
     FloatingActionButton fabAddNestedModel;
-    Unbinder unbinder;
-    @BindView(R.id.fabBGLayout)
+    private FragmentTreeModelListBinding mBinding;
     View mFabBGLayout;
-    @BindView(R.id.fabAddModelLayout)
     LinearLayout mFabAddModelLayout;
-    @BindView(R.id.fabAddNestedModelLayout)
     LinearLayout mFabAddNestedModelLayout;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton mFabMenuButtonRoot;
-    @BindView(R.id.fabMenuButtonRootLayout)
     LinearLayout mFabMenuButtonRootLayout;
     private ItemTouchHelper mItemTouchHelper;
     private String mFilter = "";
@@ -126,7 +114,15 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tree_model_list, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentTreeModelListBinding.bind(view);
+        mRecyclerView = mBinding.recyclerView;
+        fabAddModel = mBinding.fabAddModel;
+        fabAddNestedModel = mBinding.fabAddNestedModel;
+        mFabBGLayout = mBinding.fabBGLayout;
+        mFabAddModelLayout = mBinding.fabAddModelLayout;
+        mFabAddNestedModelLayout = mBinding.fabAddNestedModelLayout;
+        mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+        mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
 
         mInputModel = Objects.requireNonNull(getArguments()).getParcelable("model");
         FabMenuItemClickListener fabMenuItemClickListener = new FabMenuItemClickListener();
@@ -240,7 +236,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     @Override

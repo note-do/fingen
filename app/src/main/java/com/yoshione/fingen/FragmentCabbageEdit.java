@@ -17,15 +17,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.yoshione.fingen.dao.CabbagesDAO;
+import com.yoshione.fingen.databinding.FragmentCabbageEditBinding;
 import com.yoshione.fingen.managers.CabbageManager;
 import com.yoshione.fingen.model.Cabbage;
 
 import java.util.Currency;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.Unbinder;
 
 /**
  * Created by slv on 04.12.2015.
@@ -33,17 +29,12 @@ import butterknife.Unbinder;
  */
 public class FragmentCabbageEdit extends DialogFragment {
 
-    @BindView(R.id.button_system_currencies)
     Button buttonSystemCurrencies;
-    @BindView(R.id.edit_text_name)
     EditText editTextName;
-    @BindView(R.id.edit_text_code)
     EditText editTextCode;
-    @BindView(R.id.edit_text_symbol)
     EditText editTextSymbol;
-    @BindView(R.id.edit_text_scale)
     EditText editTextScale;
-    Unbinder unbinder;
+    private FragmentCabbageEditBinding mBinding;
 
     public FragmentCabbageEdit() {
     }
@@ -64,7 +55,13 @@ public class FragmentCabbageEdit extends DialogFragment {
         String title = getArguments().getString("title");
         Cabbage cabbage = getArguments().getParcelable("cabbage");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_cabbage_edit, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentCabbageEditBinding.bind(view);
+        buttonSystemCurrencies = mBinding.buttonSystemCurrencies;
+        editTextName = mBinding.editTextName;
+        editTextCode = mBinding.editTextCode;
+        editTextSymbol = mBinding.editTextSymbol;
+        editTextScale = mBinding.editTextScale;
+        mBinding.buttonSystemCurrencies.setOnClickListener(v -> selectSystemCurrencyClick());
 
         if (cabbage != null) {
             editTextName.setText(cabbage.getName());
@@ -141,10 +138,9 @@ public class FragmentCabbageEdit extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
-    @OnClick(R.id.button_system_currencies)
     void selectSystemCurrencyClick() {
         CabbageManager.getInstance().showSelectSystemCurrencyDialog(getActivity(), new CabbageManager.OnSelectCurrencyListener() {
             @Override

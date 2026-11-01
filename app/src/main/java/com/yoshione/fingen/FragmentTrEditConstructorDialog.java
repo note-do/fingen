@@ -1,6 +1,5 @@
 package com.yoshione.fingen;
 
-
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -23,16 +22,13 @@ import com.yoshione.fingen.adapter.AdapterTabOrder;
 import com.yoshione.fingen.adapter.AdapterTrEditConstructor;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
 import com.yoshione.fingen.adapter.helper.SimpleItemTouchHelperCallback;
+import com.yoshione.fingen.databinding.FragmentTabOrderDialogBinding;
 import com.yoshione.fingen.model.TrEditItem;
 import com.yoshione.fingen.utils.PrefUtils;
 import com.yoshione.fingen.widgets.ContextMenuRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 
 /**
  * Created by Leonid on 23.11.2016.
@@ -42,9 +38,8 @@ import butterknife.Unbinder;
 public class FragmentTrEditConstructorDialog extends DialogFragment implements OnStartDragListener {
 
 
-    @BindView(R.id.recycler_view)
     ContextMenuRecyclerView mRecyclerView;
-    Unbinder unbinder;
+    private FragmentTabOrderDialogBinding mBinding;
     AdapterTrEditConstructor adapter;
     private ItemTouchHelper mItemTouchHelper;
 
@@ -52,7 +47,8 @@ public class FragmentTrEditConstructorDialog extends DialogFragment implements O
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_tab_order_dialog, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentTabOrderDialogBinding.bind(view);
+        mRecyclerView = mBinding.recyclerView;
 
         adapter = new AdapterTrEditConstructor(this);
         adapter.setHasStableIds(true);

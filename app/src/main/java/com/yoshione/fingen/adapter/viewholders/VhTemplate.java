@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.yoshione.fingen.dao.AccountsDAO;
+import com.yoshione.fingen.databinding.ListItemTemplatesBinding;
 import com.yoshione.fingen.managers.AccountManager;
 import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.Template;
@@ -20,9 +21,6 @@ import com.yoshione.fingen.utils.IconGenerator;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 /**
  * Created by slv on 06.04.2016.
  *
@@ -30,15 +28,12 @@ import butterknife.ButterKnife;
 public class VhTemplate extends VhModelBase {
 
 
-    @BindView(R.id.textViewAmount)TextView textViewAmount;
-    @BindView(R.id.imageview_icon)ImageView imageViewIcon;
-    @BindView(R.id.spaceBottom)
+    TextView textViewAmount;
+    ImageView imageViewIcon;
     FrameLayout mSpaceBottom;
-    @BindView(R.id.spaceBottomFinal)
     FrameLayout mSpaceBottomFinal;
 
 
-    @BindView(R.id.textViewName)
     TextView textViewName;
     //    @BindView(R.id.textViewAmount)
 //    TextView textViewAmount;
@@ -46,7 +41,12 @@ public class VhTemplate extends VhModelBase {
 
     public VhTemplate(View itemView, IOnItemClickListener onItemClickListener, Context mContext) {
         super(itemView, onItemClickListener, mContext);
-        ButterKnife.bind(this, itemView);
+        ListItemTemplatesBinding binding = ListItemTemplatesBinding.bind(itemView);
+        textViewAmount = binding.textViewAmount;
+        imageViewIcon = binding.imageviewIcon;
+        mSpaceBottom = binding.spaceBottom;
+        mSpaceBottomFinal = binding.spaceBottomFinal;
+        textViewName = binding.textViewName;
         mAmountColorizer = new AmountColorizer(mContext);
     }
 

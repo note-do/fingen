@@ -1,6 +1,6 @@
 # Fingen — правила для оркестратора
 
-Android-приложение учёта доходов и расходов (Java, Gradle, AGP 3.3.0, Gradle 5.4.1, compileSdk 28, minSdk 21). Пакет: `com.yoshione.fingen`, код в `app/src/main/java/com/yoshione/fingen/`.
+Android-приложение учёта доходов и расходов (Java, Gradle, AGP 8.13.2, Gradle 8.13, JDK 17, compileSdk 28, minSdk 21, AndroidX). Пакет: `com.yoshione.fingen`, код в `app/src/main/java/com/yoshione/fingen/`.
 
 ## Роль оркестратора
 
@@ -40,17 +40,18 @@ Android-приложение учёта доходов и расходов (Java
 
 ## Сборка и тесты
 
-Команды выполнять из корня проекта:
+Команды выполнять из корня проекта. Gradle запускать с JDK 17 (`JAVA_HOME` на JDK 17, например `/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home`).
 - `./gradlew assembleDebug` — сборка debug APK.
-- `./gradlew testDebugUnitTest` — юнит-тесты (`app/src/test`).
-- `./gradlew connectedDebugAndroidTest` — инструментальные тесты, нужны устройство или эмулятор (`app/src/androidTest`, например `SmsParserTest`).
+- `./gradlew testProdDebugUnitTest` — юнит-тесты (`app/src/test`; у проекта есть flavor `prod`, поэтому задача с `Prod`). Пока тестов нет.
+- `./gradlew connectedProdDebugAndroidTest` — инструментальные тесты, нужны устройство или эмулятор (`app/src/androidTest`: `SmsParserTest`, DAO-тесты). Прогон удаляет установленное приложение с устройства.
 - `./gradlew lintDebug` — lint.
 
 Android Studio — только редактор. Сборка и тесты идут через Gradle в терминале.
 
 ## Правила для всех агентов
 
-- Код стилистически совпадает с окружающим: именование, комментарии, отступы, идиомы (сейчас — butterknife, dagger, RxJava2, support-библиотеки, не AndroidX).
+- Код стилистически совпадает с окружающим: именование, комментарии, отступы, идиомы (сейчас — AndroidX, dagger, RxJava2; ButterKnife мигрируется на ViewBinding, новый код пишем на ViewBinding, без ButterKnife).
+- Git: на текущем этапе миграции коммит допустим после каждого пункта плана по разрешению пользователя (сообщение по пункту, `Co-Authored-By`). Пуш — только по команде пользователя.
 - Не трогать `build/`, `.gradle/`, `.idea/`, `local.properties`, `*.jks`, `keystore.properties`.
 - Не менять `gradle.properties`, версии зависимостей и `build.gradle` без явного решения оркестратора.
 - Не удалять файлы без явного разрешения пользователя.

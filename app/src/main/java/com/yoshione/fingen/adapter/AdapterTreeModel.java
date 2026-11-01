@@ -23,6 +23,7 @@ import com.yoshione.fingen.adapter.helper.ItemTouchHelperAdapter;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
 import com.yoshione.fingen.dao.AbstractDAO;
 import com.yoshione.fingen.dao.BaseDAO;
+import com.yoshione.fingen.databinding.ListItemTreeModel2Binding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IAdapterEventsListener;
 import com.yoshione.fingen.interfaces.IOrderable;
@@ -36,8 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.yoshione.fingen.widgets.FlipView;
 
 /**
@@ -338,18 +337,18 @@ public class AdapterTreeModel extends RecyclerView.Adapter implements ItemTouchH
     }
 
     static class ViewHolderTreeModel extends RecyclerView.ViewHolder {
-        @BindView(R.id.drag_handle)
         FlipView dragHandle;
-        @BindView(R.id.textViewModelName)
         TextView textViewModelName;
-        @BindView(R.id.expandableIndicator)
         ImageView expandableIndicator;
-        @BindView(R.id.color_tag)
         ImageView colorTag;
 
         ViewHolderTreeModel(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemTreeModel2Binding binding = ListItemTreeModel2Binding.bind(view);
+            dragHandle = binding.dragHandle;
+            textViewModelName = binding.textViewModelName;
+            expandableIndicator = binding.expandableIndicator;
+            colorTag = binding.colorTag;
         }
     }
 

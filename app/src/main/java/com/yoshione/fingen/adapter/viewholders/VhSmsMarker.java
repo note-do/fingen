@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.yoshione.fingen.databinding.ListItemSmsMarkerBinding;
 import com.yoshione.fingen.managers.SmsMarkerManager;
 import com.yoshione.fingen.model.SmsMarker;
 import com.yoshione.fingen.R;
@@ -13,27 +14,24 @@ import com.yoshione.fingen.utils.SmsParser;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 /**
  * Created by slv on 25.12.2015.
  *
  */
 public class VhSmsMarker extends VhModelBase {
-    @BindView(R.id.textViewType)
     TextView textViewType;
-    @BindView(R.id.textViewObject)
     TextView textViewObject;
-    @BindView(R.id.textViewMarker)
     TextView textViewValue;
-    @BindView(R.id.imageViewIcon)
     ImageView mImageViewIcon;
     Context mContext;
 
     public VhSmsMarker(View itemView, VhModelBase.IOnItemClickListener onItemClickListener, Context context) {
         super(itemView, onItemClickListener, context);
-        ButterKnife.bind(this, itemView);
+        ListItemSmsMarkerBinding binding = ListItemSmsMarkerBinding.bind(itemView);
+        textViewType = binding.textViewType;
+        textViewObject = binding.textViewObject;
+        textViewValue = binding.textViewMarker;
+        mImageViewIcon = binding.imageViewIcon;
         mContext = context;
     }
 

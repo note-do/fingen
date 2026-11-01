@@ -14,13 +14,11 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import com.yoshione.fingen.R;
+import com.yoshione.fingen.databinding.ListItemColumnIndexBinding;
 import com.yoshione.fingen.model.EntityToFieldLink;
 import com.yoshione.fingen.utils.ImportParams;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by slv on 18.05.2016.
@@ -253,14 +251,14 @@ public class AdapterColumnIndex extends RecyclerView.Adapter {
     }
 
     static class ColumnIndexViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.spinnerIndex)
         EditText mSpinnerIndex;
-        @BindView(R.id.textInputLayoutSpinnerIndex)
         TextInputLayout mTextInputLayoutSpinnerIndex;
 
         ColumnIndexViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ListItemColumnIndexBinding binding = ListItemColumnIndexBinding.bind(itemView);
+            mSpinnerIndex = binding.spinnerIndex;
+            mTextInputLayoutSpinnerIndex = binding.textInputLayoutSpinnerIndex;
         }
     }
 }

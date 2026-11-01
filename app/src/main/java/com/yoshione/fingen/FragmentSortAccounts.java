@@ -13,10 +13,9 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
+import com.yoshione.fingen.databinding.FragmentSortAccountsBinding;
 import com.yoshione.fingen.model.Events;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import org.greenrobot.eventbus.EventBus;
 
 /**
@@ -27,9 +26,7 @@ public class FragmentSortAccounts extends DialogFragment {
 
     private static final String TAG = "FragmentSortAccounts";
 
-    @BindView(R.id.spinnerSortType)
     EditText spinnerSortType;
-    @BindView(R.id.spinnerSortOrder)
     EditText spinnerSortOrder;
 
     private SharedPreferences preferences;
@@ -56,7 +53,9 @@ public class FragmentSortAccounts extends DialogFragment {
         sortOrder = preferences.getInt("accounts_sort_order", 0);
         String title = getArguments().getString("title");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_sort_accounts, null);
-        ButterKnife.bind(this, view);
+        FragmentSortAccountsBinding binding = FragmentSortAccountsBinding.bind(view);
+        spinnerSortType = binding.spinnerSortType;
+        spinnerSortOrder = binding.spinnerSortOrder;
 
         final String[] sortTypes = getActivity().getResources().getStringArray(R.array.acc_sort_types);
         spinnerSortType.setText(sortTypes[sortType]);

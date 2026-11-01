@@ -23,6 +23,7 @@ import android.widget.ImageButton;
 import com.yoshione.fingen.dao.CategoriesDAO;
 import com.yoshione.fingen.dao.ProductsDAO;
 import com.yoshione.fingen.dao.ProjectsDAO;
+import com.yoshione.fingen.databinding.FragmentProductEntryEditBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.model.Product;
 import com.yoshione.fingen.model.ProductEntry;
@@ -31,10 +32,6 @@ import com.yoshione.fingen.widgets.AmountEditor;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 
 import static android.app.Activity.RESULT_OK;
 import static com.yoshione.fingen.utils.RequestCodes.REQUEST_CODE_SELECT_MODEL;
@@ -46,35 +43,21 @@ import static com.yoshione.fingen.utils.RequestCodes.REQUEST_CODE_SELECT_MODEL;
 
 public class FragmentProductEntryEdit extends DialogFragment {
 
-    @BindView(R.id.textViewProduct)
     AutoCompleteTextView mTextViewProduct;
-    @BindView(R.id.textInputLayoutProduct)
     TextInputLayout mTextInputLayoutProduct;
-    @BindView(R.id.imageButtonDeleteProduct)
     ImageButton mImageButtonDeleteProduct;
-    @BindView(R.id.textViewCategory)
     EditText mTextViewCategory;
-    @BindView(R.id.textInputLayoutCategory)
     TextInputLayout mTextInputLayoutCategory;
-    @BindView(R.id.imageButtonDeleteCategory)
     ImageButton mImageButtonDeleteCategory;
-    @BindView(R.id.textViewProject)
     EditText mTextViewProject;
-    @BindView(R.id.textInputLayoutProject)
     TextInputLayout mTextInputLayoutProject;
-    @BindView(R.id.imageButtonDeleteProject)
     ImageButton mImageButtonDeleteProject;
-    @BindView(R.id.amount_editor)
     AmountEditor mAmountEditor;
-    @BindView(R.id.textViewQuantity)
     EditText mTextViewQuantity;
-    @BindView(R.id.textInputLayoutQuantity)
     TextInputLayout mTextInputLayoutQuantity;
-    @BindView(R.id.imageButtonMore)
     ImageButton mImageButtonMore;
-    @BindView(R.id.imageButtonLess)
     ImageButton mImageButtonLess;
-    Unbinder unbinder;
+    private FragmentProductEntryEditBinding mBinding;
     ProductEntry mProductEntry;
 
     public void setEntryEditListener(IProductEntryEditListener entryEditListener) {
@@ -102,7 +85,21 @@ public class FragmentProductEntryEdit extends DialogFragment {
         String title = getArguments().getString("title");
         mProductEntry = getArguments().getParcelable("product_entry");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_product_entry_edit, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentProductEntryEditBinding.bind(view);
+        mTextViewProduct = mBinding.textViewProduct;
+        mTextInputLayoutProduct = mBinding.textInputLayoutProduct;
+        mImageButtonDeleteProduct = mBinding.imageButtonDeleteProduct;
+        mTextViewCategory = mBinding.textViewCategory;
+        mTextInputLayoutCategory = mBinding.textInputLayoutCategory;
+        mImageButtonDeleteCategory = mBinding.imageButtonDeleteCategory;
+        mTextViewProject = mBinding.textViewProject;
+        mTextInputLayoutProject = mBinding.textInputLayoutProject;
+        mImageButtonDeleteProject = mBinding.imageButtonDeleteProject;
+        mAmountEditor = mBinding.amountEditor;
+        mTextViewQuantity = mBinding.textViewQuantity;
+        mTextInputLayoutQuantity = mBinding.textInputLayoutQuantity;
+        mImageButtonMore = mBinding.imageButtonMore;
+        mImageButtonLess = mBinding.imageButtonLess;
         mAmountEditor.setActivity(getActivity());
 
         if (mProductEntry != null) {
@@ -273,7 +270,7 @@ public class FragmentProductEntryEdit extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     @Override

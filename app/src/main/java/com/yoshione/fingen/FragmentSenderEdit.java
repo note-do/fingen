@@ -33,16 +33,13 @@ import android.widget.NumberPicker;
 import android.widget.Toast;
 
 import com.yoshione.fingen.dao.SendersDAO;
+import com.yoshione.fingen.databinding.FragmentSenderEditBinding;
 import com.yoshione.fingen.model.Sender;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.Unbinder;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -57,18 +54,12 @@ import permissions.dispatcher.RuntimePermissions;
 @RuntimePermissions
 public class FragmentSenderEdit extends DialogFragment {
 
-    Unbinder unbinder;
-    @BindView(R.id.editTextName)
+    private FragmentSenderEditBinding mBinding;
     EditText mEditTextName;
-    @BindView(R.id.editTextPhoneNo)
     EditText mEditTextPhoneNo;
-    @BindView(R.id.editTextAmountPos)
     EditText mEditTextAmountPos;
-    @BindView(R.id.editTextBalancePos)
     EditText mEditTextBalancePos;
-    @BindView(R.id.imageButtonSelectSender)
     ImageButton mImageButtonSelectSender;
-    @BindView(R.id.checkBoxAddCreditLimitToBalance)
     CheckBox mCheckBoxAddCreditLimitToBalance;
     private Sender mSender;
 
@@ -91,7 +82,17 @@ public class FragmentSenderEdit extends DialogFragment {
         String title = getArguments().getString("title");
         mSender = getArguments().getParcelable("sender");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_sender_edit, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentSenderEditBinding.bind(view);
+        mEditTextName = mBinding.editTextName;
+        mEditTextPhoneNo = mBinding.editTextPhoneNo;
+        mEditTextAmountPos = mBinding.editTextAmountPos;
+        mEditTextBalancePos = mBinding.editTextBalancePos;
+        mImageButtonSelectSender = mBinding.imageButtonSelectSender;
+        mCheckBoxAddCreditLimitToBalance = mBinding.checkBoxAddCreditLimitToBalance;
+        mBinding.editTextAmountPos.setOnClickListener(v -> onClick(v));
+        mBinding.editTextBalancePos.setOnClickListener(v -> onClick(v));
+        mBinding.imageButtonSelectSender.setOnClickListener(v -> onClick(v));
+        mBinding.checkBoxAddCreditLimitToBalance.setOnClickListener(v -> onClick(v));
 
         if (mSender != null) {
             mEditTextName.setText(mSender.getName());
@@ -151,7 +152,6 @@ public class FragmentSenderEdit extends DialogFragment {
     }
 
     @SuppressWarnings("ResourceType")
-    @OnClick({R.id.editTextAmountPos, R.id.editTextBalancePos, R.id.imageButtonSelectSender, R.id.checkBoxAddCreditLimitToBalance})
     public void onClick(View view) {
         int[] attrs = {android.R.attr.background, android.R.attr.textColorPrimary};
         TypedArray ta = getActivity().obtainStyledAttributes(getThemeId(), attrs);
@@ -231,7 +231,7 @@ public class FragmentSenderEdit extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     @NeedsPermission(Manifest.permission.READ_SMS)

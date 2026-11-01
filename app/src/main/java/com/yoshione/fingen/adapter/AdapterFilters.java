@@ -36,6 +36,9 @@ import com.yoshione.fingen.R;
 import com.yoshione.fingen.dao.AbstractDAO;
 import com.yoshione.fingen.dao.AccountsDAO;
 import com.yoshione.fingen.dao.BaseDAO;
+import com.yoshione.fingen.databinding.ListItemFilterAmountBinding;
+import com.yoshione.fingen.databinding.ListItemFilterDate2Binding;
+import com.yoshione.fingen.databinding.ListItemFilterTagviewBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
 import com.yoshione.fingen.filters.AmountFilter;
@@ -58,9 +61,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by Leonid on 05.11.2015.
@@ -192,23 +192,22 @@ public class AdapterFilters extends RecyclerView.Adapter {
     }
 
     class BaseViewHolder extends ViewHolderAbstractFilter {
-        @BindView(R.id.caption)
         TextView textViewCaption;
-        @BindView(R.id.switch_enabled)
         Switch switchEnabled;
-        @BindView(R.id.buttonDelete)
         ImageButton mButtonDelete;
-        @BindView(R.id.switch_exclude)
         Switch mSwitchExclude;
-        @BindView(R.id.text_view_not)
         TextView textViewNot;
-        @BindView(R.id.text_view_on)
         TextView textViewOn;
         AbstractFilter abstractFilter;
 
         BaseViewHolder(View v) {
             super(v);
-            ButterKnife.bind(this, v);
+            textViewCaption = v.findViewById(R.id.caption);
+            switchEnabled = v.findViewById(R.id.switch_enabled);
+            mButtonDelete = v.findViewById(R.id.buttonDelete);
+            mSwitchExclude = v.findViewById(R.id.switch_exclude);
+            textViewNot = v.findViewById(R.id.text_view_not);
+            textViewOn = v.findViewById(R.id.text_view_on);
 
             itemView.setLongClickable(true);
         }
@@ -298,27 +297,27 @@ public class AdapterFilters extends RecyclerView.Adapter {
 
     class AmountFilterViewHolder extends BaseViewHolder {
 
-        @BindView(R.id.check_box_outcome)
         AppCompatCheckBox checkBoxOutcome;
-        @BindView(R.id.check_box_income)
         AppCompatCheckBox checkBoxIncome;
-        @BindView(R.id.edit_text_min_amount)
         EditText editTextMin;
-        @BindView(R.id.edit_text_max_amount)
         EditText editTextMax;
-        @BindView(R.id.radio_group_type)
         RadioGroup radioGroupType;
-        @BindView(R.id.radio_button_type_transaction)
         RadioButton radioButtonTypeTransaction;
-        @BindView(R.id.radio_button_type_transfer)
         RadioButton radioButtonTypeTransfer;
-        @BindView(R.id.radio_button_type_both)
         RadioButton radioButtonTypeBoth;
         private boolean mBinding;
 
         AmountFilterViewHolder(View v) {
             super(v);
-            ButterKnife.bind(this, v);
+            ListItemFilterAmountBinding binding = ListItemFilterAmountBinding.bind(v);
+            checkBoxOutcome = binding.checkBoxOutcome;
+            checkBoxIncome = binding.checkBoxIncome;
+            editTextMin = binding.editTextMinAmount;
+            editTextMax = binding.editTextMaxAmount;
+            radioGroupType = binding.radioGroupType;
+            radioButtonTypeTransaction = binding.radioButtonTypeTransaction;
+            radioButtonTypeTransfer = binding.radioButtonTypeTransfer;
+            radioButtonTypeBoth = binding.radioButtonTypeBoth;
         }
 
         @SuppressLint("SetTextI18n")
@@ -461,12 +460,12 @@ public class AdapterFilters extends RecyclerView.Adapter {
     class AccountFilterViewHolder extends BaseViewHolder {
 
         //        AccountFilter accountFilter;
-        @BindView(R.id.tag_view)
         TagView tagView;
 
         AccountFilterViewHolder(View v) {
             super(v);
-            ButterKnife.bind(this, v);
+            ListItemFilterTagviewBinding binding = ListItemFilterTagviewBinding.bind(v);
+            tagView = binding.tagView;
         }
 
         @Override
@@ -512,12 +511,12 @@ public class AdapterFilters extends RecyclerView.Adapter {
 
     class NestedModelFilterViewHolder extends BaseViewHolder {
 
-        @BindView(R.id.tag_view)
         TagView tagView;
 
         NestedModelFilterViewHolder(View v) {
             super(v);
-            ButterKnife.bind(this, v);
+            ListItemFilterTagviewBinding binding = ListItemFilterTagviewBinding.bind(v);
+            tagView = binding.tagView;
         }
 
         @Override
@@ -599,17 +598,17 @@ public class AdapterFilters extends RecyclerView.Adapter {
 
     class DateRangeFilterViewHolder extends BaseViewHolder implements DatePickerDialog.OnDateSetListener {
 
-        @BindView(R.id.edit_text_start_date)
         EditText buttonStartDate;
-        @BindView(R.id.edit_text_end_date)
         EditText buttonEndDate;
-        @BindView(R.id.button_more)
         ImageButton buttonMore;
         int dateType;
 
         DateRangeFilterViewHolder(View v) {
             super(v);
-            ButterKnife.bind(this, v);
+            ListItemFilterDate2Binding binding = ListItemFilterDate2Binding.bind(v);
+            buttonStartDate = binding.editTextStartDate;
+            buttonEndDate = binding.editTextEndDate;
+            buttonMore = binding.buttonMore;
 
             buttonMore.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -19,8 +19,7 @@ import com.yoshione.fingen.adapter.helper.OnStartDragListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.yoshione.fingen.databinding.ListItemTreeModel2Binding;
 import com.yoshione.fingen.widgets.FlipView;
 
 /**
@@ -111,20 +110,20 @@ public class AdapterTabOrder extends RecyclerView.Adapter implements ItemTouchHe
     }
 
     static class ViewHolderTabOrder extends RecyclerView.ViewHolder {
-        @BindView(R.id.drag_handle)
         FlipView dragHandle;
-        @BindView(R.id.textViewModelName)
         TextView textViewModelName;
-        @BindView(R.id.expandableIndicator)
         ImageView expandableIndicator;
-        @BindView(R.id.container)
         ConstraintLayout container;
-        @BindView(R.id.color_tag)
         ImageView colorTag;
 
         ViewHolderTabOrder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemTreeModel2Binding binding = ListItemTreeModel2Binding.bind(view);
+            dragHandle = binding.dragHandle;
+            textViewModelName = binding.textViewModelName;
+            expandableIndicator = binding.expandableIndicator;
+            container = binding.container;
+            colorTag = binding.colorTag;
         }
     }
 

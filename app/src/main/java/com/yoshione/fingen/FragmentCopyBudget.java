@@ -12,14 +12,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
+import com.yoshione.fingen.databinding.FragmentCopyBudgetBinding;
 import com.yoshione.fingen.utils.LocaleUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 
 /**
  * Created by slv on 02.04.2016.
@@ -29,17 +26,14 @@ public class FragmentCopyBudget extends DialogFragment {
 
     private static final String TAG = "FragmentCopyBudget";
 
-    @BindView(R.id.editTextYear)
     EditText editTextYear;
-    @BindView(R.id.textViewMonth)
     EditText textViewMonth;
-    @BindView(R.id.checkboxReplaceExists)
     AppCompatCheckBox checkboxReplaceExists;
 
     private int mYear;
     private int mMonth;
 
-    Unbinder unbinder;
+    private FragmentCopyBudgetBinding mBinding;
 
     void setCopyBudgetDialogListener(ICopyBudgetDialogListener copyBudgetDialogListener) {
         this.copyBudgetDialogListener = copyBudgetDialogListener;
@@ -81,7 +75,10 @@ public class FragmentCopyBudget extends DialogFragment {
         mMonth = getArguments().getInt("month");
         boolean showCheckBox = getArguments().getBoolean("showCheckBox");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_copy_budget, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentCopyBudgetBinding.bind(view);
+        editTextYear = mBinding.editTextYear;
+        textViewMonth = mBinding.textViewMonth;
+        checkboxReplaceExists = mBinding.checkboxReplaceExists;
 
         final String monthList[] = getMonthList();
 
@@ -160,7 +157,7 @@ public class FragmentCopyBudget extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     interface ICopyBudgetDialogListener {

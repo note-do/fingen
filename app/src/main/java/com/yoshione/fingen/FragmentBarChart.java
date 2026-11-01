@@ -25,6 +25,7 @@ import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.yoshione.fingen.dao.AbstractDAO;
 import com.yoshione.fingen.dao.BaseDAO;
+import com.yoshione.fingen.databinding.FragmentBarChartBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.managers.AbstractModelManager;
 import com.yoshione.fingen.utils.BaseNode;
@@ -39,10 +40,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 /**
  * Created by Leonid on 16.08.2015.
  * a
@@ -51,12 +48,9 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
 
     public static final String TAG = "FragmentBarChart";
     private final boolean mDrawBarLabels = false;
-    @BindView(R.id.barChart)
     HorizontalBarChart mBarChart;
-    Unbinder unbinder;
-    @BindView(R.id.fab)
+    private FragmentBarChartBinding mBinding;
     FloatingActionButton mFab;
-    @BindView(R.id.fabLayout)
     LinearLayout mFabLayout;
 
     private FgLargeValuesFormatter largeValuesFormatter;
@@ -67,7 +61,10 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_bar_chart, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentBarChartBinding.bind(view);
+        mBarChart = mBinding.barChart;
+        mFab = mBinding.fab;
+        mFabLayout = mBinding.fabLayout;
 
         mFab.setOnClickListener(new EntityChartFabOnClickListener(mBarChart, getActivity()));
 
@@ -108,7 +105,7 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     private void setupBarChart() {

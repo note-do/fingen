@@ -29,6 +29,7 @@ import com.yoshione.fingen.FgConst;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.calc.CalculatorBuilder;
 import com.yoshione.fingen.dao.CabbagesDAO;
+import com.yoshione.fingen.databinding.WidgetAmountEditBinding;
 import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.model.Events;
 import com.yoshione.fingen.receivers.CalcReciever;
@@ -47,10 +48,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
 /**
  * Created by Leonid on 14.11.2015.
  *
@@ -61,17 +58,11 @@ public class AmountEditor extends LinearLayout {
 
     public OnAmountChangeListener mOnAmountChangeListener;
     public OnCabbageChangeListener mOnCabbageChangeListener;
-    @BindView(R.id.imagebutton_amount_sign)
     public ImageButton btnAmountSign;
-    @BindView(R.id.edittext_amount)
     EditText edAmount;
-    @BindView(R.id.imageButtonCalc)
     ImageButton btnCalc;
-    @BindView(R.id.editTextCabbage)
     EditText spinnerCabbage;
-    @BindView(R.id.textInputLayoutCabbage)
     TextInputLayout mTextInputLayoutCabbage;
-    @BindView(R.id.textInputLayoutAmount)
     TextInputLayout mTextInputLayoutAmount;
     private boolean mAllowChangeCabbage = true;
     private int type;
@@ -246,7 +237,14 @@ public class AmountEditor extends LinearLayout {
     private void init(final Context context) {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.widget_amount_edit, null);
         this.addView(view);
-        ButterKnife.bind(this);
+        WidgetAmountEditBinding binding = WidgetAmountEditBinding.bind(view);
+        btnAmountSign = binding.imagebuttonAmountSign;
+        edAmount = binding.edittextAmount;
+        btnCalc = binding.imageButtonCalc;
+        spinnerCabbage = binding.editTextCabbage;
+        mTextInputLayoutCabbage = binding.textInputLayoutCabbage;
+        mTextInputLayoutAmount = binding.textInputLayoutAmount;
+        binding.imageButtonCalc.setOnClickListener(v -> onCalculatorClick());
         scale = 2;
 
         mAmountColorizer = new AmountColorizer(context);
@@ -352,7 +350,6 @@ public class AmountEditor extends LinearLayout {
         mTextInputLayoutAmount.setHint(hint);
     }
 
-    @OnClick(R.id.imageButtonCalc)
     void onCalculatorClick() {
         CalcReciever receiver = new CalcReciever(this, activity);
         activity.registerReceiver(receiver, new IntentFilter(FgConst.ACT_CALC_DONE));
