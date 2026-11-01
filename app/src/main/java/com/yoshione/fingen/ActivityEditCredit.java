@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityEditCredit2Binding;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
@@ -28,9 +29,6 @@ import com.yoshione.fingen.model.Payee;
 import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 import static com.yoshione.fingen.utils.RequestCodes.REQUEST_CODE_SELECT_MODEL;
 
@@ -42,15 +40,11 @@ public class ActivityEditCredit extends ToolbarActivity implements FragmentPayee
 
 //    private static final String TAG = "ActivityEditCredit";
 
-    @BindView(R.id.textViewAccount)
+    private ActivityEditCredit2Binding mBinding;
     EditText textViewAccount;
-    @BindView(R.id.textViewCategory)
     EditText textViewCategory;
-    @BindView(R.id.editTextComment)
     EditText textViewComment;
-    @BindView(R.id.imageButtonDeleteCategory)
     ImageButton mImageButtonDeleteCategory;
-    @BindView(R.id.buttonSaveTransaction)
     Button mButtonSaveTransaction;
     private Credit mCredit;
     private FragmentPayee fragmentPayee;
@@ -61,7 +55,14 @@ public class ActivityEditCredit extends ToolbarActivity implements FragmentPayee
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ButterKnife.bind(this);
+        mBinding = ActivityEditCredit2Binding.bind(getContentRoot());
+        textViewAccount = mBinding.textViewAccount;
+        textViewCategory = mBinding.textViewCategory;
+        textViewComment = mBinding.editTextComment;
+        mImageButtonDeleteCategory = mBinding.imageButtonDeleteCategory;
+        mButtonSaveTransaction = mBinding.buttonSaveTransaction;
+        mBinding.buttonSaveTransaction.setOnClickListener(v -> onSaveClick());
+        mBinding.imageButtonDeleteCategory.setOnClickListener(v -> onClick());
         mCredit = getIntent().getParcelableExtra("credit");
     }
 
@@ -274,7 +275,6 @@ public class ActivityEditCredit extends ToolbarActivity implements FragmentPayee
         }
     }
 
-    @OnClick(R.id.buttonSaveTransaction)
     public void onSaveClick() {
         checkPayeeAndCreateIfNecessary();
 
@@ -306,7 +306,6 @@ public class ActivityEditCredit extends ToolbarActivity implements FragmentPayee
         }
     }
 
-    @OnClick(R.id.imageButtonDeleteCategory)
     public void onClick() {
         mCredit.setCategoryID(-1);
         initCategory();

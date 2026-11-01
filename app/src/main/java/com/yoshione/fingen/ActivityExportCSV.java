@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityExportCsvBinding;
 import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -34,9 +35,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -53,18 +51,13 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
     private final static int HANDLER_OPERATION_TOAST = 3;
     private static final ProgressBar[] numberProgressBarArr = new ProgressBar[]{null};
     private static final Activity[] activityArr = new Activity[]{null};
-    @BindView(R.id.progressbar)
+    private ActivityExportCsvBinding mBinding;
     ProgressBar progressbar;
     UpdateProgressHandler handler;
-    @BindView(R.id.editTextDirectory)
     EditText mEditTextDirectory;
-    @BindView(R.id.editTextFileName)
     EditText mEditTextFileName;
-    @BindView(R.id.textInputLayoutDir)
     TextInputLayout mTextInputLayoutDir;
-    @BindView(R.id.textInputLayoutFileName)
     TextInputLayout mTextInputLayoutFileName;
-    @BindView(R.id.checkBoxExportProducts)
     CheckBox mCheckBoxExportProducts;
     private int mCurrentProgress;
 
@@ -81,7 +74,14 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityExportCsvBinding.bind(getContentRoot());
+        progressbar = mBinding.progressbar;
+        mEditTextDirectory = mBinding.editTextDirectory;
+        mEditTextFileName = mBinding.editTextFileName;
+        mTextInputLayoutDir = mBinding.textInputLayoutDir;
+        mTextInputLayoutFileName = mBinding.textInputLayoutFileName;
+        mCheckBoxExportProducts = mBinding.checkBoxExportProducts;
+        mBinding.editTextDirectory.setOnClickListener(v -> OnSelectFileClick());
 
         progressbar.setProgress(0);
         numberProgressBarArr[0] = progressbar;
@@ -121,7 +121,6 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
         }
     }
 
-    @OnClick(R.id.editTextDirectory)
     void OnSelectFileClick() {
         ActivityExportCSVPermissionsDispatcher.SelectFileWithPermissionCheck(ActivityExportCSV.this);
     }

@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityBackupBinding;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -54,8 +55,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -71,33 +70,20 @@ public class ActivityBackup extends ToolbarActivity {
     private static final int MSG_SHOW_DIALOG = 0;
     private static final int MSG_DOWNLOAD_FILE = 1;
 
-    @BindView(R.id.fabBackup)
+    private ActivityBackupBinding mBinding;
     FloatingActionButton fabBackup;
-    @BindView(R.id.fabRestore)
     FloatingActionButton fabRestore;
-    @BindView(R.id.fabRestoreFromDropbox)
     FloatingActionButton fabRestoreFromDropbox;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton fabMenuButtonRoot;
-    @BindView(R.id.switchCompatEnablePasswordProtection)
     SwitchCompat mSwitchCompatEnablePasswordProtection;
-    @BindView(R.id.editTextPassword)
     EditText mEditTextPassword;
-    @BindView(R.id.editTextDropboxAccount)
     EditText mEditTextDropboxAccount;
-    @BindView(R.id.textInputLayoutDropboxAccount)
     TextInputLayout mTextInputLayoutDropboxAccount;
-    @BindView(R.id.textViewLastBackupToDropbox)
     TextView mTextViewLastBackupToDropbox;
-    @BindView(R.id.buttonLogoutFromDropbox)
     Button mButtonLogoutFromDropbox;
-    @BindView(R.id.fabBGLayout)
     View fabBGLayout;
-    @BindView(R.id.fabBackupLayout)
     LinearLayout mFabBackupLayout;
-    @BindView(R.id.fabRestoreLayout)
     LinearLayout mFabRestoreLayout;
-    @BindView(R.id.fabRestoreFromDropboxLayout)
     LinearLayout mFabRestoreFromDropboxLayout;
 
     private SharedPreferences prefs;
@@ -107,7 +93,21 @@ public class ActivityBackup extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityBackupBinding.bind(getContentRoot());
+        fabBackup = mBinding.fabBackup;
+        fabRestore = mBinding.fabRestore;
+        fabRestoreFromDropbox = mBinding.fabRestoreFromDropbox;
+        fabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+        mSwitchCompatEnablePasswordProtection = mBinding.switchCompatEnablePasswordProtection;
+        mEditTextPassword = mBinding.editTextPassword;
+        mEditTextDropboxAccount = mBinding.editTextDropboxAccount;
+        mTextInputLayoutDropboxAccount = mBinding.textInputLayoutDropboxAccount;
+        mTextViewLastBackupToDropbox = mBinding.textViewLastBackupToDropbox;
+        mButtonLogoutFromDropbox = mBinding.buttonLogoutFromDropbox;
+        fabBGLayout = mBinding.fabBGLayout;
+        mFabBackupLayout = mBinding.fabBackupLayout;
+        mFabRestoreLayout = mBinding.fabRestoreLayout;
+        mFabRestoreFromDropboxLayout = mBinding.fabRestoreFromDropboxLayout;
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         initFabMenu();
         initPasswordProtection();

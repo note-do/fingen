@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityEditTransactionBinding;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -116,9 +117,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -148,127 +146,67 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     //</editor-fold>
 
     //<editor-fold desc="Bind views" defaultstate="collapsed">
-    @BindView(R.id.te_lay_DateTime)
+    private ActivityEditTransactionBinding mBinding;
     LinearLayout teLayDateTime;
-    @BindView(R.id.editTextTemplateName)
     EditText editTextTemplateName;
-    @BindView(R.id.layoutCategory)
     RelativeLayout layoutCategory;
-    @BindView(R.id.layoutSms)
     RelativeLayout layoutSms;
-    @BindView(R.id.layoutProject)
     RelativeLayout layoutProject;
-    @BindView(R.id.layoutLocation)
     RelativeLayout layoutLocation;
-    @BindView(R.id.textViewSrcAmount)
     EditText textViewSrcAmount;
-    @BindView(R.id.textViewDepartment)
     EditText edDepartment;
-    @BindView(R.id.imageButtonDeleteDepartment)
     ImageButton imageButtonDeleteDepartment;
-    @BindView(R.id.layoutDepartment)
     RelativeLayout layoutDepartment;
-    @BindView(R.id.textViewSimpleDebt)
     EditText mTextViewSimpleDebt;
-    @BindView(R.id.imageButtonDeleteDebt)
     ImageButton mImageButtonDeleteDebt;
-    @BindView(R.id.layoutSimpleDebt)
     RelativeLayout layoutSimpleDebt;
-    @BindView(R.id.buttonMore)
     Button mButtonMore;
-    @BindView(R.id.textInputLayoutTemplateName)
     TextInputLayout mTextInputLayoutTemplateName;
-    @BindView(R.id.textInputLayoutSrcAmount)
     TextInputLayout mTextInputLayoutSrcAmount;
-    @BindView(R.id.textInputLayoutExchangeRate)
     TextInputLayout mTextInputLayoutExchangeRate;
-    @BindView(R.id.te_pager_payee)
     MyViewPager viewPager;
-    @BindView(R.id.textInputLayoutAccount)
     TextInputLayout textInputLayoutAccount;
-    @BindView(R.id.textViewAccount)
     EditText textViewAccount;
-    @BindView(R.id.textViewCategory)
     EditText edCategory;
-    @BindView(R.id.textViewProject)
     EditText edProject;
-    @BindView(R.id.textViewLocation)
     EditText edLocation;
-    @BindView(R.id.editTextDate)
     EditText edDate;
-    @BindView(R.id.te_ed_Time)
     EditText edTime;
-    @BindView(R.id.edit_text_exchange_rate)
     EditText edExchangeRate;
-    @BindView(R.id.editTextComment)
     EditText edComment;
-    @BindView(R.id.te_tv_sms)
     SmsEditText edSms;
-    @BindView(R.id.amount_editor)
     AmountEditor amountEditor;
-    @BindView(R.id.dest_amount_editor)
     AmountEditor destAmountEditor;
-    @BindView(R.id.imageButtonDeleteLocation)
     ImageButton imageButtonDeleteLocation;
-    @BindView(R.id.imageButtonDeleteCategory)
     ImageButton imageButtonDeleteCategory;
-    @BindView(R.id.imageButtonDeleteProject)
     ImageButton imageButtonDeleteProject;
-    @BindView(R.id.imageButtonAddMarker)
     ImageButton imageButtonAddMarker;
-    @BindView(R.id.tabLayoutType)
     TabLayout tabLayoutType;
-    @BindView(R.id.textViewCaptonProductList)
     TextView mTextViewCaptonProductList;
-    @BindView(R.id.expandableIndicator)
     ImageView mExpandableIndicator;
-    @BindView(R.id.recyclerViewProductList)
     RecyclerView mRecyclerViewProductList;
-    @BindView(R.id.layoutProductList)
     ConstraintLayout mLayoutProductList;
-    @BindView(R.id.imageViewLoadingProducts)
     ImageView mImageViewLoadingProducts;
-    @BindView(R.id.textViewLoadingProducts)
     TextView mTextViewLoadingProducts;
-    @BindView(R.id.layoutLoadingProducts)
     ConstraintLayout mLayoutLoadingProducts;
-    @BindView(R.id.imageButtonInvertExRate)
     ImageButton mImageButtonInvertExRate;
-    @BindView(R.id.layoutExchangeRate)
     RelativeLayout mLayoutExchangeRate;
-    @BindView(R.id.fabBGLayout)
     View mFabBGLayout;
-    @BindView(R.id.fabSelectAll)
     FloatingActionButton mFabSelectAll;
-    @BindView(R.id.fabSelectAllLayout)
     LinearLayout mFabSelectAllLayout;
-    @BindView(R.id.fabUnselectAll)
     FloatingActionButton mFabUnselectAll;
-    @BindView(R.id.fabUnselectAllLayout)
     LinearLayout mFabUnselectAllLayout;
-    @BindView(R.id.fabSetCategory)
     FloatingActionButton mFabSetCategory;
-    @BindView(R.id.fabSetCategoryLayout)
     LinearLayout mFabSetCategoryLayout;
-    @BindView(R.id.fabSetProject)
     FloatingActionButton mFabSetProject;
-    @BindView(R.id.fabSetProjectLayout)
     LinearLayout mFabSetProjectLayout;
-    @BindView(R.id.fabDeleteSelected)
     FloatingActionButton mFabDeleteSelected;
-    @BindView(R.id.fabDeleteSelectedLayout)
     LinearLayout mFabDeleteSelectedLayout;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton mFabMenuButtonRoot;
-    @BindView(R.id.fabMenuButtonRootLayout)
     LinearLayout mFabMenuButtonRootLayout;
-    @BindView(R.id.layoutPayeeOrDestAcc)
     LinearLayout mLayoutPayeeOrDestAcc;
-    @BindView(R.id.layoutAmounts)
     LinearLayout mLayoutAmounts;
-    @BindView(R.id.layoutRoot)
     LinearLayout mLayoutRoot;
-    @BindView(R.id.layoutComment)
     TextInputLayout mLayoutComment;
     //</editor-fold>
 
@@ -312,7 +250,76 @@ public class ActivityEditTransaction extends ToolbarActivity implements
 
         FGApplication.getAppComponent().inject(this);
 
-        ButterKnife.bind(this);
+        mBinding = ActivityEditTransactionBinding.bind(getContentRoot());
+        teLayDateTime = findViewById(R.id.te_lay_DateTime);
+        editTextTemplateName = mBinding.editTextTemplateName;
+        layoutCategory = mBinding.layoutCategory;
+        layoutSms = mBinding.layoutSms;
+        layoutProject = mBinding.layoutProject;
+        layoutLocation = mBinding.layoutLocation;
+        textViewSrcAmount = mBinding.textViewSrcAmount;
+        edDepartment = mBinding.textViewDepartment;
+        imageButtonDeleteDepartment = mBinding.imageButtonDeleteDepartment;
+        layoutDepartment = mBinding.layoutDepartment;
+        mTextViewSimpleDebt = mBinding.textViewSimpleDebt;
+        mImageButtonDeleteDebt = mBinding.imageButtonDeleteDebt;
+        layoutSimpleDebt = mBinding.layoutSimpleDebt;
+        mButtonMore = mBinding.buttonMore;
+        mTextInputLayoutTemplateName = mBinding.textInputLayoutTemplateName;
+        mTextInputLayoutSrcAmount = mBinding.textInputLayoutSrcAmount;
+        mTextInputLayoutExchangeRate = mBinding.textInputLayoutExchangeRate;
+        viewPager = findViewById(R.id.te_pager_payee);
+        textInputLayoutAccount = mBinding.textInputLayoutAccount;
+        textViewAccount = mBinding.textViewAccount;
+        edCategory = mBinding.textViewCategory;
+        edProject = mBinding.textViewProject;
+        edLocation = mBinding.textViewLocation;
+        edDate = mBinding.editTextDate;
+        edTime = findViewById(R.id.te_ed_Time);
+        edExchangeRate = findViewById(R.id.edit_text_exchange_rate);
+        edComment = mBinding.editTextComment;
+        edSms = findViewById(R.id.te_tv_sms);
+        amountEditor = findViewById(R.id.amount_editor);
+        destAmountEditor = findViewById(R.id.dest_amount_editor);
+        imageButtonDeleteLocation = mBinding.imageButtonDeleteLocation;
+        imageButtonDeleteCategory = mBinding.imageButtonDeleteCategory;
+        imageButtonDeleteProject = mBinding.imageButtonDeleteProject;
+        imageButtonAddMarker = mBinding.imageButtonAddMarker;
+        tabLayoutType = mBinding.tabLayoutType;
+        mTextViewCaptonProductList = findViewById(R.id.textViewCaptonProductList);
+        mExpandableIndicator = findViewById(R.id.expandableIndicator);
+        mRecyclerViewProductList = findViewById(R.id.recyclerViewProductList);
+        mLayoutProductList = findViewById(R.id.layoutProductList);
+        mImageViewLoadingProducts = findViewById(R.id.imageViewLoadingProducts);
+        mTextViewLoadingProducts = findViewById(R.id.textViewLoadingProducts);
+        mLayoutLoadingProducts = findViewById(R.id.layoutLoadingProducts);
+        mImageButtonInvertExRate = mBinding.imageButtonInvertExRate;
+        mLayoutExchangeRate = mBinding.layoutExchangeRate;
+        mFabBGLayout = mBinding.fabBGLayout;
+        mFabSelectAll = mBinding.fabSelectAll;
+        mFabSelectAllLayout = mBinding.fabSelectAllLayout;
+        mFabUnselectAll = mBinding.fabUnselectAll;
+        mFabUnselectAllLayout = mBinding.fabUnselectAllLayout;
+        mFabSetCategory = mBinding.fabSetCategory;
+        mFabSetCategoryLayout = mBinding.fabSetCategoryLayout;
+        mFabSetProject = mBinding.fabSetProject;
+        mFabSetProjectLayout = mBinding.fabSetProjectLayout;
+        mFabDeleteSelected = mBinding.fabDeleteSelected;
+        mFabDeleteSelectedLayout = mBinding.fabDeleteSelectedLayout;
+        mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+        mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
+        mLayoutPayeeOrDestAcc = mBinding.layoutPayeeOrDestAcc;
+        mLayoutAmounts = mBinding.layoutAmounts;
+        mLayoutRoot = mBinding.layoutRoot;
+        mLayoutComment = mBinding.layoutComment;
+        mBinding.buttonSaveTransaction.setOnClickListener(v -> onSaveClick());
+        mBinding.buttonMore.setOnClickListener(v -> onClick());
+        mBinding.imageButtonDeleteLocation.setOnClickListener(v -> onTrashButtonClick(v));
+        mBinding.imageButtonDeleteCategory.setOnClickListener(v -> onTrashButtonClick(v));
+        mBinding.imageButtonDeleteDebt.setOnClickListener(v -> onTrashButtonClick(v));
+        mBinding.imageButtonDeleteProject.setOnClickListener(v -> onTrashButtonClick(v));
+        mBinding.imageButtonDeleteDepartment.setOnClickListener(v -> onTrashButtonClick(v));
+        mBinding.editTextDate.setOnClickListener(v -> onDateClick(v));
 
         mTrEditItems = PrefUtils.getTrEditorLayout(mPreferences, this);
         recreateViews();
@@ -652,7 +659,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         }
     }
 
-    @OnClick(R.id.buttonSaveTransaction)
     public void onSaveClick() {
 
         switch (viewPager.getCurrentItem()) {
@@ -837,7 +843,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         builder.show();
     }
 
-    @OnClick(R.id.buttonMore)
     public void onClick() {
         mIsBtnMorePressed = !mIsBtnMorePressed;
         updateControlsState();
@@ -1786,8 +1791,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         ActivityEditTransactionPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    @OnClick({R.id.imageButtonDeleteLocation, R.id.imageButtonDeleteCategory, R.id.imageButtonDeleteDebt,
-            R.id.imageButtonDeleteProject, R.id.imageButtonDeleteDepartment})
     void onTrashButtonClick(View v) {
         switch (v.getId()) {
             case R.id.imageButtonDeleteLocation:
@@ -1998,7 +2001,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     }
 
     //<editor-fold desc="Date & Time pickers" defaultstate="collapsed">
-//    @OnClick(R.id.editTextDate)
     public void onDateClick(View view) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(transaction.getDateTime());

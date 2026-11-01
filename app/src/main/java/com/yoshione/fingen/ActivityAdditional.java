@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityAdditionalBinding;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
@@ -14,12 +15,10 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class ActivityAdditional extends ToolbarActivity {
 
-    @BindView(R.id.recycler_view)
+    private ActivityAdditionalBinding mBinding;
     RecyclerView recyclerView;
 
     @Override
@@ -35,7 +34,8 @@ public class ActivityAdditional extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityAdditionalBinding.bind(getContentRoot());
+        recyclerView = findViewById(R.id.recycler_view);
 
         List<MenuItem> menuItemList = new ArrayList<>();
 

@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityImportCsvAdvancedBinding;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,9 +44,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -62,25 +60,16 @@ public class ActivityImportCSVAdvanced extends ToolbarActivity implements IProgr
     private final static int HANDLER_OPERATION_TOAST = 3;
     private static final ProgressBar[] ProgressBarArr = new ProgressBar[]{null};
     private static final Activity[] activityArr = new Activity[]{null};
-    @BindView(R.id.editTextFileName)
+    private ActivityImportCsvAdvancedBinding mBinding;
     EditText editTextFileName;
-    @BindView(R.id.progressbar)
     ProgressBar progressbar;
-    @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
-    @BindView(R.id.textView3)
     TextView mTextView3;
-    @BindView(R.id.layoutRW)
     LinearLayout mLayoutRW;
-    @BindView(R.id.textViewSkipLines)
     EditText mTextViewSkipLines;
-    @BindView(R.id.imageButtonDec)
     ImageButton mImageButtonDec;
-    @BindView(R.id.imageButtonInc)
     ImageButton mImageButtonInc;
-    @BindView(R.id.textInputLayoutLines)
     TextInputLayout mTextInputLayoutLines;
-    @BindView(R.id.switchCompatSkipDuplicates)
     SwitchCompat mSwitchCompatSkipDuplicates;
     UpdateProgressHandler handler;
     private int mCurrentProgress;
@@ -93,7 +82,20 @@ public class ActivityImportCSVAdvanced extends ToolbarActivity implements IProgr
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityImportCsvAdvancedBinding.bind(getContentRoot());
+        editTextFileName = findViewById(R.id.editTextFileName);
+        progressbar = mBinding.progressbar;
+        mRecyclerView = findViewById(R.id.recycler_view);
+        mTextView3 = mBinding.textView3;
+        mLayoutRW = mBinding.layoutRW;
+        mTextViewSkipLines = mBinding.textViewSkipLines;
+        mImageButtonDec = mBinding.imageButtonDec;
+        mImageButtonInc = mBinding.imageButtonInc;
+        mTextInputLayoutLines = mBinding.textInputLayoutLines;
+        mSwitchCompatSkipDuplicates = mBinding.switchCompatSkipDuplicates;
+        mBinding.imageButtonInc.setOnClickListener(v -> OnChangeSkipLinesClick(v));
+        mBinding.imageButtonDec.setOnClickListener(v -> OnChangeSkipLinesClick(v));
+        findViewById(R.id.editTextFileName).setOnClickListener(v -> OnSelectFileClick());
 
         progressbar.setProgress(0);
         mCurrentProgress = 0;
@@ -130,7 +132,6 @@ public class ActivityImportCSVAdvanced extends ToolbarActivity implements IProgr
         mTextViewSkipLines.setText(String.valueOf(mSkipLines));
     }
 
-    @OnClick({R.id.imageButtonInc, R.id.imageButtonDec})
     void OnChangeSkipLinesClick(View view) {
         if (mPath.isEmpty()) return;
         switch (view.getId()) {
@@ -167,7 +168,6 @@ public class ActivityImportCSVAdvanced extends ToolbarActivity implements IProgr
         }
     }
 
-    @OnClick(R.id.editTextFileName)
     void OnSelectFileClick() {
         ActivityImportCSVAdvancedPermissionsDispatcher.SelectFileWithPermissionCheck(ActivityImportCSVAdvanced.this);
     }

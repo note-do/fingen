@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityMainBinding;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
@@ -92,8 +93,6 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import dagger.Lazy;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -117,33 +116,21 @@ public class ActivityMain extends ToolbarActivity {
     private static final int ACCOUNT_CLICK_ACTION_NEW_TRANSACTION = 1;
 
 
-    @BindView(R.id.pager)
+    private ActivityMainBinding mBinding;
     ViewPager viewPager;
-    @BindView(R.id.tabLayout)
     TabLayout tabLayout;
     @Nullable
-    @BindView(R.id.sliding_layout_transactions)
     SlidingUpPanelLayout mSlidingUpTransactions;
     @Nullable
-    @BindView(R.id.sliding_layout_accounts)
     SlidingUpPanelLayout mSlidingUpAccounts;
-    @BindView(R.id.coordinatorLayout)
     CoordinatorLayout coordinatorLayout;
-    @BindView(R.id.appbar)
     AppBarLayout mAppBarLayout;
-    @BindView(R.id.textViewSubtitle)
     TextView mTextViewActiveSet;
-    @BindView(R.id.buttonTemplates)
     Button mButtonTemplates;
-    @BindView(R.id.buttonNewExpense)
     Button mButtonNewExpense;
-    @BindView(R.id.buttonNewIncome)
     Button mButtonNewIncome;
-    @BindView(R.id.buttonNewTransfer)
     Button mButtonNewTransfer;
-    @BindView(R.id.buttonsBar)
     LinearLayout mButtonsBar;
-    @BindView(R.id.buttonsBarContainer)
     FrameLayout mButtonsBarContainer;
 
     private FragmentAccounts fragmentAccounts;
@@ -209,7 +196,20 @@ public class ActivityMain extends ToolbarActivity {
 
         mPreferences.edit().putBoolean(FgConst.PREF_SWITCH_TAB_ON_START, true).apply();
 
-        ButterKnife.bind(this);
+        mBinding = ActivityMainBinding.bind(getContentRoot());
+        viewPager = mBinding.pager;
+        tabLayout = findViewById(R.id.tabLayout);
+        mSlidingUpTransactions = findViewById(R.id.sliding_layout_transactions);
+        mSlidingUpAccounts = findViewById(R.id.sliding_layout_accounts);
+        coordinatorLayout = mBinding.coordinatorLayout;
+        mAppBarLayout = findViewById(R.id.appbar);
+        mTextViewActiveSet = findViewById(R.id.textViewSubtitle);
+        mButtonTemplates = mBinding.buttonTemplates;
+        mButtonNewExpense = mBinding.buttonNewExpense;
+        mButtonNewIncome = mBinding.buttonNewIncome;
+        mButtonNewTransfer = mBinding.buttonNewTransfer;
+        mButtonsBar = mBinding.buttonsBar;
+        mButtonsBarContainer = mBinding.buttonsBarContainer;
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -611,7 +611,20 @@ public class ActivityMain extends ToolbarActivity {
     @Override
     public void onBackPressed() {
         // Закрываем Navigation Drawer по нажатию системной кнопки "Назад" если он открыт
-        ButterKnife.bind(this);
+                mBinding = ActivityMainBinding.bind(getContentRoot());
+        viewPager = mBinding.pager;
+        tabLayout = findViewById(R.id.tabLayout);
+        mSlidingUpTransactions = findViewById(R.id.sliding_layout_transactions);
+        mSlidingUpAccounts = findViewById(R.id.sliding_layout_accounts);
+        coordinatorLayout = mBinding.coordinatorLayout;
+        mAppBarLayout = findViewById(R.id.appbar);
+        mTextViewActiveSet = findViewById(R.id.textViewSubtitle);
+        mButtonTemplates = mBinding.buttonTemplates;
+        mButtonNewExpense = mBinding.buttonNewExpense;
+        mButtonNewIncome = mBinding.buttonNewIncome;
+        mButtonNewTransfer = mBinding.buttonNewTransfer;
+        mButtonsBar = mBinding.buttonsBar;
+        mButtonsBarContainer = mBinding.buttonsBarContainer;
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START))
         {
             mDrawerLayout.closeDrawer(GravityCompat.START);

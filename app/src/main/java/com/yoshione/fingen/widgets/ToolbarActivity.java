@@ -14,6 +14,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 
 //import com.arellomobile.mvp.MvpDelegate;
 import com.yoshione.fingen.ActivityMain;
@@ -25,8 +26,6 @@ import com.yoshione.fingen.utils.ViewServer;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
@@ -38,7 +37,6 @@ public abstract class ToolbarActivity extends AppCompatActivity implements IUnsu
 //    private MvpDelegate<? extends ToolbarActivity> mMvpDelegate;
 
     protected final String TAG = this.getClass().getName();
-    @BindView(R.id.toolbar)
     public Toolbar toolbar;
     private CompositeDisposable mCompositeDisposable;
 
@@ -57,7 +55,7 @@ public abstract class ToolbarActivity extends AppCompatActivity implements IUnsu
 //        getMvpDelegate().onCreate(savedInstanceState);
 
         setContentView(getLayoutResourceId());
-        ButterKnife.bind(this);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FGApplication.getAppComponent().inject(this);
@@ -129,6 +127,13 @@ public abstract class ToolbarActivity extends AppCompatActivity implements IUnsu
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    /**
+     * Root view of the layout set by getLayoutResourceId(), used to bind ViewBinding.
+     */
+    protected View getContentRoot() {
+        return ((ViewGroup) findViewById(android.R.id.content)).getChildAt(0);
     }
 
     protected abstract int getLayoutResourceId();

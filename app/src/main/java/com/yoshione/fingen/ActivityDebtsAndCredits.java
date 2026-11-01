@@ -4,6 +4,7 @@
 
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityDebtsAndCreditsBinding;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,8 +30,6 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 
 /**
@@ -39,9 +38,8 @@ import butterknife.ButterKnife;
  */
 public class ActivityDebtsAndCredits extends ToolbarActivity {
 
-    @BindView(R.id.viewPager)
+    private ActivityDebtsAndCreditsBinding mBinding;
     ViewPager viewPager;
-    @BindView(R.id.tabLayout)
     TabLayout tabLayout;
     private FragmentModelList fragmentCredits;
     private FragmentModelList fragmentDebts;
@@ -49,7 +47,9 @@ public class ActivityDebtsAndCredits extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityDebtsAndCreditsBinding.bind(getContentRoot());
+        viewPager = mBinding.viewPager;
+        tabLayout = findViewById(R.id.tabLayout);
 
 //        if (savedInstanceState == null) {
             fragmentCredits = FragmentModelList.newInstance(new Credit(), 0);

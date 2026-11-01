@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityImportCsvBinding;
 import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -31,9 +32,6 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 import java.io.File;
 import java.io.IOException;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -50,11 +48,9 @@ public class ActivityImportCSV extends ToolbarActivity implements IProgressEvent
     private final static int HANDLER_OPERATION_TOAST = 3;
     private static final ProgressBar[] numberProgressBarArr = new ProgressBar[]{null};
     private static final Activity[] activityArr = new Activity[]{null};
-    @BindView(R.id.editTextFileName)
+    private ActivityImportCsvBinding mBinding;
     EditText editTextFileName;
-    @BindView(R.id.progressbar)
     ProgressBar progressbar;
-    @BindView(R.id.switchCompatSkipDuplicates)
     SwitchCompat mSwitchCompatSkipDuplicates;
     UpdateProgressHandler handler;
     private int mCurrentProgress;
@@ -62,7 +58,11 @@ public class ActivityImportCSV extends ToolbarActivity implements IProgressEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityImportCsvBinding.bind(getContentRoot());
+        editTextFileName = findViewById(R.id.editTextFileName);
+        progressbar = mBinding.progressbar;
+        mSwitchCompatSkipDuplicates = mBinding.switchCompatSkipDuplicates;
+        findViewById(R.id.editTextFileName).setOnClickListener(v -> OnSelectFileClick());
 
         progressbar.setProgress(0);
         numberProgressBarArr[0] = progressbar;
@@ -112,7 +112,6 @@ public class ActivityImportCSV extends ToolbarActivity implements IProgressEvent
         }
     }
 
-    @OnClick(R.id.editTextFileName)
     void OnSelectFileClick() {
         ActivityImportCSVPermissionsDispatcher.SelectFileWithPermissionCheck(ActivityImportCSV.this);
     }

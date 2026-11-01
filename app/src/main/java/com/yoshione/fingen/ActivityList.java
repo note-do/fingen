@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityCategoryListBinding;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.FragmentManager;
@@ -17,12 +18,10 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 
 import java.util.HashSet;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class ActivityList extends ToolbarActivity implements SearchView.OnQueryTextListener, IAdapterEventsListener {
 
-    @BindView(R.id.container)
+    private ActivityCategoryListBinding mBinding;
     LinearLayout container;
     FragmentTreeModelList fragment;
     private int mViewMode;
@@ -31,7 +30,8 @@ public class ActivityList extends ToolbarActivity implements SearchView.OnQueryT
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityCategoryListBinding.bind(getContentRoot());
+        container = mBinding.container;
         IAbstractModel model = getIntent().getParcelableExtra("model");
 
         if (getSupportActionBar() != null) {

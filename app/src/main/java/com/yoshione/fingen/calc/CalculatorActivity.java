@@ -1,5 +1,6 @@
 package com.yoshione.fingen.calc;
 
+import com.yoshione.fingen.databinding.ActivityCalculatorBinding;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
@@ -20,8 +21,6 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class CalculatorActivity extends ToolbarActivity {
     public static final int NUMBER_EDIT_TEXT_MAX_LENGTH = 30;
@@ -39,49 +38,28 @@ public class CalculatorActivity extends ToolbarActivity {
     public static final String SECONDS_VALUE = "secondsValue";
     public static final String OPERATOR_EXECUTE = "operatorExecute";
     public static final String PREV_OPERATOR_EXECUTE = "prevOperatorExecute";
-    @BindView(R.id.developing_operation_inputText)
+    private ActivityCalculatorBinding mBinding;
     TextView mDevelopingOperationInputText;
-    @BindView(R.id.number_inputText)
     NumericEditText mNumberInputText;
-    @BindView(R.id.clear_button)
     Button mClearButton;
-    @BindView(R.id.seven_button)
     Button mSevenButton;
-    @BindView(R.id.four_button)
     Button mFourButton;
-    @BindView(R.id.one_button)
     Button mOneButton;
-    @BindView(R.id.zero_button)
     Button mZeroButton;
-    @BindView(R.id.divider_button)
     Button mDividerButton;
-    @BindView(R.id.eight_button)
     Button mEightButton;
-    @BindView(R.id.five_button)
     Button mFiveButton;
-    @BindView(R.id.two_button)
     Button mTwoButton;
-    @BindView(R.id.two_zero_button)
     Button mTwoZeroButton;
-    @BindView(R.id.multiplication_button)
     Button mMultiplicationButton;
-    @BindView(R.id.nine_button)
     Button mNineButton;
-    @BindView(R.id.six_button)
     Button mSixButton;
-    @BindView(R.id.three_button)
     Button mThreeButton;
-    @BindView(R.id.point_button)
     Button mPointButton;
-    @BindView(R.id.delete_button)
     Button mDeleteButton;
-    @BindView(R.id.subtraction_button)
     Button mSubtractionButton;
-    @BindView(R.id.sum_button)
     Button mSumButton;
-    @BindView(R.id.equal_button)
     Button mEqualButton;
-    @BindView(R.id.submit_button)
     Button mSubmitButton;
 
     private DecimalFormat decimalFormat;
@@ -185,7 +163,29 @@ public class CalculatorActivity extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityCalculatorBinding.bind(getContentRoot());
+        mDevelopingOperationInputText = findViewById(R.id.developing_operation_inputText);
+        mNumberInputText = findViewById(R.id.number_inputText);
+        mClearButton = findViewById(R.id.clear_button);
+        mSevenButton = findViewById(R.id.seven_button);
+        mFourButton = findViewById(R.id.four_button);
+        mOneButton = findViewById(R.id.one_button);
+        mZeroButton = findViewById(R.id.zero_button);
+        mDividerButton = findViewById(R.id.divider_button);
+        mEightButton = findViewById(R.id.eight_button);
+        mFiveButton = findViewById(R.id.five_button);
+        mTwoButton = findViewById(R.id.two_button);
+        mTwoZeroButton = findViewById(R.id.two_zero_button);
+        mMultiplicationButton = findViewById(R.id.multiplication_button);
+        mNineButton = findViewById(R.id.nine_button);
+        mSixButton = findViewById(R.id.six_button);
+        mThreeButton = findViewById(R.id.three_button);
+        mPointButton = findViewById(R.id.point_button);
+        mDeleteButton = findViewById(R.id.delete_button);
+        mSubtractionButton = findViewById(R.id.subtraction_button);
+        mSumButton = findViewById(R.id.sum_button);
+        mEqualButton = findViewById(R.id.equal_button);
+        mSubmitButton = findViewById(R.id.submit_button);
 
         initComponents();
     }

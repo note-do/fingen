@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityReportsBinding;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -41,8 +42,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class ActivityReports extends ToolbarActivity {
 
@@ -51,25 +50,16 @@ public class ActivityReports extends ToolbarActivity {
     private static final int FRAGMENT_TIME_CHART = 2;
     private static final int FRAGMENTS_COUNT = 3;
 
-    @BindView(R.id.textInputLayoutData)
+    private ActivityReportsBinding mBinding;
     TextInputLayout mTextInputLayoutData;
-    @BindView(R.id.textInputLayoutDateRange)
     TextInputLayout mTextInputLayoutDateRange;
-    @BindView(R.id.pager)
     ViewPager viewPager;
-    @BindView(R.id.tabLayout)
     TabLayout tabLayout;
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
-    @BindView(R.id.textViewDateRange)
     TextView mTextViewDateRange;
-    @BindView(R.id.editTextCabbage)
     EditText mEditTextCabbage;
-    @BindView(R.id.editTextData)
     EditText mEditTextData;
-    @BindView(R.id.editTextShow)
     EditText mEditTextShow;
-    @BindView(R.id.editTextDateRange)
     EditText mEditTextDateRange;
     ReportBuilder mReportBuilder;
     private int mCurrentFragment;
@@ -92,7 +82,17 @@ public class ActivityReports extends ToolbarActivity {
     @SuppressWarnings("unchecked")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityReportsBinding.bind(getContentRoot());
+        mTextInputLayoutData = mBinding.textInputLayoutData;
+        mTextInputLayoutDateRange = mBinding.textInputLayoutDateRange;
+        viewPager = mBinding.pager;
+        tabLayout = findViewById(R.id.tabLayout);
+        toolbar = findViewById(R.id.toolbar);
+        mTextViewDateRange = mBinding.textViewDateRange;
+        mEditTextCabbage = mBinding.editTextCabbage;
+        mEditTextData = mBinding.editTextData;
+        mEditTextShow = mBinding.editTextShow;
+        mEditTextDateRange = mBinding.editTextDateRange;
 
         mCurrentFragment = 0;
 

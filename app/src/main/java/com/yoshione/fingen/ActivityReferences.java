@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityReferencesBinding;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -25,11 +26,10 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 
 public class ActivityReferences extends ToolbarActivity {
 
-    @BindView(R.id.recycler_view)
+    private ActivityReferencesBinding mBinding;
     RecyclerView recyclerView;
 
     private Drawable getIcon(int id) {
@@ -39,6 +39,8 @@ public class ActivityReferences extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mBinding = ActivityReferencesBinding.bind(getContentRoot());
+        recyclerView = findViewById(R.id.recycler_view);
 
         List<MenuItem> menuItemList = new ArrayList<>();
 

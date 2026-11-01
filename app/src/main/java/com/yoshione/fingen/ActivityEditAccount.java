@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityEditAccountBinding;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -31,9 +32,6 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import com.yoshione.fingen.utils.HelpSequence;
 
 public class ActivityEditAccount extends ToolbarActivity {
@@ -44,31 +42,19 @@ public class ActivityEditAccount extends ToolbarActivity {
     private static final int ERR_NOT_UNIQUE_ACCOUNT_NAME = 3;
 
     //<editor-fold desc="View bindings">
-    @BindView(R.id.editTextName)
+    private ActivityEditAccountBinding mBinding;
     EditText editTextName;
-    @BindView(R.id.editTextType)
     EditText editTextType;
-    @BindView(R.id.editTextCabbage)
     EditText editTextCabbage;
-    @BindView(R.id.editTextEmitent)
     EditText editTextEmitent;
-    @BindView(R.id.editTextLast4Digits)
     EditText editTextLast4Digits;
-    @BindView(R.id.editTextComment)
     EditText editTextComment;
-    @BindView(R.id.amountEditorStartBalance)
     AmountEditor amountEditorStartBalance;
-    @BindView(R.id.checkboxAccountClosed)
     AppCompatCheckBox checkboxAccountClosed;
-    @BindView(R.id.amountEditorCreditLimit)
     AmountEditor amountEditorCreditLimit;
-    @BindView(R.id.textInputLayoutEmitent)
     TextInputLayout mTextInputLayoutEmitent;
-    @BindView(R.id.textInputLayoutLast4Digits)
     TextInputLayout mTextInputLayoutLast4Digits;
-    @BindView(R.id.textInputLayoutName)
     TextInputLayout mTextInputLayoutName;
-    @BindView(R.id.textInputLayoutCabbage)
     TextInputLayout mTextInputLayoutCabbage;
     //</editor-fold>
 
@@ -95,7 +81,21 @@ public class ActivityEditAccount extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityEditAccountBinding.bind(getContentRoot());
+        editTextName = mBinding.editTextName;
+        editTextType = mBinding.editTextType;
+        editTextCabbage = mBinding.editTextCabbage;
+        editTextEmitent = mBinding.editTextEmitent;
+        editTextLast4Digits = mBinding.editTextLast4Digits;
+        editTextComment = mBinding.editTextComment;
+        amountEditorStartBalance = mBinding.amountEditorStartBalance;
+        checkboxAccountClosed = mBinding.checkboxAccountClosed;
+        amountEditorCreditLimit = mBinding.amountEditorCreditLimit;
+        mTextInputLayoutEmitent = mBinding.textInputLayoutEmitent;
+        mTextInputLayoutLast4Digits = mBinding.textInputLayoutLast4Digits;
+        mTextInputLayoutName = mBinding.textInputLayoutName;
+        mTextInputLayoutCabbage = mBinding.textInputLayoutCabbage;
+        mBinding.buttonSaveAccount.setOnClickListener(v -> onSaveClick());
         account = getIntent().getParcelableExtra("account");
     }
 
@@ -359,7 +359,6 @@ public class ActivityEditAccount extends ToolbarActivity {
         return 0;
     }
 
-    @OnClick(R.id.buttonSaveAccount)
     public void onSaveClick() {
         switch (validateAccount()) {
             case ERR_EMPTY_ACCOUNT_NAME:

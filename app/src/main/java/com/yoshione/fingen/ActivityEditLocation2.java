@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityEditLocation2Binding;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -29,9 +30,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.yoshione.fingen.dao.LocationsDAO;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -49,11 +47,9 @@ import permissions.dispatcher.RuntimePermissions;
 public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraChangeListener, OnMapInitializedListener,
         OnMapClickListener, OnCameraMoveListener, OnMapMarkerClickListener,
         OnInfoWindowClickListener, OnLatLngScreenLocationCallback {
-    @BindView(R.id.editTextName)
+    private ActivityEditLocation2Binding mBinding;
     EditText editTextName;
-    @BindView(R.id.buttonSaveLocation)
     Button mButtonSaveLocation;
-    @BindView(R.id.map)
     AirMapView map;
     private com.yoshione.fingen.model.Location location;
 
@@ -106,7 +102,11 @@ public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraCh
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityEditLocation2Binding.bind(getContentRoot());
+        editTextName = mBinding.editTextName;
+        mButtonSaveLocation = mBinding.buttonSaveLocation;
+        map = mBinding.map;
+        mBinding.buttonSaveLocation.setOnClickListener(v -> onSaveClick());
 
         if (savedInstanceState != null) {
             location = savedInstanceState.getParcelable("location");
@@ -183,7 +183,6 @@ public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraCh
         location = savedInstanceState.getParcelable("location");
     }
 
-    @OnClick(R.id.buttonSaveLocation)
     public void onSaveClick() {
         if (location.getName().isEmpty()) return;
         LocationsDAO locationsDAO = LocationsDAO.getInstance(getApplicationContext());

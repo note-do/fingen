@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityProBinding;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
@@ -16,14 +17,12 @@ import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class ActivityPro extends ToolbarActivity {
 
-    @BindView(R.id.recycler_view)
+    private ActivityProBinding mBinding;
     RecyclerView recyclerView;
     boolean isBillingAvailable;
     @Inject
@@ -43,7 +42,8 @@ public class ActivityPro extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityProBinding.bind(getContentRoot());
+        recyclerView = findViewById(R.id.recycler_view);
 
         FGApplication.getAppComponent().inject(this);
 
