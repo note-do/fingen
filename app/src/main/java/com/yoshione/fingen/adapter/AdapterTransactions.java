@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.l4digital.fastscroll.FastScroller;
+import com.yoshione.fingen.widgets.FgFastScrollRecyclerView;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.adapter.viewholders.TransactionViewHolder;
 import com.yoshione.fingen.adapter.viewholders.TransactionViewHolderParams;
@@ -33,7 +33,7 @@ import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter;
  * Created by slv on 10.09.2015.
  * a
  */
-public class AdapterTransactions extends RecyclerView.Adapter implements FastScroller.SectionIndexer,
+public class AdapterTransactions extends RecyclerView.Adapter implements FgFastScrollRecyclerView.SectionIndexer,
         StickyRecyclerHeadersAdapter<AdapterTransactions.HeaderViewHolder>, ITransactionClickListener {
 //    private static final String TAG = "AdapterTransactions";
 
