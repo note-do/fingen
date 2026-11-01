@@ -128,7 +128,7 @@ dependencies {
     implementation 'com.github.skydoves:colorpickerview:2.5.0'
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.3'
     implementation 'de.psdev.licensesdialog:licensesdialog:2.2.0'
-    implementation 'org.apache.commons:commons-lang3:3.7'
+    implementation 'org.apache.commons:commons-lang3:3.21.0'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.59'
     implementation 'org.greenrobot:eventbus:3.1.1'
     androidTestImplementation 'junit:junit:4.12'
