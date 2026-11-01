@@ -8,6 +8,7 @@ repositories {
 apply plugin: 'com.android.application'
 
 android {
+    namespace "com.yoshione.fingen"
     compileSdkVersion 28
     buildToolsVersion '28.0.3'
     defaultConfig {
@@ -91,6 +92,10 @@ android {
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/NOTICE.txt'
     }
+    buildFeatures {
+        buildConfig true
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
