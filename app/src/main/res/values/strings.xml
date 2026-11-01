@@ -1254,15 +1254,7 @@
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_rationale" formatted="false">External storage access permission is needed to backup and restore DB. Click Next, and allow access to external storage.</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
     <string name="msg_permission_rw_external_storage_denied" formatted="false">External storage access permission denied</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_never_askagain" formatted="false">External storage access permission denied</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->

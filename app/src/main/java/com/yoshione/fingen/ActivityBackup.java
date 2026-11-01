@@ -1,7 +1,6 @@
 package com.yoshione.fingen;
 
 import com.yoshione.fingen.databinding.ActivityBackupBinding;
-import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,8 +12,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputLayout;
 import androidx.appcompat.app.AlertDialog;
@@ -62,14 +59,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
 
-@RuntimePermissions
 public class ActivityBackup extends ToolbarActivity {
 
     private static final String TAG = "ActivityBackup";
@@ -360,24 +350,20 @@ public class ActivityBackup extends ToolbarActivity {
     private void initFabMenu() {
         mFabMenuController = new FabMenuController(fabMenuButtonRoot, fabBGLayout, this, mFabBackupLayout, mFabRestoreLayout, mFabRestoreFromDropboxLayout);
         fabBackup.setOnClickListener(new DebouncingOnClickListener(v -> {
-            ActivityBackupPermissionsDispatcher.backupDBWithPermissionCheck(ActivityBackup.this);
+            backupDB();
             mFabMenuController.closeFABMenu();
         }));
         fabRestore.setOnClickListener(new DebouncingOnClickListener(v -> {
-            ActivityBackupPermissionsDispatcher.restoreDBWithPermissionCheck(ActivityBackup.this);
+            restoreDB();
             mFabMenuController.closeFABMenu();
         }));
-        fabRestoreFromDropbox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ActivityBackupPermissionsDispatcher.restoreDBFromDropboxWithPermissionCheck((ActivityBackup) v.getContext());
-                mFabMenuController.closeFABMenu();
-            }
-        });
+        fabRestoreFromDropbox.setOnClickListener(new DebouncingOnClickListener(v -> {
+            restoreDBFromDropbox();
+            mFabMenuController.closeFABMenu();
+        }));
     }
 
-    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void backupDB() {
+    private void backupDB() {
         DbxClientV2 client = DropboxClient.getClient(this);
         boolean folderAvailable = BackupFolder.isAvailable(this);
         if (!folderAvailable) {
@@ -414,13 +400,11 @@ public class ActivityBackup extends ToolbarActivity {
         }
     }
 
-    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void restoreDB() {
+    private void restoreDB() {
         new FileSelectDialog(this).showSelectBackupDialog();
     }
 
-    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void restoreDBFromDropbox() {
+    private void restoreDBFromDropbox() {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -441,62 +425,6 @@ public class ActivityBackup extends ToolbarActivity {
             }
         });
         t.start();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // NOTE: delegate the permission handling to generated method
-        ActivityBackupPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
-    }
-
-    @OnShowRationale({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void showRationaleForContact(PermissionRequest request) {
-        // NOTE: Show a rationale to explain why the permission is needed, e.g. with a dialog.
-        // Call proceed() or cancel() on the provided PermissionRequest to continue or abort
-        showRationaleDialog(R.string.msg_permission_rw_external_storage_rationale, request);
-    }
-
-    @OnPermissionDenied({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void onCameraDenied() {
-        // NOTE: Deal with a denied permission, e.g. by showing specific UI
-        // or disabling certain functionality
-        Toast.makeText(this, R.string.msg_permission_rw_external_storage_denied, Toast.LENGTH_SHORT).show();
-    }
-
-    @OnNeverAskAgain({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void onCameraNeverAskAgain() {
-        Toast.makeText(this, R.string.msg_permission_rw_external_storage_never_askagain, Toast.LENGTH_SHORT).show();
-    }
-
-    private void showRationaleDialog(@StringRes int messageResId, final PermissionRequest request) {
-        new AlertDialog.Builder(this)
-                .setPositiveButton(R.string.act_next, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        request.proceed();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        request.cancel();
-                    }
-                })
-                .setCancelable(false)
-                .setMessage(R.string.msg_permission_rw_external_storage_rationale)
-                .show();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        ActivityBackupPermissionsDispatcher.checkPermissionsWithPermissionCheck(this);
-    }
-
-    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void checkPermissions() {
-        Log.d(TAG, "Check permissions");
     }
 
     private static class UpdateRwHandler extends Handler {

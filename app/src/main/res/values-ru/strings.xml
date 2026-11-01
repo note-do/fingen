@@ -1254,15 +1254,7 @@
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_rationale" formatted="false">Для работы системы резервного копирования необходимо разрешение. Нажмите Далее и разрешите доступ к файлам.</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
     <string name="msg_permission_rw_external_storage_denied" formatted="false">Операция не выполнена, так как разрешение не было получено.</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_never_askagain" formatted="false">Операция не выполнена, так как разрешение не было получено.</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->

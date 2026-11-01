@@ -675,37 +675,6 @@ public class ActivityMain extends ToolbarActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    //<editor-fold desc="Получаем права на доступ к external storage" defaultstate="collapsed">
-    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void getExternalStoragepermission() {
-        Log.d(TAG, "getExternalStoragepermission");
-    }
-
-    @OnShowRationale({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void showRationaleForExStorage(PermissionRequest request) {
-        showExStorageRationaleDialog(R.string.msg_permission_rw_external_storage_rationale, request);
-    }
-
-    @OnPermissionDenied({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void onExStorageDenied() {
-        Toast.makeText(this, R.string.msg_permission_rw_external_storage_denied, Toast.LENGTH_SHORT).show();
-    }
-
-    @OnNeverAskAgain({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void onExStorageNeverAskAgain() {
-        Toast.makeText(this, R.string.msg_permission_rw_external_storage_never_askagain, Toast.LENGTH_SHORT).show();
-    }
-
-    private void showExStorageRationaleDialog(@StringRes int messageResId, final PermissionRequest request) {
-        new AlertDialog.Builder(this)
-                .setPositiveButton(R.string.act_next, (dialog, which) -> request.proceed())
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> request.cancel())
-                .setCancelable(false)
-                .setMessage(messageResId)
-                .show();
-    }
-    //</editor-fold>
-
     //<editor-fold desc="Получаем права на чтение смс" defaultstate="collapsed">
     @NeedsPermission(Manifest.permission.RECEIVE_SMS)
     void getReceiveSmsPermission() {
@@ -755,7 +724,6 @@ public class ActivityMain extends ToolbarActivity {
                 }
             }
         }
-        ActivityMainPermissionsDispatcher.getExternalStoragepermissionWithPermissionCheck(this);
     }
 
     private void openReferences() {
