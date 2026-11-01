@@ -21,7 +21,8 @@ Android-приложение учёта доходов и расходов. Па
 ### Библиотеки (актуальные)
 - UI: Material 1.14.0 (`com.google.android.material`) и `coordinatorlayout` 1.1.0 (явно); тема AppCompat сохранена (`Theme.AppCompat`, MaterialComponents не используется; используются AppBarLayout, FloatingActionButton, NavigationView, TabLayout, TextInputLayout — работают на AppCompat-теме), `NavigationView` + `DrawerLayout` (drawer), `androidx.preference` (настройки), `FlipView` собственный (`widgets/FlipView`). Нижние шторки на экранах транзакций, счетов и бюджета — `BottomSheetBehavior` (корень `FrameLayout`, шторка в отдельном `CoordinatorLayout`, высота `peekHeight` и нижний отступ контента задаются в `SumsTableOnGlobalLayoutListener`; parallax списка бюджета не сохранён).
 - Привязка views: ViewBinding (`*Binding`, `getContentRoot()` в `ToolbarActivity`). ButterKnife удалён. Views из `<include>` и динамические layout берутся через `findViewById`.
-- Права: PermissionsDispatcher 4.9.2 (`@RuntimePermissions`).
+- Права: PermissionsDispatcher 4.9.2 (`@RuntimePermissions`); для SMS. Доступ к хранилищу для бэкапов не запрашивается.
+- Бэкапы: локальная папка выбирается пользователем через SAF (`ACTION_OPEN_DOCUMENT_TREE` + persistable permission), работа через `DocumentsContract` в `utils/BackupFolder` (без `androidx.documentfile`). Архив строится в `cacheDir/backup`, затем копируется в выбранную папку; в кэше остаётся последний файл. Восстановление: список .zip из папки и «Другой файл…» (`ACTION_OPEN_DOCUMENT`), файл копируется в кэш и идёт в прежний `restoreDB`.
 - DI: Dagger 2.60.1 (`di/`).
 - Реактивность: RxJava 3.1.12 (`io.reactivex.rxjava3`, `core.Single`), RxAndroid 3.0.2 (`rxjava3.android.schedulers`).
 - Шифрование бэкапов: bcprov-jdk18on 1.86 (`utils/winzipaes/impl/*BC`, WinZip AES, PBKDF2-SHA1); проверяется `AESEncrypterRoundTripTest`.
@@ -61,6 +62,9 @@ Android-приложение учёта доходов и расходов. Па
 - Убрать `nonFinalResIds`, `enableAppCompileTimeRClass` после перехода (предупреждения AGP).
 
 ### Известные особенности
+- Uri папки бэкапов — в prefs (`FgConst.PREF_BACKUP_FOLDER_URI`). При смене папки старое persistable-разрешение снимается. Доступность — `BackupFolder.isAvailable` (разрешение в `getPersistedUriPermissions` + папка существует и принимает файлы).
+- Папка не выбрана, доступ отозван или копирование не удалось: `BackupWorker` пропускает локальную копию, Dropbox работает как обычно, выставляется `PREF_BACKUP_FOLDER_UNAVAILABLE`. `ActivityMain` один раз за запуск процесса показывает диалог-предупреждение (по флагу или `isAvailable == false`). Флаг сбрасывается при выборе папки и успешной копии.
+- Копия перед миграцией БД (`DBHelper.onUpgrade` → `backupDB(false)`) пишется только в `cacheDir/backup`; `backupDB(vacuum, true)` дополнительно копирует в выбранную папку. Тесты миграций смотрят `BackupFolder.getCacheDir`.
 - Ключ Google Maps: `manifestPlaceholders.mapsApiKey` в `app/build.gradle` берётся из `keystore.properties` только если там есть все ключи подписи вместе с `mapsApiKey`, иначе пустая строка. Без ключа экран выбора места открывается, но карта пустая (в logcat `Authorization failure`), маркер и тап по карте не проверялись. Для карты: добавить `mapsApiKey` в `keystore.properties`. `my location` включается только при выданном `ACCESS_FINE_LOCATION`.
 - Подготовка к targetSdk 36 (targetSdk пока 28): у компонентов с intent-filter явный `android:exported`; все `PendingIntent` с `FLAG_IMMUTABLE`; `registerReceiver` только через `ContextCompat.registerReceiver` с `RECEIVER_EXPORTED`/`RECEIVER_NOT_EXPORTED`; «назад» — `OnBackPressedCallback` через `getOnBackPressedDispatcher()` (не `onBackPressed`).
 - Обработчики нажатий, которые раньше были `@OnClick`, используют `utils/DebouncingOnClickListener` (защита от двойного нажатия, как у ButterKnife). Новые обработчики, которые открывают экран или сохраняют данные, тоже оборачивать.
