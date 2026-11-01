@@ -62,6 +62,7 @@ Android-приложение учёта доходов и расходов. Па
 
 ### Известные особенности
 - Ключ Google Maps: `manifestPlaceholders.mapsApiKey` в `app/build.gradle` берётся из `keystore.properties` только если там есть все ключи подписи вместе с `mapsApiKey`, иначе пустая строка. Без ключа экран выбора места открывается, но карта пустая (в logcat `Authorization failure`), маркер и тап по карте не проверялись. Для карты: добавить `mapsApiKey` в `keystore.properties`. `my location` включается только при выданном `ACCESS_FINE_LOCATION`.
+- Подготовка к targetSdk 36 (targetSdk пока 28): у компонентов с intent-filter явный `android:exported`; все `PendingIntent` с `FLAG_IMMUTABLE`; `registerReceiver` только через `ContextCompat.registerReceiver` с `RECEIVER_EXPORTED`/`RECEIVER_NOT_EXPORTED`; «назад» — `OnBackPressedCallback` через `getOnBackPressedDispatcher()` (не `onBackPressed`).
 - Обработчики нажатий, которые раньше были `@OnClick`, используют `utils/DebouncingOnClickListener` (защита от двойного нажатия, как у ButterKnife). Новые обработчики, которые открывают экран или сохраняют данные, тоже оборачивать.
 - В `AndroidManifest.xml` у `<application>` убран `tools:node="replace"`: компоненты библиотек (WorkManager и др.) попадают в итоговый манифест от самих библиотек.
 - Однократная очистка задач старого android-job: `FGApplication.cancelLegacyJobs()` через `JobScheduler`, флаг `PREF_ANDROID_JOB_MIGRATED`. Можно удалить, когда у пользователей не останется версий с android-job.
