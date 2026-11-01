@@ -25,13 +25,33 @@
         app:layout_constraintTop_toBottomOf="@id/include2">
     </TextView>
 
+    <TextView
+        android:id="@+id/textViewBackupFolder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/activity_margin"
+        android:layout_marginEnd="@dimen/activity_margin"
+        app:layout_constraintTop_toBottomOf="@id/textViewAutoBackupInfo"
+        tools:text="Backup folder: Backup" />
+
+    <Button
+        android:id="@+id/buttonSelectBackupFolder"
+        style="@android:style/Widget.Material.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/activity_margin"
+        android:layout_marginEnd="@dimen/activity_margin"
+        android:text="@string/act_select_backup_folder"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textViewBackupFolder" />
+
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchCompatEnablePasswordProtection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_margin"
         android:text="@string/ttl_enable_backup_password_protection"
-        app:layout_constraintTop_toBottomOf="@id/textViewAutoBackupInfo"/>
+        app:layout_constraintTop_toBottomOf="@id/buttonSelectBackupFolder"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayoutPassword"

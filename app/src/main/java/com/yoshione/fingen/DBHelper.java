@@ -1,6 +1,5 @@
 package com.yoshione.fingen;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -8,12 +7,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
-import androidx.core.app.ActivityCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.text.InputType;
@@ -28,6 +25,7 @@ import com.yoshione.fingen.interfaces.IOnUnzipComplete;
 import com.yoshione.fingen.managers.CabbageManager;
 import com.yoshione.fingen.model.BaseModel;
 import com.yoshione.fingen.model.Cabbage;
+import com.yoshione.fingen.utils.BackupFolder;
 import com.yoshione.fingen.utils.FileUtils;
 import com.yoshione.fingen.utils.Lg;
 import com.yoshione.fingen.utils.Translit;
@@ -898,27 +896,44 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         return mContext.getDatabasePath(DATABASE_NAME).toString();
     }
 
+    /**
+     * Builds a backup zip in the app cache dir (backup/). Does not touch the user's backup folder.
+     */
     public File backupDB(boolean vacuum) throws IOException {
-        File backup = null;
+        return backupDB(vacuum, false);
+    }
+
+    /**
+     * @param copyToFolder also copy the file to the backup folder chosen by the user (SAF), if it is available.
+     * @return the cache file, which is used for upload to Dropbox
+     */
+    public File backupDB(boolean vacuum, boolean copyToFolder) throws IOException {
         if (vacuum) {
             mDatabase.execSQL("VACUUM");
         }
-        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            String backupPath = FileUtils.getExtFingenBackupFolder();
-            String alpha = "";
-            if (BuildConfig.FLAVOR.equals("nd")) alpha = "_alpha";
-            @SuppressLint("SimpleDateFormat") String backupFile = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + alpha + ".zip";
+        String alpha = "";
+        if (BuildConfig.FLAVOR.equals("nd")) alpha = "_alpha";
+        @SuppressLint("SimpleDateFormat") String backupFile = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()) + alpha + ".zip";
+        String backupPath = BackupFolder.getCacheDir(mContext).getAbsolutePath() + "/";
 
-            if (!backupPath.isEmpty()) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                String password = preferences.getString("backup_password", "");
-                Boolean enableProtection = preferences.getBoolean("enable_backup_password", false);
-                if (enableProtection && !password.isEmpty()) {
-                    backup = FileUtils.zipAndEncrypt(getDbPath(), backupPath + backupFile, password);
-                } else {
-                    backup = FileUtils.zip(new String[]{getDbPath()}, backupPath + backupFile);
-                }
-                Log.d(TAG, String.format("File %s saved", backupFile));
+        File backup;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        String password = preferences.getString("backup_password", "");
+        Boolean enableProtection = preferences.getBoolean("enable_backup_password", false);
+        if (enableProtection && !password.isEmpty()) {
+            backup = FileUtils.zipAndEncrypt(getDbPath(), backupPath + backupFile, password);
+        } else {
+            backup = FileUtils.zip(new String[]{getDbPath()}, backupPath + backupFile);
+        }
+        Log.d(TAG, String.format("File %s saved to cache", backupFile));
+        if (copyToFolder) {
+            try {
+                BackupFolder.copyToFolder(mContext, backup);
+                Log.d(TAG, String.format("File %s copied to backup folder", backupFile));
+                preferences.edit().putBoolean(FgConst.PREF_BACKUP_FOLDER_UNAVAILABLE, false).apply();
+            } catch (IOException e) {
+                Log.e(TAG, "Can't copy backup to the backup folder: " + e.getMessage());
+                preferences.edit().putBoolean(FgConst.PREF_BACKUP_FOLDER_UNAVAILABLE, true).apply();
             }
         }
         return backup;
@@ -966,46 +981,43 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
     }
 
     synchronized private void restoreDB(String filename, final AppCompatActivity activity) {
-        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.READ_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED) {
-            final File file = new File(filename);
-            final File db = new File(getDbPath());
-            final IOnUnzipComplete completeListener = new IOnUnzipComplete() {
-                @Override
-                public void onComplete() {
-                    if (db.delete()) {
-                        File restored = new File(db.getParent() + "/fingen.db.ex");
-                        restored.renameTo(db);
-                    }
-                    Intent restartIntent = Intent.makeRestartActivityTask(new ComponentName(mContext, ActivityMain.class));
-                    activity.startActivity(restartIntent);
-                    Runtime.getRuntime().exit(0);
+        final File file = new File(filename);
+        final File db = new File(getDbPath());
+        final IOnUnzipComplete completeListener = new IOnUnzipComplete() {
+            @Override
+            public void onComplete() {
+                if (db.delete()) {
+                    File restored = new File(db.getParent() + "/fingen.db.ex");
+                    restored.renameTo(db);
                 }
-
-                @Override
-                public void onError() {
-                    Toast.makeText(activity, "Error on restore DB", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onWrongPassword() {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                    builder.setTitle(activity.getString(R.string.ttl_enter_password));
-                    final EditText input = (EditText) activity.getLayoutInflater().inflate(R.layout.template_edittext, null);
-                    input.setText("");
-                    input.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    builder.setView(input);
-
-                    builder.setPositiveButton("OK", new OnOkListener(file.toString(), db.getParent() + "/", input, this));
-
-                    builder.show();
-                    input.requestFocus();
-                }
-            };
-            if (file.exists()) {
-                final String password = PreferenceManager.getDefaultSharedPreferences(mContext).getString("backup_password", "");
-                FileUtils.unzipAndDecrypt(file.toString(), db.getParent() + "/", password, completeListener);
+                Intent restartIntent = Intent.makeRestartActivityTask(new ComponentName(mContext, ActivityMain.class));
+                activity.startActivity(restartIntent);
+                Runtime.getRuntime().exit(0);
             }
+
+            @Override
+            public void onError() {
+                Toast.makeText(activity, "Error on restore DB", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onWrongPassword() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setTitle(activity.getString(R.string.ttl_enter_password));
+                final EditText input = (EditText) activity.getLayoutInflater().inflate(R.layout.template_edittext, null);
+                input.setText("");
+                input.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                builder.setView(input);
+
+                builder.setPositiveButton("OK", new OnOkListener(file.toString(), db.getParent() + "/", input, this));
+
+                builder.show();
+                input.requestFocus();
+            }
+        };
+        if (file.exists()) {
+            final String password = PreferenceManager.getDefaultSharedPreferences(mContext).getString("backup_password", "");
+            FileUtils.unzipAndDecrypt(file.toString(), db.getParent() + "/", password, completeListener);
         }
     }
 

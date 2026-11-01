@@ -1232,7 +1232,21 @@
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_auto_backup_info" formatted="false">Backups are created automatically and stored to the memory card in Fingen/\Backup</string>
+    <string name="ttl_auto_backup_info" formatted="false">Backups are created automatically and stored in the selected folder</string>
+
+    <string name="ttl_backup_folder" formatted="false">Backup folder: %s</string>
+
+    <string name="ttl_backup_folder_not_selected" formatted="false">Backup folder is not selected</string>
+
+    <string name="act_select_backup_folder" formatted="false">Select folder</string>
+
+    <string name="act_restore_other_file" formatted="false">Other file…</string>
+
+    <string name="msg_backup_saved" formatted="false">Backup saved to the selected folder</string>
+
+    <string name="msg_backup_folder_unavailable" formatted="false">Backup folder is not available. Select the folder again.</string>
+
+    <string name="msg_backup_folder_selection_failed" formatted="false">Cannot get access to the selected folder</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->

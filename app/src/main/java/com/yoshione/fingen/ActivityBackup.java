@@ -4,7 +4,9 @@ import com.yoshione.fingen.databinding.ActivityBackupBinding;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +44,7 @@ import com.dropbox.core.v2.users.FullAccount;
 import com.yoshione.fingen.dropbox.DropboxClient;
 import com.yoshione.fingen.dropbox.UploadTask;
 import com.yoshione.fingen.dropbox.UserAccountTask;
+import com.yoshione.fingen.utils.BackupFolder;
 import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.interfaces.IOnComplete;
 import com.yoshione.fingen.utils.DateTimeFormatter;
@@ -77,11 +80,17 @@ public class ActivityBackup extends ToolbarActivity {
     private static final int MSG_SHOW_DIALOG = 0;
     private static final int MSG_DOWNLOAD_FILE = 1;
 
+    private static final int REQUEST_PICK_FOLDER = 1;
+    private static final int REQUEST_PICK_BACKUP_FILE = 2;
+    private static final String RESTORE_CACHE_PREFIX = "restore_";
+
     private ActivityBackupBinding mBinding;
     FloatingActionButton fabBackup;
     FloatingActionButton fabRestore;
     FloatingActionButton fabRestoreFromDropbox;
     FloatingActionButton fabMenuButtonRoot;
+    TextView mTextViewBackupFolder;
+    Button mButtonSelectBackupFolder;
     SwitchCompat mSwitchCompatEnablePasswordProtection;
     EditText mEditTextPassword;
     EditText mEditTextDropboxAccount;
@@ -116,6 +125,8 @@ public class ActivityBackup extends ToolbarActivity {
         fabRestore = mBinding.fabRestore;
         fabRestoreFromDropbox = mBinding.fabRestoreFromDropbox;
         fabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+        mTextViewBackupFolder = mBinding.textViewBackupFolder;
+        mButtonSelectBackupFolder = mBinding.buttonSelectBackupFolder;
         mSwitchCompatEnablePasswordProtection = mBinding.switchCompatEnablePasswordProtection;
         mEditTextPassword = mBinding.editTextPassword;
         mEditTextDropboxAccount = mBinding.editTextDropboxAccount;
@@ -128,9 +139,11 @@ public class ActivityBackup extends ToolbarActivity {
         mFabRestoreFromDropboxLayout = mBinding.fabRestoreFromDropboxLayout;
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         initFabMenu();
+        initBackupFolder();
         initPasswordProtection();
         initDropbox();
         mHandler = new UpdateRwHandler(this);
+        deleteRestoreTempFiles();
     }
 
     @Override
@@ -149,6 +162,79 @@ public class ActivityBackup extends ToolbarActivity {
         menu.findItem(R.id.action_go_home).setVisible(true);
         return true;
 
+    }
+
+    private void initBackupFolder() {
+        mButtonSelectBackupFolder.setOnClickListener(new DebouncingOnClickListener(view ->
+                startActivityForResult(BackupFolder.createPickFolderIntent(), REQUEST_PICK_FOLDER)));
+        updateBackupFolderField();
+    }
+
+    private void updateBackupFolderField() {
+        String name = BackupFolder.getFolderName(this);
+        if (name.isEmpty()) {
+            mTextViewBackupFolder.setText(R.string.ttl_backup_folder_not_selected);
+        } else {
+            mTextViewBackupFolder.setText(getString(R.string.ttl_backup_folder, name));
+        }
+    }
+
+    private void deleteRestoreTempFiles() {
+        File[] files = getCacheDir().listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().startsWith(RESTORE_CACHE_PREFIX)) {
+                    file.delete();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK || data == null || data.getData() == null) {
+            return;
+        }
+        if (requestCode == REQUEST_PICK_FOLDER) {
+            if (BackupFolder.setFolder(this, data.getData())) {
+                updateBackupFolderField();
+            } else {
+                Toast.makeText(this, R.string.msg_backup_folder_selection_failed, Toast.LENGTH_LONG).show();
+            }
+        } else if (requestCode == REQUEST_PICK_BACKUP_FILE) {
+            restoreFromUri(data.getData());
+        }
+    }
+
+    /**
+     * Copies the document to the cache and goes on with the usual restore from a local file.
+     */
+    private void restoreFromUri(final Uri uri) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final File file = FileUtils.copyUriToCache(ActivityBackup.this, uri, RESTORE_CACHE_PREFIX, ".zip");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!isFinishing()) {
+                                DBHelper.getInstance(ActivityBackup.this).showRestoreDialog(file.getAbsolutePath(), ActivityBackup.this);
+                            }
+                        }
+                    });
+                } catch (IOException | RuntimeException e) {
+                    Log.e(TAG, "Can't read backup: " + e.getMessage());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(ActivityBackup.this, R.string.msg_file_not_exist, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        }).start();
     }
 
     private void initPasswordProtection() {
@@ -273,20 +359,14 @@ public class ActivityBackup extends ToolbarActivity {
 
     private void initFabMenu() {
         mFabMenuController = new FabMenuController(fabMenuButtonRoot, fabBGLayout, this, mFabBackupLayout, mFabRestoreLayout, mFabRestoreFromDropboxLayout);
-        fabBackup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ActivityBackupPermissionsDispatcher.backupDBWithPermissionCheck((ActivityBackup) v.getContext());
-                mFabMenuController.closeFABMenu();
-            }
-        });
-        fabRestore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ActivityBackupPermissionsDispatcher.restoreDBWithPermissionCheck((ActivityBackup) v.getContext());
-                mFabMenuController.closeFABMenu();
-            }
-        });
+        fabBackup.setOnClickListener(new DebouncingOnClickListener(v -> {
+            ActivityBackupPermissionsDispatcher.backupDBWithPermissionCheck(ActivityBackup.this);
+            mFabMenuController.closeFABMenu();
+        }));
+        fabRestore.setOnClickListener(new DebouncingOnClickListener(v -> {
+            ActivityBackupPermissionsDispatcher.restoreDBWithPermissionCheck(ActivityBackup.this);
+            mFabMenuController.closeFABMenu();
+        }));
         fabRestoreFromDropbox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -299,8 +379,22 @@ public class ActivityBackup extends ToolbarActivity {
     @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     void backupDB() {
         DbxClientV2 client = DropboxClient.getClient(this);
+        boolean folderAvailable = BackupFolder.isAvailable(this);
+        if (!folderAvailable) {
+            Toast.makeText(this, R.string.msg_backup_folder_unavailable, Toast.LENGTH_LONG).show();
+            if (client == null) {
+                return;
+            }
+        }
         try {
-            File zip = DBHelper.getInstance(getApplicationContext()).backupDB(true);
+            final File zip = DBHelper.getInstance(getApplicationContext()).backupDB(true, folderAvailable);
+            if (folderAvailable) {
+                if (prefs.getBoolean(FgConst.PREF_BACKUP_FOLDER_UNAVAILABLE, false)) {
+                    Toast.makeText(this, R.string.msg_backup_folder_unavailable, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, R.string.msg_backup_saved, Toast.LENGTH_SHORT).show();
+                }
+            }
             if (client != null && zip != null) {
                 new UploadTask(ActivityBackup.this, client, zip, new IOnComplete() {
                     @Override
@@ -309,8 +403,11 @@ public class ActivityBackup extends ToolbarActivity {
                         SharedPreferences preferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(ActivityBackup.this);
                         preferences.edit().putLong(FgConst.PREF_SHOW_LAST_SUCCESFUL_BACKUP_TO_DROPBOX, new Date().getTime()).apply();
                         initLastDropboxBackupField();
+                        BackupFolder.cleanCache(ActivityBackup.this, zip);
                     }
                 }).execute();
+            } else {
+                BackupFolder.cleanCache(this, zip);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -491,13 +588,16 @@ public class ActivityBackup extends ToolbarActivity {
             AlertDialog.Builder builderSingle = new AlertDialog.Builder(activity);
             builderSingle.setTitle(activity.getResources().getString(R.string.ttl_select_db_file));
 
-            List<File> files = FileUtils.getListFiles(getApplicationContext(), new File(FileUtils.getExtFingenBackupFolder()), ".zip");
-            List<String> names = new ArrayList<>();
-            String path;
-            for (int i = files.size() - 1; i >= 0; i--) {
-                path = files.get(i).toString();
-                names.add(path.substring(path.lastIndexOf("/") + 1));
+            final List<BackupFolder.Item> files = BackupFolder.listBackups(getApplicationContext());
+            if (BackupFolder.getFolderUri(getApplicationContext()) != null && files.isEmpty()
+                    && !BackupFolder.isAvailable(getApplicationContext())) {
+                Toast.makeText(activity, R.string.msg_backup_folder_unavailable, Toast.LENGTH_LONG).show();
             }
+            List<String> names = new ArrayList<>();
+            for (BackupFolder.Item item : files) {
+                names.add(item.name);
+            }
+            names.add(activity.getString(R.string.act_restore_other_file));
 
             final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(activity, android.R.layout.select_dialog_singlechoice);
             arrayAdapter.addAll(names);
@@ -514,9 +614,15 @@ public class ActivityBackup extends ToolbarActivity {
             builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    ListView lw = ((AlertDialog) dialog).getListView();
-                    String fileName = (String) lw.getAdapter().getItem(which);
-                    DBHelper.getInstance(activity).showRestoreDialog(FileUtils.getExtFingenBackupFolder() + fileName, activity);
+                    if (which < files.size()) {
+                        restoreFromUri(files.get(which).uri);
+                    } else {
+                        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        intent.setType("*/*");
+                        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/zip", "application/x-zip-compressed", "application/octet-stream"});
+                        startActivityForResult(intent, REQUEST_PICK_BACKUP_FILE);
+                    }
                 }
             });
             builderSingle.show();

@@ -1,14 +1,11 @@
 package com.yoshione.fingen.utils;
 
-import android.Manifest;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
-import androidx.core.app.ActivityCompat;
 
 import android.util.Log;
 
@@ -27,8 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
@@ -193,24 +188,6 @@ public class FileUtils {
         onCompleteListener.onComplete();
     }
 
-    public static List<File> getListFiles(Context context, File parentDir, String ext) {
-        ArrayList<File> inFiles = new ArrayList<>();
-
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            File[] files = parentDir.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    inFiles.addAll(getListFiles(context, file, ext));
-                } else {
-                    if (file.getName().endsWith(ext)) {
-                        inFiles.add(file);
-                    }
-                }
-            }
-        }
-        return inFiles;
-    }
-
     /**
      * Display name of a document (SAF Uri), or empty string if it can't be resolved.
      */
@@ -240,7 +217,14 @@ public class FileUtils {
      * The caller must delete the file.
      */
     public static File copyUriToCache(Context context, Uri uri) throws IOException {
-        File tmp = File.createTempFile("csv_import", ".csv", context.getCacheDir());
+        return copyUriToCache(context, uri, "csv_import", ".csv");
+    }
+
+    /**
+     * Same as {@link #copyUriToCache(Context, Uri)} with a custom temporary file name pattern.
+     */
+    public static File copyUriToCache(Context context, Uri uri, String prefix, String suffix) throws IOException {
+        File tmp = File.createTempFile(prefix, suffix, context.getCacheDir());
         InputStream in = context.getContentResolver().openInputStream(uri);
         if (in == null) {
             tmp.delete();

@@ -1232,7 +1232,21 @@
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_auto_backup_info" formatted="false">Резервные копии создаются автоматически и сохраняются на карте памяти в папке Fingen/\Backup</string>
+    <string name="ttl_auto_backup_info" formatted="false">Резервные копии создаются автоматически и сохраняются в выбранной папке</string>
+
+    <string name="ttl_backup_folder" formatted="false">Папка резервных копий: %s</string>
+
+    <string name="ttl_backup_folder_not_selected" formatted="false">Папка резервных копий не выбрана</string>
+
+    <string name="act_select_backup_folder" formatted="false">Выбрать папку</string>
+
+    <string name="act_restore_other_file" formatted="false">Другой файл…</string>
+
+    <string name="msg_backup_saved" formatted="false">Резервная копия сохранена в выбранную папку</string>
+
+    <string name="msg_backup_folder_unavailable" formatted="false">Папка резервных копий недоступна. Выберите папку заново.</string>
+
+    <string name="msg_backup_folder_selection_failed" formatted="false">Не удалось получить доступ к выбранной папке</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
