@@ -52,7 +52,7 @@ Android-приложение учёта доходов и расходов. Па
 
 ### Известные особенности
 - Обработчики нажатий, которые раньше были `@OnClick`, используют `utils/DebouncingOnClickListener` (защита от двойного нажатия, как у ButterKnife). Новые обработчики, которые открывают экран или сохраняют данные, тоже оборачивать.
-- Тесты: `app/src/androidTest`: `SmsParserTest`, `AccountsDAOTest`, `TransactionsDAOTest`, `DbSnapshot` (снимок `_id` до теста и откат после — тесты не оставляют данных), `DbSnapshotTest`. Юнит-тестов в `app/src/test` пока нет.
+- Тесты: `app/src/androidTest`: `SmsParserTest`, `AccountsDAOTest`, `TransactionsDAOTest`, `DbSnapshot` (снимок `_id` до теста и откат после — тесты не оставляют данных), `DbSnapshotTest`, `dropbox/DropboxClientTest` (хранение credential и миграция V3, без сети). Юнит-тестов в `app/src/test` пока нет.
 - Тесты ДАО — проверка сохранения счетов и транзакций; при падении NPE в `DBHelper.updateFullNames` или `createItem` смотреть `SearchString` и закрытие транзакции.
 
 ## Роль оркестратора
