@@ -70,7 +70,8 @@ final class MigrationTestHelper {
             String line;
             while ((line = reader.readLine()) != null) {
                 String trimmed = line.trim();
-                if (trimmed.isEmpty() || trimmed.toUpperCase().startsWith("PRAGMA")) {
+                if (trimmed.isEmpty() || trimmed.toUpperCase().startsWith("PRAGMA")
+                        || trimmed.startsWith("--")) {
                     continue;
                 }
                 current.append(line).append('\n');
@@ -128,6 +129,59 @@ final class MigrationTestHelper {
                 }
             }
             result.put(table, columns);
+        }
+        return result;
+    }
+
+    /**
+     * Lower-case "table" -> set of lower-case "column:type". Identifier case is ignored, because
+     * old fixtures declare isActive and a clean database declares IsActive.
+     */
+    static Map<String, Set<String>> dumpColumnsIgnoreCase(SQLiteDatabase db) {
+        Map<String, Set<String>> result = new TreeMap<>();
+        for (Map.Entry<String, Set<String>> entry : dumpColumns(db).entrySet()) {
+            Set<String> columns = new HashSet<>();
+            for (String column : entry.getValue()) {
+                columns.add(column.toLowerCase());
+            }
+            result.put(entry.getKey().toLowerCase(), columns);
+        }
+        return result;
+    }
+
+    /**
+     * Indexes of all tables as "table|origin|unique|columns" (index name is added for indexes
+     * created by CREATE INDEX). Does not depend on the SQL text of the tables.
+     */
+    static Set<String> dumpIndexes(SQLiteDatabase db) {
+        Set<String> result = new HashSet<>();
+        List<String> tables = new ArrayList<>();
+        try (Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type = 'table' "
+                + "AND name NOT LIKE 'sqlite_%' AND name <> 'android_metadata'", null)) {
+            while (c.moveToNext()) {
+                tables.add(c.getString(0));
+            }
+        }
+        for (String table : tables) {
+            List<String[]> indexes = new ArrayList<>();
+            try (Cursor c = db.rawQuery("PRAGMA index_list(\"" + table + "\")", null)) {
+                int originIdx = c.getColumnIndex("origin");
+                while (c.moveToNext()) {
+                    indexes.add(new String[]{c.getString(c.getColumnIndex("name")),
+                            c.getString(c.getColumnIndex("unique")),
+                            originIdx >= 0 ? c.getString(originIdx) : ""});
+                }
+            }
+            for (String[] index : indexes) {
+                StringBuilder columns = new StringBuilder();
+                try (Cursor c = db.rawQuery("PRAGMA index_info(\"" + index[0] + "\")", null)) {
+                    while (c.moveToNext()) {
+                        columns.append(c.getString(c.getColumnIndex("name"))).append(',');
+                    }
+                }
+                String name = "c".equals(index[2]) ? "|" + index[0] : "";
+                result.add((table + "|" + index[2] + "|" + index[1] + "|" + columns + name).toLowerCase());
+            }
         }
         return result;
     }
