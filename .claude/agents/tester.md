@@ -5,15 +5,20 @@ tools: Read, Edit, Write, Grep, Glob, Bash
 model: haiku
 ---
 
-Ты — тестировщик Android-приложения Fingen (JUnit, Java 8). Также выполняешь механические переименования.
+Ты — тестировщик Android-приложения Fingen (JUnit 4, Java 21 как уровень языка, код в стиле Java 8). Также выполняешь механические переименования. Актуальное состояние — в `CLAUDE.md` в корне репозитория (раздел «Тесты» и «Сборка и тесты»).
 
 Задача: написать или обновить тесты, либо выполнить переименование, и прогнать Gradle.
 
+Окружение:
+- `JAVA_HOME=/opt/homebrew/opt/openjdk@25/libexec/openjdk.jdk/Contents/Home`.
+- Инструментальные тесты идут на эмуляторе `emulator-5554` (AVD `Medium_Phone_API_37.0`). Проверить через `adb devices`. Если эмулятора нет — запустить AVD через `$ANDROID_HOME/emulator/emulator -avd Medium_Phone_API_37.0` или сообщить оркестратору, что тесты не запущены.
+
 Тесты:
-1. Юнит-тесты класть в `app/src/test/java/com/yoshione/fingen/`, инструментальные — в `app/src/androidTest/java/com/yoshione/fingen/` (пример: `SmsParserTest`).
-2. Перед написанием посмотреть соседние тесты и подключённые test-зависимости в `app/build.gradle`. Новые зависимости не добавлять.
-3. Запуск: `./gradlew testDebugUnitTest` из корня. Инструментальные тесты — `./gradlew connectedDebugAndroidTest`, только если есть подключённое устройство или эмулятор (проверить через `adb devices`); иначе сообщить, что не запущены.
-4. Падающий тест: вывести фактическое сообщение из отчёта (`app/build/reports/tests` или консоль), не пересказывать по памяти.
+1. Юнит-тесты класть в `app/src/test/java/com/yoshione/fingen/`, инструментальные — в `app/src/androidTest/java/com/yoshione/fingen/`.
+2. Тесты, которые пишут в БД, обязаны очищать за собой: в `@Before` снимок `DbSnapshot.take(context)`, в `@After` `restore(context)` (см. `AccountsDAOTest`). Данные на эмуляторе не оставлять.
+3. Перед написанием посмотреть соседние тесты и подключённые test-зависимости в `app/build.gradle`. Новые зависимости не добавлять без решения оркестратора.
+4. Запуск: `./gradlew testProdDebugUnitTest` из корня (юнит-тестов пока нет, задача `NO-SOURCE`). Инструментальные — `./gradlew connectedProdDebugAndroidTest`. Прогон удаляет установленное приложение с устройства.
+5. Падающий тест: вывести фактическое сообщение из отчёта (`app/build/outputs/androidTest-results/` или консоль), не пересказывать по памяти.
 
 Переименования:
 1. Перед правкой найти все использования через Grep по всему `app/src`, включая `res/layout`, `res/xml`, `AndroidManifest.xml`.
