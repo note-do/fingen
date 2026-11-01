@@ -173,6 +173,39 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
                              Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
+        if (view != null) {
+            mBinding = FragmentTransactionsBinding.bind(view);
+            layoutSumTable = view.findViewById(R.id.layoutSummaryTable);
+            switchAllFilters = mBinding.switchAllFilters;
+            recyclerViewFilters = mBinding.recyclerViewFilters;
+            mFabGoTop = mBinding.fabGoTop;
+            mFabSelectAll = mBinding.fabSelectAll;
+            mFabUnselectAll = mBinding.fabUnselectAll;
+            mFabEditSelected = mBinding.fabEditSelected;
+            mFabExportSelected = mBinding.fabExportSelected;
+            mFabDeleteSelected = mBinding.fabDeleteSelected;
+            mSlidingLayoutTransactions = mBinding.slidingLayoutTransactions;
+            mEditTextSearch = mBinding.editTextSearch;
+            mImageButtonClearSearchString = mBinding.imageButtonClearSearchString;
+            mCardViewSearch = mBinding.cardViewSearch;
+            mDragView = mBinding.dragView;
+            mTextViewSelectedCount = mBinding.textViewSelectedCount;
+            mImageViewPullMe = mBinding.imageViewPullMe;
+            mSlidingPanelHeader = mBinding.slidingPanelHeader.getRoot();
+            mButtonSearch = mBinding.buttonSearch;
+            mButtonReports = mBinding.buttonReports;
+            mButtonAddFilter = mBinding.buttonAddFilter;
+            mButtonClearFilters = mBinding.buttonClearfilters;
+            mFabSelectAllLayout = mBinding.fabSelectAllLayout;
+            mFabUnselectAllLayout = mBinding.fabUnselectAllLayout;
+            mFabEditSelectedLayout = mBinding.fabEditSelectedLayout;
+            mFabExportSelectedLayout = mBinding.fabExportSelectedLayout;
+            mFabDeleteSelectedLayout = mBinding.fabDeleteSelectedLayout;
+            mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+            mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
+            mFabBGLayout = mBinding.fabBGLayout;
+        }
+
         FGApplication.getAppComponent().inject(this);
 
         if (getActivity() != null) {
@@ -293,38 +326,6 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             });
         }
 
-        if (view != null) {
-            mBinding = FragmentTransactionsBinding.bind(view);
-            layoutSumTable = view.findViewById(R.id.layoutSummaryTable);
-            switchAllFilters = mBinding.switchAllFilters;
-            recyclerViewFilters = mBinding.recyclerViewFilters;
-            mFabGoTop = mBinding.fabGoTop;
-            mFabSelectAll = mBinding.fabSelectAll;
-            mFabUnselectAll = mBinding.fabUnselectAll;
-            mFabEditSelected = mBinding.fabEditSelected;
-            mFabExportSelected = mBinding.fabExportSelected;
-            mFabDeleteSelected = mBinding.fabDeleteSelected;
-            mSlidingLayoutTransactions = mBinding.slidingLayoutTransactions;
-            mEditTextSearch = mBinding.editTextSearch;
-            mImageButtonClearSearchString = mBinding.imageButtonClearSearchString;
-            mCardViewSearch = mBinding.cardViewSearch;
-            mDragView = mBinding.dragView;
-            mTextViewSelectedCount = mBinding.textViewSelectedCount;
-            mImageViewPullMe = mBinding.imageViewPullMe;
-            mSlidingPanelHeader = mBinding.slidingPanelHeader.getRoot();
-            mButtonSearch = mBinding.buttonSearch;
-            mButtonReports = mBinding.buttonReports;
-            mButtonAddFilter = mBinding.buttonAddFilter;
-            mButtonClearFilters = mBinding.buttonClearfilters;
-            mFabSelectAllLayout = mBinding.fabSelectAllLayout;
-            mFabUnselectAllLayout = mBinding.fabUnselectAllLayout;
-            mFabEditSelectedLayout = mBinding.fabEditSelectedLayout;
-            mFabExportSelectedLayout = mBinding.fabExportSelectedLayout;
-            mFabDeleteSelectedLayout = mBinding.fabDeleteSelectedLayout;
-            mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
-            mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
-            mFabBGLayout = mBinding.fabBGLayout;
-        }
         return view;
     }
 
