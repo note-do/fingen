@@ -49,9 +49,9 @@
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
-        <name>ColorPicker</name>
-        <url>https://github.com/QuadFlask/colorpicker</url>
-        <copyright>QuadFlask</copyright>
+        <name>ColorPickerView</name>
+        <url>https://github.com/skydoves/ColorPickerView</url>
+        <copyright>2017 skydoves (Jaewoong Eum)</copyright>
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>

@@ -127,7 +127,7 @@ dependencies {
     implementation 'com.github.angads25:filepicker:1.1.1'
     implementation 'com.github.permissions-dispatcher:permissionsdispatcher:4.9.2'
     implementation 'com.github.PhilJay:MPAndroidChart:v2.2.5'
-    implementation 'com.github.QuadFlask:colorpicker:0.0.13'
+    implementation 'com.github.skydoves:colorpickerview:2.5.0'
     implementation 'com.github.l4digital:fastscroll:1.0.4@aar'
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.3'
     implementation 'com.timehop.stickyheadersrecyclerview:library:0.4.3@aar'

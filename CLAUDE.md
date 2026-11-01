@@ -32,20 +32,21 @@ Android-приложение учёта доходов и расходов. Па
 - Changelog: `res/raw/changelog.xml` (и `raw-ru`), диалог — `FragmentChangelog` (ListView).
 - Сканер и PIN-код: PIN-защита своя — `lock/PinLockManager` и `lock/PinActivity` (lollipin удалён, старые PIN сброшены).
 - Лицензии: `licensesdialog` 2.2.0 (`ActivityAbout`, `.show()`; `showAppCompat` в 2.x удалён), список — `res/raw/license.xml` (синхронизировать с зависимостями `app/build.gradle`).
-- Прочее: `fastscroll` (JitPack, `@aar`), `actionitembadge`, `iconics-core` (нужен `actionitembadge`), `slidinguppanel`, `airmapview`, `filepicker`, `colorpicker`, `MPAndroidChart` — заброшенные, см. «Миграция в процессе».
+- Выбор цвета: skydoves `colorpickerview` 2.5.0 (Maven Central, `ColorPickerDialog.Builder`).
+- Прочее: `fastscroll` (JitPack, `@aar`), `actionitembadge`, `iconics-core` (нужен `actionitembadge`), `slidinguppanel`, `airmapview`, `filepicker`, `MPAndroidChart` — заброшенные, см. «Миграция в процессе».
 - БД: `android.database.sqlite` (framework SQLite). requery удалён.
 
 ### Удалено (не возвращать)
 - Fabric / Crashlytics / Answers.
 - ФНС-чеки (`fts/`, Retrofit, OkHttp logging, decoro, qrcodereaderview).
-- lollipin, materialdrawer, xpece support-preference, changeloglib, MaterialShowCase, HeaderDecor (aar), requery, ButterKnife, flipview (библиотека).
+- lollipin, materialdrawer, xpece support-preference, changeloglib, MaterialShowCase, HeaderDecor (aar), requery, ButterKnife, flipview (библиотека), QuadFlask colorpicker.
 - `com.evernote:android-job` (`BackupJob`, `BackupTestJob` и их creator-ы), его компоненты в манифесте и ProGuard-правила.
 - Мёртвые ресурсы materialdrawer и `material_drawer_*`.
 - Платные отчёты и биллинг: `iab` (anjlab), `ActivityPro`, XOR-ключ лицензии, `resValue` `inAppLicenseKey`/`inAppLicenseSalt`. Отчёты бесплатны для всех.
 
 ### Миграция в процессе (план)
 - Google Drive — отдельная фича позже.
-- Заменить заброшенные библиотеки: slidinguppanel → BottomSheet, actionitembadge → BadgeDrawable, airmapview → play-services-maps, filepicker → SAF, MPAndroidChart → v3; colorpicker — обновить.
+- Заменить заброшенные библиотеки: slidinguppanel → BottomSheet, actionitembadge → BadgeDrawable, airmapview → play-services-maps, filepicker → SAF, MPAndroidChart → v3.
 - RxJava 2 → 3, Dagger и RxAndroid до актуальных, commons-lang3 и bcprov (CVE), junit.
 - БД: тесты миграций с фикстурами версий 16, 21, 23, 30, 34 → 35; проверить `legacy_alter_table` (ALTER TABLE RENAME) и `journal_mode`.
 - Совместимость бэкапов: читать старые зашифрованные (WinZip AES, PBKDF2-SHA1) и незашифрованные бэкапы.

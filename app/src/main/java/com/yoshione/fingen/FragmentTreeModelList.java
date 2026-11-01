@@ -19,9 +19,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.builder.ColorPickerClickListener;
-import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.skydoves.colorpickerview.ColorEnvelope;
+import com.skydoves.colorpickerview.ColorPickerDialog;
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener;
 import com.yoshione.fingen.adapter.AdapterTreeModel;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
 import com.yoshione.fingen.adapter.helper.SimpleItemTouchHelperCallback;
@@ -328,16 +328,16 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
             }
             case R.id.action_select_color: {
                 final IAbstractModel model = dao.getModelById(info.id);
-                ColorPickerDialogBuilder
-                        .with(Objects.requireNonNull(getActivity()))
+                ColorPickerDialog.Builder colorDialogBuilder = new ColorPickerDialog.Builder(Objects.requireNonNull(getActivity()));
+                colorDialogBuilder.getColorPickerView().setInitialColor(model.getColor());
+                colorDialogBuilder
                         .setTitle(getActivity().getResources().getString(R.string.ttl_select_color))
-                        .initialColor(model.getColor())
-                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
-                        .lightnessSliderOnly()
-                        .density(12)
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                        .attachBrightnessSlideBar(true)
+                        .attachAlphaSlideBar(false)
+                        .setPositiveButton("ok", new ColorEnvelopeListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                            public void onColorSelected(ColorEnvelope envelope, boolean fromUser) {
+                                int selectedColor = envelope.getColor();
                                 IAbstractModel model1 = dao.getModelById(model.getID());
                                 if (model.getClass().equals(Category.class)) {
                                     ((Category) model1).setColor(selectedColor);
@@ -364,7 +364,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                                 dialog.cancel();
                             }
                         })
-                        .build()
+                        .create()
                         .show();
                 break;
             }
