@@ -1,12 +1,11 @@
 package com.yoshione.fingen;
 
 import android.content.Context;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.TableLayout;
 
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-
-import android.view.View;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yoshione.fingen.utils.ScreenUtils;

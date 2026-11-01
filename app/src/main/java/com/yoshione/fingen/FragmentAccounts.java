@@ -24,7 +24,6 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.yoshione.fingen.adapter.AdapterAccounts;
 import com.yoshione.fingen.adapter.AdapterAccountsSets;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
@@ -51,6 +50,7 @@ import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.utils.ScreenUtils;
 import com.yoshione.fingen.widgets.AmountEditor;
 import com.yoshione.fingen.widgets.ContextMenuRecyclerView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yoshione.fingen.widgets.FgLinearLayoutManager;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
@@ -80,7 +80,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     private static final int CONTEXT_MENU_SETS = 1;
     public AdapterAccounts adapter;
     TableLayout mLayoutSumTable;
-    SlidingUpPanelLayout mSlidingUpPanelLayout;
+    BottomSheetBehavior<LinearLayout> mBottomSheetBehavior;
     ContextMenuRecyclerView mRecyclerViewAccountsSets;
     Button mButtonAddAccountSet;
     Button mButtonAddAccount;
@@ -133,7 +133,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
 
         FragmentAccountsBinding binding = FragmentAccountsBinding.bind(view);
         mLayoutSumTable = view.findViewById(R.id.layoutSummaryTable);
-        mSlidingUpPanelLayout = binding.slidingLayoutAccounts;
+        mBottomSheetBehavior = BottomSheetBehavior.from(binding.dragViewAccounts);
         mRecyclerViewAccountsSets = binding.recyclerViewAccountsSets;
         mButtonAddAccountSet = binding.buttonAddAccountSet;
         mButtonAddAccount = binding.buttonAddAccount;
@@ -172,7 +172,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
         mItemTouchHelper.attachToRecyclerView(recyclerView);
 
         mLayoutSumTable.getViewTreeObserver().addOnGlobalLayoutListener(
-                    new SumsTableOnGlobalLayoutListener(getActivity(), mLayoutSumTable, mSlidingUpPanelLayout));
+                    new SumsTableOnGlobalLayoutListener(getActivity(), mLayoutSumTable, mBottomSheetBehavior, binding.relativeLayoutAccounts));
 
         if (getActivity() instanceof ActivityMain) {
             ((ActivityMain) getActivity()).mAppBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
@@ -251,7 +251,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
         registerForContextMenu(mRecyclerViewAccountsSets);
         loadAccountsSets();
         if (mAccountsDAO.get().getModelCount() == 0) {
-            mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
         }
     }
 

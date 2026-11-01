@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.sothree.slidinguppanel.SlidingUpPanelLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:sothree="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/sliding_layout_accounts"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    sothree:umanoDragView="@+id/dragView"
-    style="@style/StyleSlidingUpPanel">
+    android:layout_height="match_parent">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="fill_parent"
-                    android:layout_height="match_parent"
-                    android:animateLayoutChanges="true"
-                    android:orientation="vertical">
+    <!-- Bottom padding equals the bottom sheet peek height (updated in SumsTableOnGlobalLayoutListener) -->
+    <RelativeLayout
+        android:id="@+id/relativeLayoutAccounts"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        android:paddingBottom="48dp">
 
         <com.yoshione.fingen.widgets.ContextMenuRecyclerView
             android:id="@+id/recycler_view"
@@ -49,13 +50,25 @@
     </RelativeLayout>
 
     <!-- SLIDING LAYOUT -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator_sheet_accounts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/dragViewAccounts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="?listItemBackground"
+        android:elevation="8dp"
         android:clickable="true"
         android:focusable="false"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        app:behavior_fitToContents="false"
+        app:behavior_halfExpandedRatio="0.5"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="48dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <include
             android:id="@+id/sliding_panel_header"
@@ -100,4 +113,6 @@
         </FrameLayout>
     </LinearLayout>
 
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</FrameLayout>
