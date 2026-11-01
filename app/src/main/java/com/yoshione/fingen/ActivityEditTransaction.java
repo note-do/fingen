@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityEditTransactionBinding;
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -312,14 +313,14 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         mLayoutAmounts = mBinding.layoutAmounts;
         mLayoutRoot = mBinding.layoutRoot;
         mLayoutComment = mBinding.layoutComment;
-        mBinding.buttonSaveTransaction.setOnClickListener(v -> onSaveClick());
-        mBinding.buttonMore.setOnClickListener(v -> onClick());
-        mBinding.imageButtonDeleteLocation.setOnClickListener(v -> onTrashButtonClick(v));
-        mBinding.imageButtonDeleteCategory.setOnClickListener(v -> onTrashButtonClick(v));
-        mBinding.imageButtonDeleteDebt.setOnClickListener(v -> onTrashButtonClick(v));
-        mBinding.imageButtonDeleteProject.setOnClickListener(v -> onTrashButtonClick(v));
-        mBinding.imageButtonDeleteDepartment.setOnClickListener(v -> onTrashButtonClick(v));
-        mBinding.editTextDate.setOnClickListener(v -> onDateClick(v));
+        mBinding.buttonSaveTransaction.setOnClickListener(new DebouncingOnClickListener(v -> onSaveClick()));
+        mBinding.buttonMore.setOnClickListener(new DebouncingOnClickListener(v -> onClick()));
+        mBinding.imageButtonDeleteLocation.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.imageButtonDeleteCategory.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.imageButtonDeleteDebt.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.imageButtonDeleteProject.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.imageButtonDeleteDepartment.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.editTextDate.setOnClickListener(new DebouncingOnClickListener(v -> onDateClick(v)));
 
         mTrEditItems = PrefUtils.getTrEditorLayout(mPreferences, this);
         recreateViews();

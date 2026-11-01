@@ -4,6 +4,7 @@
 
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.ContentResolver;
@@ -89,10 +90,10 @@ public class FragmentSenderEdit extends DialogFragment {
         mEditTextBalancePos = mBinding.editTextBalancePos;
         mImageButtonSelectSender = mBinding.imageButtonSelectSender;
         mCheckBoxAddCreditLimitToBalance = mBinding.checkBoxAddCreditLimitToBalance;
-        mBinding.editTextAmountPos.setOnClickListener(v -> onClick(v));
-        mBinding.editTextBalancePos.setOnClickListener(v -> onClick(v));
-        mBinding.imageButtonSelectSender.setOnClickListener(v -> onClick(v));
-        mBinding.checkBoxAddCreditLimitToBalance.setOnClickListener(v -> onClick(v));
+        mBinding.editTextAmountPos.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
+        mBinding.editTextBalancePos.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
+        mBinding.imageButtonSelectSender.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
+        mBinding.checkBoxAddCreditLimitToBalance.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
 
         if (mSender != null) {
             mEditTextName.setText(mSender.getName());

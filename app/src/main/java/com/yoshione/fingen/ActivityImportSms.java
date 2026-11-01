@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityImportSmsBinding;
 import android.Manifest;
 import android.app.Activity;
@@ -99,11 +100,11 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
         editTextEndDate = mBinding.editTextEndDate;
         editTextEndTime = mBinding.editTextEndTime;
         checkboxAutoCreateTransactions = mBinding.checkboxAutoCreateTransactions;
-        mBinding.editTextSender.setOnClickListener(v -> onClick());
-        mBinding.editTextStartDate.setOnClickListener(v -> onDateClick(v));
-        mBinding.editTextEndDate.setOnClickListener(v -> onDateClick(v));
-        mBinding.editTextStartTime.setOnClickListener(v -> onTimeClick(v));
-        mBinding.editTextEndTime.setOnClickListener(v -> onTimeClick(v));
+        mBinding.editTextSender.setOnClickListener(new DebouncingOnClickListener(v -> onClick()));
+        mBinding.editTextStartDate.setOnClickListener(new DebouncingOnClickListener(v -> onDateClick(v)));
+        mBinding.editTextEndDate.setOnClickListener(new DebouncingOnClickListener(v -> onDateClick(v)));
+        mBinding.editTextStartTime.setOnClickListener(new DebouncingOnClickListener(v -> onTimeClick(v)));
+        mBinding.editTextEndTime.setOnClickListener(new DebouncingOnClickListener(v -> onTimeClick(v)));
 
         progressbarArr[0] = progressbar;
         progressbar.setProgress(0);

@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityEditLocation2Binding;
 import android.Manifest;
 import android.content.DialogInterface;
@@ -106,7 +107,7 @@ public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraCh
         editTextName = mBinding.editTextName;
         mButtonSaveLocation = mBinding.buttonSaveLocation;
         map = mBinding.map;
-        mBinding.buttonSaveLocation.setOnClickListener(v -> onSaveClick());
+        mBinding.buttonSaveLocation.setOnClickListener(new DebouncingOnClickListener(v -> onSaveClick()));
 
         if (savedInstanceState != null) {
             location = savedInstanceState.getParcelable("location");

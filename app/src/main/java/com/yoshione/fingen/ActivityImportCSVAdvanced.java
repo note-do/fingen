@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityImportCsvAdvancedBinding;
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -93,9 +94,9 @@ public class ActivityImportCSVAdvanced extends ToolbarActivity implements IProgr
         mImageButtonInc = mBinding.imageButtonInc;
         mTextInputLayoutLines = mBinding.textInputLayoutLines;
         mSwitchCompatSkipDuplicates = mBinding.switchCompatSkipDuplicates;
-        mBinding.imageButtonInc.setOnClickListener(v -> OnChangeSkipLinesClick(v));
-        mBinding.imageButtonDec.setOnClickListener(v -> OnChangeSkipLinesClick(v));
-        findViewById(R.id.editTextFileName).setOnClickListener(v -> OnSelectFileClick());
+        mBinding.imageButtonInc.setOnClickListener(new DebouncingOnClickListener(v -> OnChangeSkipLinesClick(v)));
+        mBinding.imageButtonDec.setOnClickListener(new DebouncingOnClickListener(v -> OnChangeSkipLinesClick(v)));
+        findViewById(R.id.editTextFileName).setOnClickListener(new DebouncingOnClickListener(v -> OnSelectFileClick()));
 
         progressbar.setProgress(0);
         mCurrentProgress = 0;

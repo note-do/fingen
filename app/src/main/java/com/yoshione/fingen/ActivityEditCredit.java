@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityEditCredit2Binding;
 import android.content.Intent;
 import android.os.Bundle;
@@ -61,8 +62,8 @@ public class ActivityEditCredit extends ToolbarActivity implements FragmentPayee
         textViewComment = mBinding.editTextComment;
         mImageButtonDeleteCategory = mBinding.imageButtonDeleteCategory;
         mButtonSaveTransaction = mBinding.buttonSaveTransaction;
-        mBinding.buttonSaveTransaction.setOnClickListener(v -> onSaveClick());
-        mBinding.imageButtonDeleteCategory.setOnClickListener(v -> onClick());
+        mBinding.buttonSaveTransaction.setOnClickListener(new DebouncingOnClickListener(v -> onSaveClick()));
+        mBinding.imageButtonDeleteCategory.setOnClickListener(new DebouncingOnClickListener(v -> onClick()));
         mCredit = getIntent().getParcelableExtra("credit");
     }
 

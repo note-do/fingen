@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityExportCsvBinding;
 import android.Manifest;
 import android.app.Activity;
@@ -81,7 +82,7 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
         mTextInputLayoutDir = mBinding.textInputLayoutDir;
         mTextInputLayoutFileName = mBinding.textInputLayoutFileName;
         mCheckBoxExportProducts = mBinding.checkBoxExportProducts;
-        mBinding.editTextDirectory.setOnClickListener(v -> OnSelectFileClick());
+        mBinding.editTextDirectory.setOnClickListener(new DebouncingOnClickListener(v -> OnSelectFileClick()));
 
         progressbar.setProgress(0);
         numberProgressBarArr[0] = progressbar;

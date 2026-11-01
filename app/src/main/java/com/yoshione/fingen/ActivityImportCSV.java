@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityImportCsvBinding;
 import android.Manifest;
 import android.app.Activity;
@@ -62,7 +63,7 @@ public class ActivityImportCSV extends ToolbarActivity implements IProgressEvent
         editTextFileName = findViewById(R.id.editTextFileName);
         progressbar = mBinding.progressbar;
         mSwitchCompatSkipDuplicates = mBinding.switchCompatSkipDuplicates;
-        findViewById(R.id.editTextFileName).setOnClickListener(v -> OnSelectFileClick());
+        findViewById(R.id.editTextFileName).setOnClickListener(new DebouncingOnClickListener(v -> OnSelectFileClick()));
 
         progressbar.setProgress(0);
         numberProgressBarArr[0] = progressbar;

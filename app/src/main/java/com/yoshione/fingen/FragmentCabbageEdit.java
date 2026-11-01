@@ -4,6 +4,7 @@
 
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -61,7 +62,7 @@ public class FragmentCabbageEdit extends DialogFragment {
         editTextCode = mBinding.editTextCode;
         editTextSymbol = mBinding.editTextSymbol;
         editTextScale = mBinding.editTextScale;
-        mBinding.buttonSystemCurrencies.setOnClickListener(v -> selectSystemCurrencyClick());
+        mBinding.buttonSystemCurrencies.setOnClickListener(new DebouncingOnClickListener(v -> selectSystemCurrencyClick()));
 
         if (cabbage != null) {
             editTextName.setText(cabbage.getName());

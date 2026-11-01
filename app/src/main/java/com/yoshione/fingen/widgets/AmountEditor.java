@@ -4,6 +4,7 @@
 
 package com.yoshione.fingen.widgets;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -244,7 +245,7 @@ public class AmountEditor extends LinearLayout {
         spinnerCabbage = binding.editTextCabbage;
         mTextInputLayoutCabbage = binding.textInputLayoutCabbage;
         mTextInputLayoutAmount = binding.textInputLayoutAmount;
-        binding.imageButtonCalc.setOnClickListener(v -> onCalculatorClick());
+        binding.imageButtonCalc.setOnClickListener(new DebouncingOnClickListener(v -> onCalculatorClick()));
         scale = 2;
 
         mAmountColorizer = new AmountColorizer(context);

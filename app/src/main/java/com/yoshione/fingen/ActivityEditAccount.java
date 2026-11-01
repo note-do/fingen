@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityEditAccountBinding;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -95,7 +96,7 @@ public class ActivityEditAccount extends ToolbarActivity {
         mTextInputLayoutLast4Digits = mBinding.textInputLayoutLast4Digits;
         mTextInputLayoutName = mBinding.textInputLayoutName;
         mTextInputLayoutCabbage = mBinding.textInputLayoutCabbage;
-        mBinding.buttonSaveAccount.setOnClickListener(v -> onSaveClick());
+        mBinding.buttonSaveAccount.setOnClickListener(new DebouncingOnClickListener(v -> onSaveClick()));
         account = getIntent().getParcelableExtra("account");
     }
 
