@@ -101,7 +101,7 @@ android {
 }
 
 //def play = '15.0.1'
-def dagger = '2.16'
+def dagger = '2.60.1'
 //def moxy = "1.5.5"
 
 dependencies {
