@@ -413,16 +413,39 @@ public class UpdateHelper {
             try {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
-                        ContentValues values = new ContentValues();
-                        for (Pair<String, Long> sender : senders) {
-                            if (sender.first.toLowerCase().equals(cursor.getString(cursor.getColumnIndex("Sender")).toLowerCase())) {
-                                values.put("_id", cursor.getLong(cursor.getColumnIndex("_id")));
-                                values.put("DateTime", cursor.getString(cursor.getColumnIndex("DateTime")));
-                                values.put("Sender", sender.second);
-                                values.put("Body", cursor.getString(cursor.getColumnIndex("Body")));
-                                db.insert("tempsms", null, values);
+                        String smsSender = cursor.getString(cursor.getColumnIndex("Sender"));
+                        long senderId = 0;
+                        if (smsSender != null && !smsSender.trim().isEmpty()) {
+                            String key = smsSender.trim().toLowerCase();
+                            Long found = null;
+                            for (Pair<String, Long> sender : senders) {
+                                if (sender.first != null && sender.first.trim().toLowerCase().equals(key)) {
+                                    found = sender.second;
+                                    break;
+                                }
+                            }
+                            if (found == null) {
+                                //Отправитель без маркера: создаем запись, чтобы не терять SMS
+                                found = insertSmsSender(db, smsSender, smsSender);
+                                if (found == null) {
+                                    found = insertSmsSender(db, smsSender + " (SMS)", smsSender);
+                                }
+                                if (found != null) {
+                                    senders.add(new Pair<>(smsSender, found));
+                                }
+                            }
+                            if (found != null) {
+                                senderId = found;
                             }
                         }
+                        ContentValues values = new ContentValues();
+                        values.put("_id", cursor.getLong(cursor.getColumnIndex("_id")));
+                        String dateTime = cursor.getString(cursor.getColumnIndex("DateTime"));
+                        values.put("DateTime", dateTime == null ? "" : dateTime);
+                        values.put("Sender", senderId);
+                        String body = cursor.getString(cursor.getColumnIndex("Body"));
+                        values.put("Body", body == null ? "" : body);
+                        db.insert("tempsms", null, values);
                         cursor.moveToNext();
                     }
                 }
@@ -432,6 +455,20 @@ public class UpdateHelper {
         }
         db.execSQL("DROP TABLE log_Incoming_SMS");
         db.execSQL("ALTER TABLE tempsms RENAME TO log_Incoming_SMS");
+    }
+
+    /** Inserts a sender with default parser settings, returns its id or null if Name or PhoneNo is already used. */
+    private static Long insertSmsSender(SQLiteDatabase db, String name, String phoneNo) {
+        ContentValues values = new ContentValues();
+        values.put("Name", name);
+        values.put("PhoneNo", phoneNo);
+        values.put("AmountPos", 0);
+        values.put("BalancePos", 1);
+        values.put("DateFormat", "");
+        values.put("LeadingCurrencySymbol", false);
+        values.put("isActive", 1);
+        long id = db.insert("ref_Senders", null, values);
+        return id >= 0 ? id : null;
     }
 
     public static void update18(SQLiteDatabase db, Context context) {

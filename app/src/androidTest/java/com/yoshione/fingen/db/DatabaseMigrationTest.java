@@ -38,8 +38,8 @@ import static org.junit.Assert.assertTrue;
  * <li>v21 = tableInfo21 (schema after update18..update20); update21 (NULL Comment of templates -> '') is already applied.</li>
  * <li>v16 = columns of tableInfo17 with types of tableInfo18, no sync columns, no constraints, no ref_Senders.
  * It is the least accurate fixture: a real v16 database may differ in types, constraints and column order.</li>
- * <li>v16 data has no sender markers (ref_Sms_Parser_Patterns.Type = 5), so update17 creates no senders and drops
- * ALL rows of log_Incoming_SMS (it keeps only SMS of known senders). This is the behaviour of update17, it is asserted.</li>
+ * <li>v16 data has no sender markers (ref_Sms_Parser_Patterns.Type = 5), so update17 creates a sender for the
+ * source Sender value of each SMS and keeps ALL rows of log_Incoming_SMS. This is asserted.</li>
  * <li>v16 DateTime is the text "yyyy-MM-dd HH:mm:ss" in the time zone of the device; update18 converts it to
  * milliseconds with the same pattern and the default time zone, so the expected value is computed in the test with
  * the same pattern. The test does not depend on the time zone of the device.</li>
@@ -337,8 +337,8 @@ public class DatabaseMigrationTest {
     }
 
     /**
-     * 16 -> 35 runs update17 ... update33. The fixture has no sender markers, so update17 drops all SMS
-     * (see the class comment). DateTime is converted from the text to milliseconds by update18.
+     * 16 -> 35 runs update17 ... update33. The fixture has no sender markers, so update17 creates a sender from
+     * the Sender value of the SMS and keeps the SMS (see the class comment). DateTime is converted from the text to milliseconds by update18.
      */
     @Test
     public void upgrade16To35_migratesDataByAllSteps() throws Exception {
@@ -374,9 +374,15 @@ public class DatabaseMigrationTest {
             assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Accounts WHERE Deleted <> 0 OR Deleted IS NULL"));
             assertEquals(-1, queryLong(migrated, "SELECT TS FROM ref_Accounts WHERE _id = 100"));
 
-            // update17: no sender markers -> no senders, SMS of unknown senders are dropped
-            assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Senders"));
-            assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM log_Incoming_SMS"));
+            // update17: no sender markers -> sender is created from the Sender value of the SMS, the SMS is kept
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Senders"));
+            assertEquals("+1000", queryString(migrated, "SELECT Name FROM ref_Senders"));
+            assertEquals("+1000", queryString(migrated, "SELECT PhoneNo FROM ref_Senders"));
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Incoming_SMS"));
+            assertEquals(100, queryLong(migrated, "SELECT _id FROM log_Incoming_SMS"));
+            assertEquals("sms body", queryString(migrated, "SELECT Body FROM log_Incoming_SMS"));
+            assertEquals(queryLong(migrated, "SELECT _id FROM ref_Senders"),
+                    queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS"));
             assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Sms_Parser_Patterns"));
             assertEquals("pattern", queryString(migrated, "SELECT Pattern FROM ref_Sms_Parser_Patterns WHERE _id = 100"));
         } finally {
@@ -429,6 +435,50 @@ public class DatabaseMigrationTest {
             assertEquals(1, queryLong(migrated, "SELECT isActive FROM ref_Senders"));
             assertEquals(queryLong(migrated, "SELECT _id FROM ref_Senders"),
                     queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 100"));
+        } finally {
+            migrated.close();
+        }
+    }
+
+    /**
+     * update17 keeps ALL SMS: the sender of an SMS is found among the marker senders by the trimmed lower case
+     * Sender value, otherwise a sender (Name = PhoneNo = source value) is created; NULL or empty Sender gives Sender = 0.
+     */
+    @Test
+    public void upgrade16To35_keepsAllSms() throws Exception {
+        MigrationTestHelper.createFixture(mContext, 16,
+                "INSERT INTO ref_Sms_Parser_Patterns (_id, Type, Object, Pattern) VALUES (100, 5, 'Bank', '+1000')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (1, '2016-05-17 10:30:00', '+1000', 'marker')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (2, '2016-05-17 10:31:00', 'ShopInfo', 'unknown 1')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (3, '2016-05-17 10:32:00', 'shopinfo', 'unknown 2')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (4, '2016-05-17 10:33:00', '+2000', 'unknown 3')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (5, '2016-05-17 10:34:00', NULL, 'no sender')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (6, '2016-05-17 10:35:00', '', 'empty sender')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (7, '2016-05-17 10:36:00', 'Bank', 'name of marker')");
+
+        SQLiteDatabase migrated = MigrationTestHelper.openMigrated(mContext, MigrationTestHelper.dbName("16"));
+        try {
+            assertEquals(35, migrated.getVersion());
+            assertEquals(7, queryLong(migrated, "SELECT COUNT(*) FROM log_Incoming_SMS"));
+            // senders: marker +1000, ShopInfo, +2000, Bank (Name is taken by the marker -> "Bank (SMS)")
+            assertEquals(4, queryLong(migrated, "SELECT COUNT(*) FROM ref_Senders"));
+            long bank = queryLong(migrated, "SELECT _id FROM ref_Senders WHERE PhoneNo = '+1000'");
+            long shop = queryLong(migrated, "SELECT _id FROM ref_Senders WHERE PhoneNo = 'ShopInfo'");
+            long other = queryLong(migrated, "SELECT _id FROM ref_Senders WHERE PhoneNo = '+2000'");
+            long bankName = queryLong(migrated, "SELECT _id FROM ref_Senders WHERE PhoneNo = 'Bank'");
+            assertEquals("Bank", queryString(migrated, "SELECT Name FROM ref_Senders WHERE _id = " + bank));
+            assertEquals("ShopInfo", queryString(migrated, "SELECT Name FROM ref_Senders WHERE _id = " + shop));
+            assertEquals("+2000", queryString(migrated, "SELECT Name FROM ref_Senders WHERE _id = " + other));
+            assertEquals("Bank (SMS)", queryString(migrated, "SELECT Name FROM ref_Senders WHERE _id = " + bankName));
+            assertEquals(1, queryLong(migrated, "SELECT isActive FROM ref_Senders WHERE _id = " + shop));
+            assertEquals(bank, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 1"));
+            assertEquals(shop, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 2"));
+            assertEquals(shop, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 3"));
+            assertEquals(other, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 4"));
+            assertEquals(0, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 5"));
+            assertEquals(0, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 6"));
+            assertEquals(bankName, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 7"));
+            assertEquals("no sender", queryString(migrated, "SELECT Body FROM log_Incoming_SMS WHERE _id = 5"));
         } finally {
             migrated.close();
         }
