@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "com.yoshione.fingen"
         minSdkVersion 26
-        targetSdkVersion 28
+        targetSdkVersion 36
         versionCode 132
         versionName "2.7"
         resValue "string", "app_name", "Fingen"

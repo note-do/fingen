@@ -10,6 +10,7 @@ import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Build;
@@ -135,12 +136,28 @@ public class FGApplication extends Application implements ISyncAnimMethods {
         super.onTerminate();
     }
 
+    // targetSdk 36 ignores screenOrientation on sw >= 600dp, so portrait is locked
+    // here for phones only; tablets and foldables rotate freely
+    private static void lockPortraitOnPhones(Activity activity) {
+        if (activity instanceof ActivityEditTransaction
+                || activity instanceof ActivityEditLocation2
+                || activity instanceof ActivityShortcut
+                || !activity.getClass().getName().startsWith("com.yoshione.fingen")) {
+            return;
+        }
+        if (activity.getResources().getConfiguration().smallestScreenWidthDp < 600) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+    }
+
     private final class FgActivityLifecycleCallbacks implements ActivityLifecycleCallbacks {
 
         int numOfRunning = 0;
 
         @Override
         public void onActivityCreated(Activity arg0, Bundle arg1) {
+            lockPortraitOnPhones(arg0);
+
             switch (Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("theme", "0"))) {
                 case ActivityMain.THEME_LIGHT:
                     arg0.setTheme(R.style.AppThemeLight);
