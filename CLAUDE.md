@@ -23,7 +23,9 @@ Android-приложение учёта доходов и расходов. Па
 - Привязка views: ViewBinding (`*Binding`, `getContentRoot()` в `ToolbarActivity`). ButterKnife удалён. Views из `<include>` и динамические layout берутся через `findViewById`.
 - Права: PermissionsDispatcher 4.9.2 (`@RuntimePermissions`).
 - DI: Dagger 2.60.1 (`di/`).
-- Реактивность: RxJava 2 (`io.reactivex.rxjava2`), RxAndroid 2.1.0. Переход на RxJava 3 — в плане.
+- Реактивность: RxJava 3.1.12 (`io.reactivex.rxjava3`, `core.Single`), RxAndroid 3.0.2 (`rxjava3.android.schedulers`).
+- Шифрование бэкапов: bcprov-jdk18on 1.86 (`utils/winzipaes/impl/*BC`, WinZip AES, PBKDF2-SHA1); проверяется `AESEncrypterRoundTripTest`.
+- Утилиты и тесты: commons-lang3 3.21.0, junit 4.13.2.
 - Dropbox: `dropbox-core-sdk` и `dropbox-android-sdk` 8.0.2, вход через PKCE (`Auth.startOAuth2PKCE`), `DbxCredential` JSON в prefs `com.yoshione.fingen.dropbox`, ключ `dropbox-credential`. Приложение App folder `Fin_Gen`, ключ `zaqelu1694tr792` задан в `app/build.gradle` (resValue `DROPBOX_APP_KEY` и схема `db-<ключ>` в манифесте). Старые токены удаляются однократно (`DropboxClient.migrateLegacyToken`), нужен повторный вход. `minSdk` поднят до 26 из-за `dropbox-android-sdk`.
 - События: EventBus 3.3.1.
 - Фоновые задачи: WorkManager 2.12.0 (`androidx.work:work-runtime`). `backup/BackupWorker` — ежедневный бэкап в окне 01:00–06:00 локального времени, цепочка OneTime (воркер в конце ставит следующий запуск), регистрация в `FGApplication.onCreate` через `enqueueUniqueWork` с `KEEP`. При ошибке Dropbox — `Result.retry()`, не более 3 попыток.
@@ -51,7 +53,7 @@ Android-приложение учёта доходов и расходов. Па
 
 ### Миграция в процессе (план)
 - Google Drive — отдельная фича позже.
-- RxJava 2 → 3, RxAndroid до актуальной, bcprov (CVE). Сделано: Dagger 2.60.1, EventBus 3.3.1, commons-lang3 3.21.0, junit 4.13.2.
+- Обновление библиотек выполнено: Dagger 2.60.1, EventBus 3.3.1, commons-lang3 3.21.0, junit 4.13.2, RxJava 3 и RxAndroid 3, bcprov-jdk18on 1.86.
 - БД: тесты миграций с фикстурами версий 16, 21, 23, 30, 34 → 35; проверить `legacy_alter_table` (ALTER TABLE RENAME) и `journal_mode`.
 - Совместимость бэкапов: читать старые зашифрованные (WinZip AES, PBKDF2-SHA1) и незашифрованные бэкапы.
 - targetSdk 28 → 35+: `FLAG_IMMUTABLE` у PendingIntent, `android:exported`, Scoped Storage (бэкапы и CSV), `POST_NOTIFICATIONS`.
