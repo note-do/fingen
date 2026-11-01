@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,7 +30,10 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.Toolbar;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -45,9 +49,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mikepenz.actionitembadge.library.ActionItemBadge;
-import com.mikepenz.actionitembadge.library.utils.BadgeStyle;
-import com.mikepenz.actionitembadge.library.utils.NumberUtils;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
@@ -150,6 +151,7 @@ public class ActivityMain extends ToolbarActivity {
     private volatile boolean waitForQueue = false;
     UpdateUIHandler mUpdateUIHandler;
     private int mUnreadSms = 0;
+    private BadgeDrawable mInboxBadge;
 
     @Inject
     Lazy<SmsMarkersDAO> mSmsMarkersDAO;
@@ -270,14 +272,23 @@ public class ActivityMain extends ToolbarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        MenuItem menuItemInbox = menu.findItem(R.id.action_incoming);
-        Drawable icon = ContextCompat.getDrawable(this, R.drawable.ic_sms_white);
-        int badgeColor = ContextCompat.getColor(this, R.color.negative_color);
-        BadgeStyle badgeStyle = new BadgeStyle(BadgeStyle.Style.DEFAULT, com.mikepenz.actionitembadge.library.R.layout.menu_action_item_badge, badgeColor, badgeColor, -1);
+        if (mInboxBadge != null) {
+            BadgeUtils.detachBadgeDrawable(mInboxBadge, toolbar, R.id.action_incoming);
+            mInboxBadge = null;
+        }
         if (mUnreadSms > 0) {
-            ActionItemBadge.update(this, menuItemInbox, icon, badgeStyle, NumberUtils.formatNumber(mUnreadSms));
-        } else {
-            ActionItemBadge.hide(menu.findItem(R.id.action_incoming));
+            // BadgeDrawable requires a MaterialComponents theme; the app theme is AppCompat,
+            // so the badge is created in a wrapped context only
+            Context badgeContext = new ContextThemeWrapper(this, com.google.android.material.R.style.Theme_MaterialComponents_Light);
+            BadgeDrawable badge = BadgeDrawable.create(badgeContext);
+            badge.setBackgroundColor(ContextCompat.getColor(this, R.color.negative_color));
+            badge.setNumber(mUnreadSms);
+            mInboxBadge = badge;
+            toolbar.post(() -> {
+                if (mInboxBadge == badge) {
+                    BadgeUtils.attachBadgeDrawable(badge, toolbar, R.id.action_incoming);
+                }
+            });
         }
         return true;
     }
