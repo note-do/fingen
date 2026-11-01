@@ -105,7 +105,6 @@ android {
 
 //def play = '15.0.1'
 def dagger = '2.16'
-def butterKnife = "10.2.3"
 //def moxy = "1.5.5"
 
 dependencies {
@@ -145,8 +144,6 @@ dependencies {
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
     androidTestImplementation 'androidx.test:runner:1.1.0'
 
-    implementation "com.jakewharton:butterknife:$butterKnife"
-    annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnife"
 
     implementation "com.google.dagger:dagger:$dagger"
     annotationProcessor "com.google.dagger:dagger-compiler:$dagger"
