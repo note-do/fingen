@@ -11,16 +11,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
@@ -33,7 +29,6 @@ import com.yoshione.fingen.di.AppComponent;
 import com.yoshione.fingen.di.DaggerAppComponent;
 import com.yoshione.fingen.di.modules.ContextModule;
 import com.yoshione.fingen.interfaces.ISyncAnimMethods;
-import com.yoshione.fingen.receivers.CustomIntentReceiver;
 import com.yoshione.fingen.lock.PinLockManager;
 
 import java.lang.ref.WeakReference;
@@ -55,7 +50,6 @@ public class FGApplication extends Application implements ISyncAnimMethods {
     // View held by Popup
     public LinearLayout mLinearLayout;
     ImageView mImageView;
-    CustomIntentReceiver mCustomIntentReceiver;
 
     public AlertDialog getDialog() {
         return mDialog;
@@ -99,8 +93,6 @@ public class FGApplication extends Application implements ISyncAnimMethods {
         PinLockManager.init(this);
 
         registerActivityLifecycleCallbacks(new FgActivityLifecycleCallbacks());
-
-        mCustomIntentReceiver = new CustomIntentReceiver();
 
         BackupWorker.schedule(this);
     }
@@ -199,14 +191,6 @@ public class FGApplication extends Application implements ISyncAnimMethods {
                     mAppPaused = true;
                 }
             }, 100L);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                try {
-                    unregisterReceiver(mCustomIntentReceiver);
-                } catch (Exception e) {
-                    Log.d(TAG, "Can't unregister receiver");
-                }
-            }
         }
 
         @Override
@@ -219,13 +203,6 @@ public class FGApplication extends Application implements ISyncAnimMethods {
             mAppPaused = false;
             // Now, one activity is running
             numOfRunning++;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                IntentFilter intentFilter = new IntentFilter();
-                intentFilter.addAction("com.yoshione.fingen.intent.action.CREATE_TRANSACTION");
-                intentFilter.addAction("com.yoshione.fingen.intent.action.CREATE_SMS");
-                ContextCompat.registerReceiver(FGApplication.this, mCustomIntentReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
-            }
         }
 
         @Override
