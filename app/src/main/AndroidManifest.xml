@@ -3,9 +3,6 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.yoshione.fingen">
 
-    <!-- dropbox-android-sdk declares minSdk 26, no API 26 usage found in its classes -->
-    <uses-sdk tools:overrideLibrary="com.dropbox.core.sdk.android"/>
-
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.READ_SMS"/>

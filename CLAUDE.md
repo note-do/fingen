@@ -9,7 +9,7 @@ Android-приложение учёта доходов и расходов. Па
 ### Сборка и версии
 - Android Gradle Plugin 9.5.0, Gradle 9.8.2 (`gradle/wrapper`, wrapper в git).
 - JDK 25 для запуска Gradle и сборки. Уровень языка и байткода Java 21 (Kotlin-компонент AGP 9.5 не принимает target 25). Код написан в стиле Java 8, новых API не требует.
-- `compileSdk` 36, `targetSdk` 28, `minSdk` 21. `targetSdk` 28 — поведение приложения на устройствах; при его повышении нужна отдельная проверка.
+- `compileSdk` 36, `targetSdk` 28, `minSdk` 26. `targetSdk` 28 — поведение приложения на устройствах; при его повышении нужна отдельная проверка.
 - Зависимости AndroidX (appcompat, material, preference, recyclerview, constraintlayout, cardview, legacy-support-v13). `android.useAndroidX=true`, `android.enableJetifier=true` (устаревший флаг, убрать после замены старых библиотек).
 - Флаги `gradle.properties`, которые нужны сейчас:
   - `android.nonFinalResIds=false` — `switch` по `R.id` требует константных id;
@@ -23,7 +23,7 @@ Android-приложение учёта доходов и расходов. Па
 - Права: PermissionsDispatcher 4.9.2 (`@RuntimePermissions`).
 - DI: Dagger 2.16 (`di/`).
 - Реактивность: RxJava 2 (`io.reactivex.rxjava2`), RxAndroid 2.1.0. Переход на RxJava 3 — в плане.
-- Dropbox: `dropbox-core-sdk` и `dropbox-android-sdk` 8.0.2, вход через PKCE (`Auth.startOAuth2PKCE`), `DbxCredential` JSON в prefs `com.yoshione.fingen.dropbox`, ключ `dropbox-credential`. Приложение App folder `Fin_Gen`, ключ `zaqelu1694tr792` задан в `app/build.gradle` (resValue `DROPBOX_APP_KEY` и схема `db-<ключ>` в манифесте). Старые токены удаляются однократно (`DropboxClient.migrateLegacyToken`), нужен повторный вход. `dropbox-android-sdk` объявляет minSdk 26, в манифесте `tools:overrideLibrary`.
+- Dropbox: `dropbox-core-sdk` и `dropbox-android-sdk` 8.0.2, вход через PKCE (`Auth.startOAuth2PKCE`), `DbxCredential` JSON в prefs `com.yoshione.fingen.dropbox`, ключ `dropbox-credential`. Приложение App folder `Fin_Gen`, ключ `zaqelu1694tr792` задан в `app/build.gradle` (resValue `DROPBOX_APP_KEY` и схема `db-<ключ>` в манифесте). Старые токены удаляются однократно (`DropboxClient.migrateLegacyToken`), нужен повторный вход. `minSdk` поднят до 26 из-за `dropbox-android-sdk`.
 - События: EventBus 3.1.1.
 - Справка: `taptargetview` через `utils/HelpSequence` (вместо MaterialShowCase).
 - Липкие заголовки списка транзакций: `stickyheadersrecyclerview` 0.4.3 (вместо HeaderDecor).
