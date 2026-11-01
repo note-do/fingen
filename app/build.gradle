@@ -131,7 +131,6 @@ dependencies {
     implementation 'com.github.l4digital:fastscroll:1.0.4@aar'
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.3'
     implementation 'com.timehop.stickyheadersrecyclerview:library:0.4.3@aar'
-    implementation 'com.sothree.slidinguppanel:library:3.4.0'
     implementation 'de.psdev.licensesdialog:licensesdialog:2.2.0'
     implementation 'org.apache.commons:commons-lang3:3.7'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.59'

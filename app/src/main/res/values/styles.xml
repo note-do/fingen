@@ -247,15 +247,6 @@
         <item name="android:textStyle">normal</item>
     </style>
 
-    <style name="StyleSlidingUpPanel">
-        <item name="android:gravity">bottom</item>
-        <item name="umanoAnchorPoint">0.5</item>
-        <item name="umanoOverlay">false</item>
-        <item name="umanoPanelHeight">48dp</item>
-        <item name="umanoParallaxOffset">48dp</item>
-        <item name="umanoShadowHeight">4dp</item>
-    </style>
-
     <style name="StyleListItemTransationsNormal">
         <item name="vertical_spacimg_tr_list">8dp</item>
         <item name="vertical_spacimg_tr_list_half">4dp</item>

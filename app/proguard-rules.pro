@@ -68,7 +68,3 @@
 -keepattributes Exceptions
 
 -keep class androidx.appcompat.widget.SearchView { *; }
-
--dontwarn com.sothree.**
--keep class com.sothree.**
--keep interface com.sothree.**

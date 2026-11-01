@@ -19,7 +19,7 @@ Android-приложение учёта доходов и расходов. Па
 - ProGuard/R8: `proguard-android-optimize.txt` и `-dontoptimize` в `app/proguard-rules.pro` — поведение release прежнее. Оптимизации выключены, release-сборка не проверялась.
 
 ### Библиотеки (актуальные)
-- UI: Material 1.14.0 (`com.google.android.material`) и `coordinatorlayout` 1.1.0 (явно); тема AppCompat сохранена (`Theme.AppCompat`, MaterialComponents не используется; используются AppBarLayout, FloatingActionButton, NavigationView, TabLayout, TextInputLayout — работают на AppCompat-теме), `NavigationView` + `DrawerLayout` (drawer), `androidx.preference` (настройки), `FlipView` собственный (`widgets/FlipView`).
+- UI: Material 1.14.0 (`com.google.android.material`) и `coordinatorlayout` 1.1.0 (явно); тема AppCompat сохранена (`Theme.AppCompat`, MaterialComponents не используется; используются AppBarLayout, FloatingActionButton, NavigationView, TabLayout, TextInputLayout — работают на AppCompat-теме), `NavigationView` + `DrawerLayout` (drawer), `androidx.preference` (настройки), `FlipView` собственный (`widgets/FlipView`). Нижние шторки на экранах транзакций, счетов и бюджета — `BottomSheetBehavior` (корень `FrameLayout`, шторка в отдельном `CoordinatorLayout`, высота `peekHeight` и нижний отступ контента задаются в `SumsTableOnGlobalLayoutListener`; parallax списка бюджета не сохранён).
 - Привязка views: ViewBinding (`*Binding`, `getContentRoot()` в `ToolbarActivity`). ButterKnife удалён. Views из `<include>` и динамические layout берутся через `findViewById`.
 - Права: PermissionsDispatcher 4.9.2 (`@RuntimePermissions`).
 - DI: Dagger 2.16 (`di/`).
@@ -33,13 +33,13 @@ Android-приложение учёта доходов и расходов. Па
 - Сканер и PIN-код: PIN-защита своя — `lock/PinLockManager` и `lock/PinActivity` (lollipin удалён, старые PIN сброшены).
 - Лицензии: `licensesdialog` 2.2.0 (`ActivityAbout`, `.show()`; `showAppCompat` в 2.x удалён), список — `res/raw/license.xml` (синхронизировать с зависимостями `app/build.gradle`).
 - Выбор цвета: skydoves `colorpickerview` 2.5.0 (Maven Central, `ColorPickerDialog.Builder`).
-- Прочее: `fastscroll` (JitPack, `@aar`), `slidinguppanel`, `airmapview`, `filepicker`, `MPAndroidChart` — заброшенные, см. «Миграция в процессе».
+- Прочее: `fastscroll` (JitPack, `@aar`), `airmapview`, `filepicker`, `MPAndroidChart` — заброшенные, см. «Миграция в процессе».
 - БД: `android.database.sqlite` (framework SQLite). requery удалён.
 
 ### Удалено (не возвращать)
 - Fabric / Crashlytics / Answers.
 - ФНС-чеки (`fts/`, Retrofit, OkHttp logging, decoro, qrcodereaderview).
-- lollipin, materialdrawer, xpece support-preference, changeloglib, MaterialShowCase, HeaderDecor (aar), requery, ButterKnife, flipview (библиотека), QuadFlask colorpicker.
+- lollipin, materialdrawer, xpece support-preference, changeloglib, MaterialShowCase, HeaderDecor (aar), requery, ButterKnife, flipview (библиотека), QuadFlask colorpicker, slidinguppanel (заменён на `BottomSheetBehavior`).
 - `com.evernote:android-job` (`BackupJob`, `BackupTestJob` и их creator-ы), его компоненты в манифесте и ProGuard-правила.
 - actionitembadge, iconics-core (бейдж SMS теперь `BadgeDrawable` из Material, создаётся в обёртке темы MaterialComponents, `ActivityMain`).
 - Мёртвые ресурсы materialdrawer и `material_drawer_*`.
@@ -47,7 +47,7 @@ Android-приложение учёта доходов и расходов. Па
 
 ### Миграция в процессе (план)
 - Google Drive — отдельная фича позже.
-- Заменить заброшенные библиотеки: slidinguppanel → BottomSheet, airmapview → play-services-maps, filepicker → SAF, MPAndroidChart → v3.
+- Заменить заброшенные библиотеки: airmapview → play-services-maps, filepicker → SAF, MPAndroidChart → v3.
 - RxJava 2 → 3, Dagger и RxAndroid до актуальных, commons-lang3 и bcprov (CVE), junit.
 - БД: тесты миграций с фикстурами версий 16, 21, 23, 30, 34 → 35; проверить `legacy_alter_table` (ALTER TABLE RENAME) и `journal_mode`.
 - Совместимость бэкапов: читать старые зашифрованные (WinZip AES, PBKDF2-SHA1) и незашифрованные бэкапы.
