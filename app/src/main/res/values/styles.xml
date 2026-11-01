@@ -10,6 +10,7 @@
         <item name="windowBackground">@color/lightGrayBackground</item>
         <item name="windowBackgroundInverse">@color/fg_black_color</item>
         <item name="listItemBackground">@color/fg_white_color</item>
+        <item name="barBackground">@color/fg_white_color</item>
         <item name="listDividerBackground">@color/lightGrayBackground</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -28,10 +29,6 @@
 
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
 
-        <item name="material_drawer_primary_text">@color/lightColorPrimaryText</item>
-        <item name="material_drawer_primary_icon">@color/lightColorPrimaryText</item>
-        <item name="material_drawer_secondary_text">@color/lightColorSecondaryText</item>
-        <item name="material_drawer_selected_text">@color/ColorPrimary</item>
 
         <item name="android:textAppearanceMedium">@style/TextAppearance.AppCompat.Subhead</item>
         <item name="android:textAppearanceMediumInverse">
@@ -47,6 +44,7 @@
         <item name="windowBackground">@color/fg_black_color</item>
         <item name="windowBackgroundInverse">@color/lightGrayBackground</item>
         <item name="listItemBackground">@color/darkGrayBackground</item>
+        <item name="barBackground">@color/darkGrayBackground</item>
         <item name="listDividerBackground">@color/fg_black_color</item>
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">@color/ColorPrimary</item>
@@ -64,10 +62,6 @@
 
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
 
-        <item name="material_drawer_primary_text">@color/darkColorPrimaryText</item>
-        <item name="material_drawer_primary_icon">@color/darkColorPrimaryText</item>
-        <item name="material_drawer_secondary_text">@color/darkColorSecondaryText</item>
-        <item name="material_drawer_selected_text">@color/ColorPrimary</item>
 
         <item name="android:textAppearanceMedium">@style/TextAppearance.AppCompat.Subhead</item>
         <item name="android:textAppearanceMediumInverse">@style/TextAppearance.AppCompat.Subhead.Inverse</item>

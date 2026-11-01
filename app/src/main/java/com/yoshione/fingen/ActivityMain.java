@@ -47,12 +47,9 @@ import android.widget.Toast;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.mikepenz.actionitembadge.library.utils.BadgeStyle;
 import com.mikepenz.actionitembadge.library.utils.NumberUtils;
-import com.mikepenz.materialdrawer.AccountHeader;
-import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.yoshione.fingen.adapter.TransactionsArrayAdapter;
 import com.yoshione.fingen.dao.SendersDAO;
@@ -119,16 +116,6 @@ public class ActivityMain extends ToolbarActivity {
     private static final int ACCOUNT_CLICK_ACTION_LIST_TRANSACTIONS = 0;
     private static final int ACCOUNT_CLICK_ACTION_NEW_TRANSACTION = 1;
 
-    private static final int DRAWER_ITEM_ID_DEBTS = 1;
-    private static final int DRAWER_ITEM_ID_REFERENCES = 3;
-    private static final int DRAWER_ITEM_ID_BUDGETS = 5;
-    private static final int DRAWER_ITEM_ID_INCOMING_SMS = 6;
-    private static final int DRAWER_ITEM_ID_ADDITIONAL = 7;
-    private static final int DRAWER_ITEM_ID_SETTINGS = 8;
-    private static final int DRAWER_ITEM_ID_SUPPORT = 9;
-    private static final int DRAWER_ITEM_ID_HELP = 11;
-    private static final int DRAWER_ITEM_ID_ABOUT = 10;
-    private static final int DRAWER_ITEM_ID_PRO = 12;
 
     @BindView(R.id.pager)
     ViewPager viewPager;
@@ -162,7 +149,8 @@ public class ActivityMain extends ToolbarActivity {
     private FragmentAccounts fragmentAccounts;
     FragmentTransactions fragmentTransactions;
     private FragmentSummary fragmentSummary;
-    private Drawer mMaterialDrawer = null;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
     FragmentStatePagerAdapter fragmentPagerAdapter;
     private final List<Fragment> fragments = new ArrayList<>();
     private final SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener =
@@ -232,10 +220,8 @@ public class ActivityMain extends ToolbarActivity {
 
         buildDrawer();
 
-        ImageButton drawerToggle = getNavButtonView(toolbar);
-        if (drawerToggle != null) {
-            drawerToggle.setImageDrawable(getDrawable(R.drawable.ic_menu_white));
-        }
+        toolbar.setNavigationIcon(R.drawable.ic_menu_white);
+        toolbar.setNavigationOnClickListener(view -> mDrawerLayout.openDrawer(GravityCompat.START));
         addFragments();
 
         setupBottomBar();
@@ -509,101 +495,69 @@ public class ActivityMain extends ToolbarActivity {
         super.onStop();
     }
 
-    private Drawable getIcon(int id) {
-        return ContextCompat.getDrawable(this, id);
+    private void buildDrawer() {
+        mDrawerLayout = findViewById(R.id.drawerLayout);
+        mNavigationView = findViewById(R.id.navigationView);
+
+        mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                // Скрываем клавиатуру при открытии Navigation Drawer
+                InputMethodManager inputMethodManager = (InputMethodManager) ActivityMain.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                if (ActivityMain.this.getCurrentFocus() != null & inputMethodManager != null) {
+                    inputMethodManager.hideSoftInputFromWindow(ActivityMain.this.getCurrentFocus().getWindowToken(), 0);
+                }
+            }
+        });
+
+        mNavigationView.setNavigationItemSelectedListener(item -> {
+            onDrawerItemSelected(item.getItemId());
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
     }
 
-    private void buildDrawer() {
-        AccountHeader headerResult;
-        headerResult = new AccountHeaderBuilder()
-                .withHeightDp(16)
-                .withActivity(this)
-//                .withHeaderBackground(R.drawable.header)
-                .withCompactStyle(true)
-                .build();
-
-
-        mMaterialDrawer = new DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(toolbar)
-                .withTranslucentStatusBar(true)
-                .withAccountHeader(headerResult)
-                .withSelectedItem(-1)
-                .addDrawerItems(
-                        new PrimaryDrawerItem().withName(R.string.ent_debts).withIcon(getIcon(R.drawable.ic_drawer_debts)).withIdentifier(DRAWER_ITEM_ID_DEBTS),
-                        new PrimaryDrawerItem().withName(R.string.ent_budget).withIcon(getIcon(R.drawable.ic_drawer_budget)).withIdentifier(DRAWER_ITEM_ID_BUDGETS),
-                        new PrimaryDrawerItem().withName(R.string.ent_references).withIcon(getIcon(R.drawable.ic_drawer_references)).withIdentifier(DRAWER_ITEM_ID_REFERENCES),
-                        new PrimaryDrawerItem().withName(R.string.ent_incoming).withIcon(getIcon(R.drawable.ic_drawer_inbox)).withIdentifier(DRAWER_ITEM_ID_INCOMING_SMS),
-                        new PrimaryDrawerItem().withName(R.string.ent_additional).withIcon(getIcon(R.drawable.ic_drawer_additional)).withIdentifier(DRAWER_ITEM_ID_ADDITIONAL),
-                        new DividerDrawerItem(),
-                        new PrimaryDrawerItem().withName(R.string.ent_pro_features).withIcon(getIcon(R.drawable.ic_drawer_pro))
-                                .withIconColor(ContextCompat.getColor(this, R.color.ColorMain)).withIdentifier(DRAWER_ITEM_ID_PRO),
-                        new PrimaryDrawerItem().withName(R.string.ent_settings).withIcon(getIcon(R.drawable.ic_drawer_settings)).withIdentifier(DRAWER_ITEM_ID_SETTINGS),
-                        new PrimaryDrawerItem().withName(R.string.ent_help).withIcon(getIcon(R.drawable.ic_drawer_help)).withIdentifier(DRAWER_ITEM_ID_HELP),
-                        new PrimaryDrawerItem().withName(R.string.act_ask_question).withIcon(getIcon(R.drawable.ic_drawer_support)).withIdentifier(DRAWER_ITEM_ID_SUPPORT),
-                        new PrimaryDrawerItem().withName(R.string.ent_about).withIcon(getIcon(R.drawable.ic_drawer_about)).withIdentifier(DRAWER_ITEM_ID_ABOUT)
-                )
-                .withOnDrawerListener(new Drawer.OnDrawerListener() {
-                    @Override
-                    public void onDrawerOpened(View drawerView) {
-                        // Скрываем клавиатуру при открытии Navigation Drawer
-                        InputMethodManager inputMethodManager = (InputMethodManager) ActivityMain.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-                        if (ActivityMain.this.getCurrentFocus() != null & inputMethodManager != null) {
-                            inputMethodManager.hideSoftInputFromWindow(ActivityMain.this.getCurrentFocus().getWindowToken(), 0);
-                        }
-                    }
-
-                    @Override
-                    public void onDrawerClosed(View drawerView) {
-                    }
-
-                    @Override
-                    public void onDrawerSlide(View view, float v) {
-
-                    }
-                })
-                .withOnDrawerItemClickListener((view, position, drawerItem) -> {
-                    if (drawerItem instanceof PrimaryDrawerItem) {
-                        Intent intent;
-                        switch ((int) drawerItem.getIdentifier()) {
-                            case DRAWER_ITEM_ID_DEBTS:
+    private void onDrawerItemSelected(int itemId) {
+        Intent intent;
+        switch (itemId) {
+                            case R.id.drawer_debts:
                                 intent = new Intent(ActivityMain.this, ActivityDebtsAndCredits.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
-                            case DRAWER_ITEM_ID_REFERENCES:
+                            case R.id.drawer_references:
                                 ActivityMain.this.openReferences();
                                 break;
-                            case DRAWER_ITEM_ID_INCOMING_SMS: {
+                            case R.id.drawer_incoming_sms: {
                                 intent = new Intent(ActivityMain.this, ActivitySmsList.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_BUDGETS: {
+                            case R.id.drawer_budgets: {
                                 intent = new Intent(ActivityMain.this, ActivityBudget.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_ADDITIONAL: {
+                            case R.id.drawer_additional: {
                                 intent = new Intent(ActivityMain.this, ActivityAdditional.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_PRO: {
+                            case R.id.drawer_pro: {
                                 intent = new Intent(ActivityMain.this, ActivityPro.class);
                                 startActivityForResult(intent, RequestCodes.REQUEST_CODE_OPEN_PRO);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_SETTINGS: {
+                            case R.id.drawer_settings: {
                                 intent = new Intent(ActivityMain.this, ActivitySettings.class);
                                 ActivityMain.this.startActivityForResult(intent, RequestCodes.REQUEST_CODE_OPEN_PREFERENCES);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_HELP: {
+                            case R.id.drawer_help: {
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://faq.fingen-app.com/"));
                                 startActivity(browserIntent);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_SUPPORT: {
+                            case R.id.drawer_support: {
                                 intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("message/rfc822");
                                 intent.putExtra(Intent.EXTRA_EMAIL,  new String[] {"support@fingen-app.com"});
@@ -613,16 +567,12 @@ public class ActivityMain extends ToolbarActivity {
                                 startActivity(Intent.createChooser(intent, "Send Email"));
                                 break;
                             }
-                            case DRAWER_ITEM_ID_ABOUT: {
+                            case R.id.drawer_about: {
                                 intent = new Intent(ActivityMain.this, ActivityAbout.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
                         }
-                    }
-                    return false;
-                })
-                .build();
     }
 
     @Override
@@ -632,14 +582,6 @@ public class ActivityMain extends ToolbarActivity {
             inputMethodManager.hideSoftInputFromWindow(ActivityMain.this.getCurrentFocus().getWindowToken(), 0);
         }
         return true;
-    }
-
-    private ImageButton getNavButtonView(Toolbar toolbar) {
-        for (int i = 0; i < toolbar.getChildCount(); i++)
-            if (toolbar.getChildAt(i) instanceof ImageButton)
-                return (ImageButton) toolbar.getChildAt(i);
-
-        return null;
     }
 
     @Override
@@ -653,7 +595,6 @@ public class ActivityMain extends ToolbarActivity {
         NotificationCounter notificationCounter = new NotificationCounter(mPreferences);
         notificationCounter.removeNotification(SMSReceiver.NOTIFICATION_ID_TRANSACTION_AUTO_CREATED);
 
-        mMaterialDrawer.deselect();
         updateCounters();
 
 //        updateLists();
@@ -671,9 +612,9 @@ public class ActivityMain extends ToolbarActivity {
     public void onBackPressed() {
         // Закрываем Navigation Drawer по нажатию системной кнопки "Назад" если он открыт
         ButterKnife.bind(this);
-        if (mMaterialDrawer.isDrawerOpen())
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START))
         {
-            mMaterialDrawer.closeDrawer();
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         }
         else if (
                 fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentAccounts.class) &
@@ -712,7 +653,7 @@ public class ActivityMain extends ToolbarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_MENU:
-                mMaterialDrawer.openDrawer();
+                mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
         }
         return super.onKeyDown(keyCode, event);

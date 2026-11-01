@@ -25,16 +25,7 @@ http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     <!--<dimen name="vertical_spacimg_tr_list">2dp</dimen>-->
 
 
-    <dimen name="material_drawer_width">240dp</dimen>
-    <dimen name="material_drawer_padding">0dp</dimen>
     <!-- Definition for the primary item -->
-    <dimen name="material_drawer_item_primary">44dp</dimen>
-    <dimen name="material_drawer_item_primary_icon">48dp</dimen>
-    <dimen name="material_drawer_item_primary_icon_padding">0dp</dimen>
-    <dimen name="material_drawer_item_primary_icon_padding_right">0dp</dimen>
-    <dimen name="material_drawer_item_primary_text">14sp</dimen>
-    <dimen name="material_drawer_item_primary_description">14.5sp</dimen>
-    <dimen name="material_drawer_item_secondary_description">12sp</dimen>
 
 
     <!-- Text size -->

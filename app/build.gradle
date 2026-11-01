@@ -133,13 +133,13 @@ dependencies {
     implementation 'com.github.QuadFlask:colorpicker:0.0.13'
     implementation 'com.github.l4digital:fastscroll:1.0.4@aar'
     implementation 'com.mikepenz:actionitembadge:3.3.2@aar'
+    implementation('com.mikepenz:iconics-core:3.0.3@aar') { transitive = true }
     implementation 'com.sothree.slidinguppanel:library:3.4.0'
     implementation 'de.psdev.licensesdialog:licensesdialog:1.8.3'
     implementation 'org.apache.commons:commons-lang3:3.7'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.59'
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation('com.anjlab.android.iab.v3:library:1.0.44') { exclude module: 'support-v4' }
-    implementation('com.mikepenz:materialdrawer:6.0.7@aar') { transitive = true }
     androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
     androidTestImplementation 'androidx.test:runner:1.1.0'
