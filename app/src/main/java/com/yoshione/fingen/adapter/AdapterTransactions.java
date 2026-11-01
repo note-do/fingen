@@ -27,14 +27,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter;
+import com.yoshione.fingen.widgets.StickyHeaderDecoration;
 
 /**
  * Created by slv on 10.09.2015.
  * a
  */
 public class AdapterTransactions extends RecyclerView.Adapter implements FgFastScrollRecyclerView.SectionIndexer,
-        StickyRecyclerHeadersAdapter<AdapterTransactions.HeaderViewHolder>, ITransactionClickListener {
+        StickyHeaderDecoration.StickyHeaderAdapter<AdapterTransactions.HeaderViewHolder>, ITransactionClickListener {
 //    private static final String TAG = "AdapterTransactions";
 
     private int lastYear;

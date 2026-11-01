@@ -49,12 +49,6 @@
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
-        <name>Sticky Headers RecyclerView</name>
-        <url>https://github.com/timehop/sticky-headers-recyclerview</url>
-        <copyright>Timehop</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
-    <notice>
         <name>ActionItemBadge</name>
         <url>https://github.com/mikepenz/ActionItemBadge</url>
         <copyright>Mike Penz</copyright>

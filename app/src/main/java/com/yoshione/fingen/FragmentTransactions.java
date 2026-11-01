@@ -87,7 +87,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
-import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration;
+import com.yoshione.fingen.widgets.StickyHeaderDecoration;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -142,7 +142,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     AdapterFilters adapterF;
     private int contextMenuTarget = -1;
     private boolean isInSelectionMode;
-    private StickyRecyclerHeadersDecoration stickyHeaderDecoration;
+    private StickyHeaderDecoration stickyHeaderDecoration;
     FabMenuController mFabMenuController;
     private volatile boolean loading;
     private final int visibleThreshold = 10;
@@ -223,7 +223,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         adapterF = new AdapterFilters(getActivity(), this, this::editFilter);
         adapterF.setHasStableIds(true);
 
-        stickyHeaderDecoration = new StickyRecyclerHeadersDecoration(adapterT);
+        stickyHeaderDecoration = new StickyHeaderDecoration(adapterT);
 
         final LinearLayoutManager linearLayoutManager = new FgLinearLayoutManager(getActivity());
 

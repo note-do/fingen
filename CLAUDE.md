@@ -28,7 +28,7 @@ Android-приложение учёта доходов и расходов. Па
 - События: EventBus 3.1.1.
 - Фоновые задачи: WorkManager 2.12.0 (`androidx.work:work-runtime`). `backup/BackupWorker` — ежедневный бэкап в окне 01:00–06:00 локального времени, цепочка OneTime (воркер в конце ставит следующий запуск), регистрация в `FGApplication.onCreate` через `enqueueUniqueWork` с `KEEP`. При ошибке Dropbox — `Result.retry()`, не более 3 попыток.
 - Справка: `taptargetview` через `utils/HelpSequence` (вместо MaterialShowCase).
-- Липкие заголовки списка транзакций: `stickyheadersrecyclerview` 0.4.3 (вместо HeaderDecor).
+- Липкие заголовки списка транзакций: собственная `widgets/StickyHeaderDecoration` (ItemDecoration; интерфейс `StickyHeaderAdapter` — getHeaderId/onCreateHeaderViewHolder/onBindHeaderViewHolder, реализует `AdapterTransactions`). Готовой поддерживаемой AndroidX-библиотеки нет.
 - Changelog: `res/raw/changelog.xml` (и `raw-ru`), диалог — `FragmentChangelog` (ListView).
 - Сканер и PIN-код: PIN-защита своя — `lock/PinLockManager` и `lock/PinActivity` (lollipin удалён, старые PIN сброшены).
 - Лицензии: `licensesdialog` 2.2.0 (`ActivityAbout`, `.show()`; `showAppCompat` в 2.x удалён), список — `res/raw/license.xml` (синхронизировать с зависимостями `app/build.gradle`).
@@ -42,7 +42,7 @@ Android-приложение учёта доходов и расходов. Па
 ### Удалено (не возвращать)
 - Fabric / Crashlytics / Answers.
 - ФНС-чеки (`fts/`, Retrofit, OkHttp logging, decoro, qrcodereaderview).
-- fastscroll (l4digital), lollipin, materialdrawer, xpece support-preference, changeloglib, MaterialShowCase, HeaderDecor (aar), requery, ButterKnife, flipview (библиотека), QuadFlask colorpicker, slidinguppanel (заменён на `BottomSheetBehavior`), filepicker (angads25; заменён на SAF).
+- fastscroll (l4digital), lollipin, materialdrawer, xpece support-preference, changeloglib, MaterialShowCase, HeaderDecor (aar), requery, ButterKnife, flipview (библиотека), QuadFlask colorpicker, stickyheadersrecyclerview (Timehop, support-классы; заменён на `StickyHeaderDecoration`), slidinguppanel (заменён на `BottomSheetBehavior`), filepicker (angads25; заменён на SAF).
 - `com.evernote:android-job` (`BackupJob`, `BackupTestJob` и их creator-ы), его компоненты в манифесте и ProGuard-правила.
 - actionitembadge, iconics-core (бейдж SMS теперь `BadgeDrawable` из Material, создаётся в обёртке темы MaterialComponents, `ActivityMain`).
 - `com.airbnb.android:airmapview` (заменён на `play-services-maps`), его запись в `res/raw/license.xml`.
