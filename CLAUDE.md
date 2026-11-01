@@ -54,7 +54,7 @@ Android-приложение учёта доходов и расходов. Па
 ### Миграция в процессе (план)
 - Google Drive — отдельная фича позже.
 - Обновление библиотек выполнено: Dagger 2.60.1, EventBus 3.3.1, commons-lang3 3.21.0, junit 4.13.2, RxJava 3 и RxAndroid 3, bcprov-jdk18on 1.86.
-- БД: тесты миграций с фикстурами версий 16, 21, 23, 30, 34 → 35. `journal_mode` проверен (`JournalModeBackupTest`): на эмуляторе API 37 без явной настройки режим `truncate` (не WAL), `-wal` не создаётся, `backupDB` (только `fingen.db`) содержит все записи — риска потери нет; при включении WAL бэкап и `restoreDB` (не удаляет `-wal`/`-shm`) надо менять. `legacy_alter_table` проверен (`LegacyAlterTableTest`): на эмуляторе API 37 (SQLite 3.50.6) по умолчанию 1, ссылки на `*_old` после миграций 16/21 → 35 не остаются; при OFF остались бы в `log_Templates`, `log_Transactions`, `ref_Accounts`, `ref_Debts`, `ref_budget` (данные те же) — важно при включении `foreign_keys`.
+- БД: тесты миграций с фикстурами версий 16, 21, 23, 30, 34 → 35. `journal_mode` проверен (`JournalModeBackupTest`): на эмуляторе API 37 без явной настройки режим `truncate` (не WAL), `-wal` не создаётся, `backupDB` (только `fingen.db`) содержит все записи — риска потери нет; при включении WAL бэкап и `restoreDB` (не удаляет `-wal`/`-shm`) надо менять. `legacy_alter_table` проверен (`LegacyAlterTableTest`): на эмуляторе API 37 (SQLite 3.50.6) по умолчанию 1, ссылки на `*_old` после миграций 16/21 → 35 не остаются; при OFF остались бы в `log_Templates`, `log_Transactions`, `ref_Accounts`, `ref_Debts`, `ref_budget` (данные те же) — важно при включении `foreign_keys`. Дефекты миграций исправлены (тесты в `DatabaseMigrationTest`): `update29` — NULL `Comment` даёт пустой `SearchString` (раньше NPE); `update17` — отправители из маркеров Type=5 пишутся SQL-вставкой без `SendersDAO` (раньше зависание: DAO ждёт конца апгрейда), опечатка `BalcancePos` исправлена (она ронял бы вставку); `update17` сохраняет все SMS: отправитель ищется среди маркеров по `trim().toLowerCase()` значения `Sender`, иначе создаётся запись `ref_Senders` (Name = PhoneNo = исходное значение, при занятом Name — `<значение> (SMS)`), пустой `Sender` даёт 0. Не проверено на реальных БД и на реальных данных с маркерами Type=5.
 - Совместимость бэкапов: читать старые зашифрованные (WinZip AES, PBKDF2-SHA1) и незашифрованные бэкапы.
 - targetSdk 28 → 35+: `FLAG_IMMUTABLE` у PendingIntent, `android:exported`, Scoped Storage (бэкапы и CSV), `POST_NOTIFICATIONS`.
 - Безопасность: `allowBackup="true"`, экспортированный `CustomIntentReceiver`, пароль бэкапа в SharedPreferences, токен Dropbox в открытых prefs.
@@ -101,7 +101,7 @@ Android-приложение учёта доходов и расходов. Па
 
 1. `architect` — план.
 2. `implementer` — правки по плану, с `assembleDebug`.
-3. `tester` — тесты и `testProdDebugUnitTest`, `connectedProdDebugAndroidTest`.
+3. `tester` — тесты: во время разработки только тесты затронутой области (классы или пакет, которые меняются, через `-Pandroid.testInstrumentationRunnerArguments.class=...`). Полный `connectedProdDebugAndroidTest` — перед коммитом, который завершает фичу или пункт плана, и перед слиянием.
 4. Оркестратор проверяет diff, обновляет раздел «Текущее состояние» этого файла и сообщает пользователю результат с фактическим выводом сборки.
 
 ## Сборка и тесты
