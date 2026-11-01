@@ -26,20 +26,6 @@
 #-dontshrink
 
 
-#Billing
--keep class com.android.vending.billing.**
--assumenosideeffects class org.solovyev.android.checkout.Billing {
-    public static void debug(...);
-    public static void warning(...);
-    public static void error(...);
-}
--assumenosideeffects class org.solovyev.android.checkout.Check {
-    static *;
-}
--keep class com.android.vending.billing.**
--keepattributes *Annotation*
--keep public class com.android.vending.licensing.ILicensingService
-
 #MP Android chart
 -keep class com.github.mikephil.charting.** { *; }
 -dontwarn io.realm.**

@@ -36,8 +36,6 @@ android {
         keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     }
     if (keystorePropertiesFile.exists() &&
-            keystoreProperties.containsKey('inAppLicenseKey') &&
-            keystoreProperties.containsKey('inAppLicenseSalt') &&
             keystoreProperties.containsKey('mapsApiKey') &&
             keystoreProperties.containsKey('storeFile') && keystoreProperties['storeFile'] != "" &&
             keystoreProperties.containsKey('storePassword') &&
@@ -45,8 +43,6 @@ android {
             keystoreProperties.containsKey('keyAlias') &&
             keystoreProperties.containsKey('keyPassword')) {
         android.defaultConfig.resValue "string", "oAuthWebClientID", keystoreProperties["oAuthWebClientID"]
-        android.defaultConfig.resValue "string", "inAppLicenseKey", keystoreProperties["inAppLicenseKey"]
-        android.defaultConfig.resValue "string", "inAppLicenseSalt", keystoreProperties["inAppLicenseSalt"]
         android.defaultConfig.manifestPlaceholders = [
                 dropboxApiKey: "db-" + dropboxAppKey,
                 mapsApiKey   : keystoreProperties["mapsApiKey"]
@@ -56,8 +52,6 @@ android {
         android.signingConfigs.config.keyAlias = keystoreProperties['keyAlias']
         android.signingConfigs.config.keyPassword = keystoreProperties['keyPassword']
     } else {
-        android.defaultConfig.resValue "string", "inAppLicenseKey", ""
-        android.defaultConfig.resValue "string", "inAppLicenseSalt", ""
         android.defaultConfig.manifestPlaceholders = [
                 dropboxApiKey: "db-" + dropboxAppKey,
                 mapsApiKey   : ""
@@ -143,7 +137,6 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.7'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.59'
     implementation 'org.greenrobot:eventbus:3.1.1'
-    implementation('com.anjlab.android.iab.v3:library:1.0.44') { exclude module: 'support-v4' }
     androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
     androidTestImplementation 'androidx.test:runner:1.1.0'
