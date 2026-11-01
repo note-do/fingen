@@ -262,11 +262,8 @@ public class DatabaseMigrationTest {
     }
 
     /**
-     * EXPECTED DEFECT, not fixed in this step: UpdateHelper.update29 (UpdateHelper.java:738) calls
-     * cursor.getString(1).toLowerCase() and throws NPE for a not deleted transaction with NULL Comment.
-     * The test describes the behaviour after a fix (migration completes), remove @Ignore then.
+     * update29 must not fail on a not deleted transaction with NULL Comment: SearchString becomes an empty string.
      */
-    @Ignore("Known defect: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on NULL Comment of a not deleted transaction")
     @Test
     public void upgrade23To35_nullCommentInNotDeletedTransaction() throws Exception {
         MigrationTestHelper.createFixture(mContext, 23,
@@ -278,6 +275,7 @@ public class DatabaseMigrationTest {
         try {
             assertEquals(35, migrated.getVersion());
             assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE _id = 100"));
+            assertEquals("", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 100"));
         } finally {
             migrated.close();
         }
@@ -320,10 +318,8 @@ public class DatabaseMigrationTest {
     }
 
     /**
-     * EXPECTED DEFECT, not fixed in this step: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on a not
-     * deleted transaction with NULL Comment. Same defect as in upgrade23To35_nullCommentInNotDeletedTransaction.
+     * Same as upgrade23To35_nullCommentInNotDeletedTransaction: update29 handles NULL Comment.
      */
-    @Ignore("Known defect: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on NULL Comment of a not deleted transaction")
     @Test
     public void upgrade21To35_nullCommentInNotDeletedTransaction() throws Exception {
         MigrationTestHelper.createFixture(mContext, 21,
@@ -335,6 +331,7 @@ public class DatabaseMigrationTest {
         try {
             assertEquals(35, migrated.getVersion());
             assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE _id = 100"));
+            assertEquals("", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 100"));
         } finally {
             migrated.close();
         }
@@ -390,10 +387,9 @@ public class DatabaseMigrationTest {
     }
 
     /**
-     * EXPECTED DEFECT, not fixed in this step: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on NULL
-     * Comment. After update18 every transaction of v16 is not deleted (Deleted = 0), so any NULL Comment hits it.
+     * After update18 every transaction of v16 is not deleted (Deleted = 0), so any NULL Comment reaches update29,
+     * which must handle it.
      */
-    @Ignore("Known defect: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on NULL Comment of a transaction (all v16 rows are not deleted after update18)")
     @Test
     public void upgrade16To35_nullCommentInTransaction() throws Exception {
         MigrationTestHelper.createFixture(mContext, 16,
@@ -404,7 +400,8 @@ public class DatabaseMigrationTest {
         SQLiteDatabase migrated = MigrationTestHelper.openMigrated(mContext, MigrationTestHelper.dbName("16"));
         try {
             assertEquals(35, migrated.getVersion());
-            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE _id = 100"));
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions"));
+            assertEquals("", queryString(migrated, "SELECT SearchString FROM log_Transactions"));
         } finally {
             migrated.close();
         }

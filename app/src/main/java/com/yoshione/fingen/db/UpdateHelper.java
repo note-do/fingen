@@ -735,7 +735,8 @@ public class UpdateHelper {
             if (cursor.moveToFirst()) {
                 while (!cursor.isAfterLast()) {
                     cv.clear();
-                    cv.put("SearchString", Translit.toTranslit(cursor.getString(1).toLowerCase()));
+                    String comment = cursor.getString(1);
+                    cv.put("SearchString", Translit.toTranslit(comment == null ? "" : comment.toLowerCase()));
                     db.update(tableName, cv, "_id = " + cursor.getString(0), null);
                     cursor.moveToNext();
                 }
