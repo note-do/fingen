@@ -10,7 +10,7 @@ Android-приложение учёта доходов и расходов. Па
 - Android Gradle Plugin 9.5.0, Gradle 9.8.2 (`gradle/wrapper`, wrapper в git).
 - JDK 25 для запуска Gradle и сборки. Уровень языка и байткода Java 21 (Kotlin-компонент AGP 9.5 не принимает target 25). Код написан в стиле Java 8, новых API не требует.
 - `compileSdk` 36, `targetSdk` 28, `minSdk` 26. `targetSdk` 28 — поведение приложения на устройствах; при его повышении нужна отдельная проверка.
-- Зависимости AndroidX (appcompat, material, preference, recyclerview, constraintlayout, cardview, legacy-support-v13). `android.useAndroidX=true`, `android.enableJetifier=true` (устаревший флаг; нужен `stickyheadersrecyclerview` 0.4.3 — классы `android.support.v7.widget.RecyclerView`).
+- Зависимости AndroidX (appcompat, material, preference, recyclerview, constraintlayout, cardview, legacy-support-v13). `android.useAndroidX=true`. `android.enableJetifier` убран: в `prodDebugRuntimeClasspath` нет артефактов `com.android.support`.
 - Флаги `gradle.properties`, которые нужны сейчас:
   - `android.nonFinalResIds=false` — `switch` по `R.id` требует константных id;
   - `android.enableAppCompileTimeRClass=false` — без него AGP 9 не компилирует `switch` по `R.id`.
@@ -56,7 +56,6 @@ Android-приложение учёта доходов и расходов. Па
 - Совместимость бэкапов: читать старые зашифрованные (WinZip AES, PBKDF2-SHA1) и незашифрованные бэкапы.
 - targetSdk 28 → 35+: `FLAG_IMMUTABLE` у PendingIntent, `android:exported`, Scoped Storage (бэкапы и CSV), `POST_NOTIFICATIONS`.
 - Безопасность: `allowBackup="true"`, экспортированный `CustomIntentReceiver`, пароль бэкапа в SharedPreferences, токен Dropbox в открытых prefs.
-- Заменить `stickyheadersrecyclerview` (support-классы) и затем убрать `android.enableJetifier`;
 - Убрать `nonFinalResIds`, `enableAppCompileTimeRClass` после перехода (предупреждения AGP).
 
 ### Известные особенности
