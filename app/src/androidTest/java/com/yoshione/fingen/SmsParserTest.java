@@ -53,7 +53,7 @@ public class SmsParserTest {
     }
 
     @Test
-    public void smsParser_CorrectParseSms() {ac
+    public void smsParser_CorrectParseSms() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         loadCSV();
