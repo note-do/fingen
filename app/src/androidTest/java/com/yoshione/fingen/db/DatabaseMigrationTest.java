@@ -565,7 +565,7 @@ public class DatabaseMigrationTest {
      * departments, no OrderNumber in currencies. Transaction 100: Project/Department/Location 0 (become -1),
      * NULL Lat/Lon/Accuracy; 101: has all references; 102: transfer; 103: deleted, NULL Comment (allowed for deleted).
      */
-    private static final String[] SEED_V21 = new String[]{
+    static final String[] SEED_V21 = new String[]{
             "INSERT INTO ref_Currencies (_id, Deleted, Code, Symbol, Name, DecimalCount) VALUES (100, 0, 'TST', 'T', 'Test', 2)",
             "INSERT INTO ref_Accounts (_id, Deleted, Type, Name, Currency, StartBalance, IsClosed) VALUES (100, 0, 0, 'Migration account', 100, 12.5, 0)",
             "INSERT INTO ref_Accounts (_id, Deleted, Type, Name, Currency, StartBalance, IsClosed) VALUES (101, 0, 0, 'Second account', 100, 0, 0)",
@@ -595,7 +595,7 @@ public class DatabaseMigrationTest {
      * senders and the deleted transaction (there is no Deleted). Payee/Category/Project/... NULL: update18 turns them into 0.
      * No sender markers (Type = 5), see the class comment.
      */
-    private static final String[] SEED_V16 = new String[]{
+    static final String[] SEED_V16 = new String[]{
             "INSERT INTO ref_Currencies (_id, Code, Symbol, Name, DecimalCount) VALUES (100, 'TST', 'T', 'Test', 2)",
             "INSERT INTO ref_Accounts (_id, Type, Name, Currency, StartBalance, IsClosed) VALUES (100, 0, 'Migration account', 100, 12.5, 0)",
             "INSERT INTO ref_Accounts (_id, Type, Name, Currency, StartBalance, IsClosed) VALUES (101, 0, 'Second account', 100, 0, 0)",

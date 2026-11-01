@@ -92,6 +92,16 @@ final class MigrationTestHelper {
         return new MigrationOpenHelper(context, name, false).getWritableDatabase();
     }
 
+    /**
+     * Same as openMigrated, but runs the given statements (for example "PRAGMA legacy_alter_table=ON")
+     * in onConfigure, i.e. before onUpgrade.
+     */
+    static SQLiteDatabase openMigratedWithPragmas(Context context, String name, String... configureSql) {
+        MigrationOpenHelper helper = new MigrationOpenHelper(context, name, false);
+        helper.mConfigureSql = configureSql;
+        return helper.getWritableDatabase();
+    }
+
     /** Creates a clean database with DBHelper.onCreate in a separate file. */
     static SQLiteDatabase openClean(Context context, String name) {
         context.deleteDatabase(name);
@@ -226,11 +236,19 @@ final class MigrationTestHelper {
     private static final class MigrationOpenHelper extends SQLiteOpenHelper {
         private final Context mContext;
         private final boolean mAllowCreate;
+        String[] mConfigureSql = new String[0];
 
         MigrationOpenHelper(Context context, String name, boolean allowCreate) {
             super(context, name, null, DBHelper.DATABASE_VERSION);
             mContext = context;
             mAllowCreate = allowCreate;
+        }
+
+        @Override
+        public void onConfigure(SQLiteDatabase db) {
+            for (String statement : mConfigureSql) {
+                db.execSQL(statement);
+            }
         }
 
         @Override
