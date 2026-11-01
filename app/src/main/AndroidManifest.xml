@@ -40,12 +40,7 @@
         <receiver
             android:name=".receivers.CustomIntentReceiver"
             android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.yoshione.fingen.intent.action.CREATE_TRANSACTION"/>
-                <action android:name="com.yoshione.fingen.intent.action.CREATE_SMS"/>
-            </intent-filter>
-        </receiver>
+            android:exported="false"/>
         <receiver
             android:name=".WidgetExpense"
             android:exported="true">

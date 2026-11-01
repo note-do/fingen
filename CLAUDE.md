@@ -62,6 +62,7 @@ Android-приложение учёта доходов и расходов. Па
 - Убрать `nonFinalResIds`, `enableAppCompileTimeRClass` после перехода (предупреждения AGP).
 
 ### Известные особенности
+- Внешний доступ к `CustomIntentReceiver` закрыт (манифест `exported="false"` без intent-filter, runtime `RECEIVER_NOT_EXPORTED`); код сохранён.
 - Uri папки бэкапов — в prefs (`FgConst.PREF_BACKUP_FOLDER_URI`). При смене папки старое persistable-разрешение снимается. Доступность — `BackupFolder.isAvailable` (разрешение в `getPersistedUriPermissions` + папка существует и принимает файлы).
 - Папка не выбрана, доступ отозван или копирование не удалось: `BackupWorker` пропускает локальную копию, Dropbox работает как обычно, выставляется `PREF_BACKUP_FOLDER_UNAVAILABLE`. `ActivityMain` один раз за запуск процесса показывает диалог-предупреждение (по флагу или `isAvailable == false`). Флаг сбрасывается при выборе папки и успешной копии.
 - Копия перед миграцией БД (`DBHelper.onUpgrade` → `backupDB(false)`) пишется только в `cacheDir/backup`; `backupDB(vacuum, true)` дополнительно копирует в выбранную папку. Тесты миграций смотрят `BackupFolder.getCacheDir`.

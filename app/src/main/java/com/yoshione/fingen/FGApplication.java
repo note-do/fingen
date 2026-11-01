@@ -224,7 +224,7 @@ public class FGApplication extends Application implements ISyncAnimMethods {
                 IntentFilter intentFilter = new IntentFilter();
                 intentFilter.addAction("com.yoshione.fingen.intent.action.CREATE_TRANSACTION");
                 intentFilter.addAction("com.yoshione.fingen.intent.action.CREATE_SMS");
-                ContextCompat.registerReceiver(FGApplication.this, mCustomIntentReceiver, intentFilter, ContextCompat.RECEIVER_EXPORTED);
+                ContextCompat.registerReceiver(FGApplication.this, mCustomIntentReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
             }
         }
 
