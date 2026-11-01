@@ -44,14 +44,12 @@ public class BackupJob extends DailyJob {
     protected DailyJobResult onRunDailyJob(Params params) {
         if (!BuildConfig.FLAVOR.equals("nd")) {
             Context context = FGApplication.getContext();
-            SharedPreferences dropboxPrefs = context.getSharedPreferences("com.yoshione.fingen.dropbox", Context.MODE_PRIVATE);
-            String token = dropboxPrefs.getString("dropbox-token", null);
+            DbxClientV2 dbxClient = DropboxClient.getClient(context);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             // Do the task here
             try {
                 File zip = DBHelper.getInstance(context).backupDB(true);
-                if (token != null && zip != null) {
-                    DbxClientV2 dbxClient = DropboxClient.getClient(token);
+                if (dbxClient != null && zip != null) {
                     // Upload to Dropbox
                     try (InputStream inputStream = new FileInputStream(zip)) {
                         dbxClient.files().uploadBuilder("/" + zip.getName()) //Path in the user's Dropbox to save the file.

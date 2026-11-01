@@ -166,8 +166,7 @@ public class ActivityBackup extends ToolbarActivity {
 
     private void initDropbox() {
         getUserAccount();
-        final SharedPreferences dropboxPrefs = getSharedPreferences("com.yoshione.fingen.dropbox", Context.MODE_PRIVATE);
-        final String token = dropboxPrefs.getString("dropbox-token", null);
+        final String token = DropboxClient.getToken(this);
         mEditTextDropboxAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -190,8 +189,7 @@ public class ActivityBackup extends ToolbarActivity {
                         }
                     }
                 });
-                dropboxPrefs.edit().remove("dropbox-token").apply();
-                dropboxPrefs.edit().remove(FgConst.PREF_DROPBOX_ACCOUNT).apply();
+                DropboxClient.unlink(ActivityBackup.this);
                 initDropbox();
             }
         });
@@ -216,8 +214,7 @@ public class ActivityBackup extends ToolbarActivity {
         String accessToken = Auth.getOAuth2Token(); //generate Access Token
         if (accessToken != null) {
             //Store accessToken in SharedPreferences
-            SharedPreferences dropboxPrefs = getSharedPreferences("com.yoshione.fingen.dropbox", Context.MODE_PRIVATE);
-            dropboxPrefs.edit().putString("dropbox-token", accessToken).apply();
+            DropboxClient.saveToken(this, accessToken);
         }
     }
 
@@ -229,11 +226,11 @@ public class ActivityBackup extends ToolbarActivity {
     }
 
     protected void getUserAccount() {
-        final SharedPreferences dropboxPrefs = getSharedPreferences("com.yoshione.fingen.dropbox", Context.MODE_PRIVATE);
+        final SharedPreferences dropboxPrefs = DropboxClient.getPrefs(this);
         mEditTextDropboxAccount.setText(dropboxPrefs.getString(FgConst.PREF_DROPBOX_ACCOUNT, ""));
-        String token = dropboxPrefs.getString("dropbox-token", null);
-        if (token == null) return;
-        new UserAccountTask(DropboxClient.getClient(token), new UserAccountTask.TaskDelegate() {
+        DbxClientV2 client = DropboxClient.getClient(this);
+        if (client == null) return;
+        new UserAccountTask(client, new UserAccountTask.TaskDelegate() {
             @Override
             public void onAccountReceived(FullAccount account) {
                 //Print account's info
@@ -287,12 +284,11 @@ public class ActivityBackup extends ToolbarActivity {
 
     @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     void backupDB() {
-        SharedPreferences dropboxPrefs = getSharedPreferences("com.yoshione.fingen.dropbox", Context.MODE_PRIVATE);
-        String token = dropboxPrefs.getString("dropbox-token", null);
+        DbxClientV2 client = DropboxClient.getClient(this);
         try {
             File zip = DBHelper.getInstance(getApplicationContext()).backupDB(true);
-            if (token != null && zip != null) {
-                new UploadTask(ActivityBackup.this, DropboxClient.getClient(token), zip, new IOnComplete() {
+            if (client != null && zip != null) {
+                new UploadTask(ActivityBackup.this, client, zip, new IOnComplete() {
                     @Override
                     public void onComplete() {
                         Toast.makeText(ActivityBackup.this, "File uploaded successfully", Toast.LENGTH_SHORT).show();
@@ -317,8 +313,7 @@ public class ActivityBackup extends ToolbarActivity {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                SharedPreferences dropboxPrefs = getApplicationContext().getSharedPreferences("com.yoshione.fingen.dropbox", Context.MODE_PRIVATE);
-                String token = dropboxPrefs.getString("dropbox-token", null);
+                String token = DropboxClient.getToken(getApplicationContext());
                 List<Metadata> metadataList;
                 List<MetadataItem> items = new ArrayList<>();
                 try {
@@ -433,9 +428,7 @@ public class ActivityBackup extends ToolbarActivity {
                                     File file = new File(activity.getCacheDir(), item.mMetadata.getName());
                                     try {
                                         OutputStream outputStream = new FileOutputStream(file);
-                                        SharedPreferences dropboxPrefs = activity.getSharedPreferences("com.yoshione.fingen.dropbox", Context.MODE_PRIVATE);
-                                        String token = dropboxPrefs.getString("dropbox-token", null);
-                                        DbxClientV2 dbxClient = DropboxClient.getClient(token);
+                                        DbxClientV2 dbxClient = DropboxClient.getClient(activity);
                                         dbxClient.files().download(item.mMetadata.getPathLower(), item.mMetadata.getRev())
                                                 .download(outputStream);
                                         activity.mHandler.sendMessage(activity.mHandler.obtainMessage(MSG_DOWNLOAD_FILE, file));
