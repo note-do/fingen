@@ -442,7 +442,7 @@ public class DatabaseMigrationTest {
 
     /**
      * update17 keeps ALL SMS: the sender of an SMS is found among the marker senders by the trimmed lower case
-     * Sender value, otherwise a sender (Name = PhoneNo = source value) is created; NULL or empty Sender gives Sender = 0.
+     * Sender value, otherwise a sender (Name = PhoneNo = source value) is created; an empty or blank Sender gives Sender = 0 (NULL cannot occur: Sender is NOT NULL in v16).
      */
     @Test
     public void upgrade16To35_keepsAllSms() throws Exception {
@@ -452,7 +452,7 @@ public class DatabaseMigrationTest {
                 "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (2, '2016-05-17 10:31:00', 'ShopInfo', 'unknown 1')",
                 "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (3, '2016-05-17 10:32:00', 'shopinfo', 'unknown 2')",
                 "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (4, '2016-05-17 10:33:00', '+2000', 'unknown 3')",
-                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (5, '2016-05-17 10:34:00', NULL, 'no sender')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (5, '2016-05-17 10:34:00', '   ', 'blank sender')",
                 "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (6, '2016-05-17 10:35:00', '', 'empty sender')",
                 "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (7, '2016-05-17 10:36:00', 'Bank', 'name of marker')");
 
@@ -478,7 +478,7 @@ public class DatabaseMigrationTest {
             assertEquals(0, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 5"));
             assertEquals(0, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 6"));
             assertEquals(bankName, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 7"));
-            assertEquals("no sender", queryString(migrated, "SELECT Body FROM log_Incoming_SMS WHERE _id = 5"));
+            assertEquals("blank sender", queryString(migrated, "SELECT Body FROM log_Incoming_SMS WHERE _id = 5"));
         } finally {
             migrated.close();
         }
