@@ -53,8 +53,7 @@ public class BackupJob extends DailyJob {
                 if (token != null && zip != null) {
                     DbxClientV2 dbxClient = DropboxClient.getClient(token);
                     // Upload to Dropbox
-                    InputStream inputStream = new FileInputStream(zip);
-                    try {
+                    try (InputStream inputStream = new FileInputStream(zip)) {
                         dbxClient.files().uploadBuilder("/" + zip.getName()) //Path in the user's Dropbox to save the file.
                                 .withMode(WriteMode.OVERWRITE) //always overwrite existing file
                                 .uploadAndFinish(inputStream);

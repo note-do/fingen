@@ -1232,6 +1232,7 @@
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
     <string name="ttl_last_backup_to_dropbox" formatted="false">Последнее сохранение в Dropbox:</string>
+    <string name="msg_dropbox_upload_failed" formatted="false">Не удалось загрузить в Dropbox: %s</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->

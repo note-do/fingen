@@ -292,7 +292,7 @@ public class ActivityBackup extends ToolbarActivity {
         try {
             File zip = DBHelper.getInstance(getApplicationContext()).backupDB(true);
             if (token != null && zip != null) {
-                new UploadTask(DropboxClient.getClient(token), zip, new IOnComplete() {
+                new UploadTask(ActivityBackup.this, DropboxClient.getClient(token), zip, new IOnComplete() {
                     @Override
                     public void onComplete() {
                         Toast.makeText(ActivityBackup.this, "File uploaded successfully", Toast.LENGTH_SHORT).show();
