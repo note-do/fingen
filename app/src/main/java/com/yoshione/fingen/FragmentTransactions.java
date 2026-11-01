@@ -52,7 +52,6 @@ import com.yoshione.fingen.filters.DateRangeFilter;
 import com.yoshione.fingen.filters.FilterListHelper;
 import com.yoshione.fingen.filters.FilterUtils;
 import com.yoshione.fingen.filters.NestedModelFilter;
-import com.yoshione.fingen.iab.BillingService;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.ILoadMoreFinish;
 import com.yoshione.fingen.interfaces.IOnLoadMore;
@@ -68,6 +67,7 @@ import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.model.StringIntItem;
 import com.yoshione.fingen.model.Template;
 import com.yoshione.fingen.model.Transaction;
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.utils.FabMenuController;
 import com.yoshione.fingen.utils.Lg;
 import com.yoshione.fingen.utils.PrefUtils;
@@ -148,8 +148,6 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     private final int visibleThreshold = 10;
     public volatile boolean endOfList = false;
 
-    @Inject
-    BillingService mBillingService;
     @Inject
     SharedPreferences mPreferences;
     @Inject
@@ -584,23 +582,12 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             builderSingle.show();
         });
         mButtonClearFilters.setOnClickListener(v -> adapterF.clearData());
-        mButtonReports.setOnClickListener(v -> ((ToolbarActivity) Objects.requireNonNull(getActivity())).unsubscribeOnDestroy(
-                mBillingService.getReportsIapInfo()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                skuDetailsWrapper -> {
-                                    Intent intent;
-                                    if (skuDetailsWrapper.isPurchased()) {
-                                        intent = new Intent(getActivity(), ActivityReports.class);
-                                        intent.putParcelableArrayListExtra("filter_list", adapterF.getFilterList());
-                                        mSlidingLayoutTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                                        startActivity(intent);
-                                    } else {
-                                        intent = new Intent(getActivity(), ActivityPro.class);
-                                        startActivityForResult(intent, RequestCodes.REQUEST_CODE_OPEN_PRO);
-                                    }
-                                })));
+        mButtonReports.setOnClickListener(new DebouncingOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ActivityReports.class);
+            intent.putParcelableArrayListExtra("filter_list", adapterF.getFilterList());
+            mSlidingLayoutTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            startActivity(intent);
+        }));
     }
 
     @Override

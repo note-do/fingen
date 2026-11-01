@@ -59,7 +59,6 @@ import com.yoshione.fingen.dao.SmsMarkersDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
-import com.yoshione.fingen.iab.BillingService;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.ITransactionItemEventListener;
 import com.yoshione.fingen.managers.AccountsSetManager;
@@ -152,8 +151,6 @@ public class ActivityMain extends ToolbarActivity {
     UpdateUIHandler mUpdateUIHandler;
     private int mUnreadSms = 0;
 
-    @Inject
-    Lazy<BillingService> mBillingService;
     @Inject
     Lazy<SmsMarkersDAO> mSmsMarkersDAO;
     @Inject

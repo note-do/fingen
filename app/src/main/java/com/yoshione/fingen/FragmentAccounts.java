@@ -37,7 +37,6 @@ import com.yoshione.fingen.databinding.FragmentAccountsBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
 import com.yoshione.fingen.filters.FilterListHelper;
-import com.yoshione.fingen.iab.BillingService;
 import com.yoshione.fingen.interfaces.IUpdateCallback;
 import com.yoshione.fingen.managers.AccountManager;
 import com.yoshione.fingen.managers.AccountsSetManager;
@@ -94,8 +93,6 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     private int contextMenuTarget = -1;
     private String mAllAccountsSetCaption;
 
-    @Inject
-    Lazy<BillingService> mBillingService;
     @Inject
     Lazy<SharedPreferences> mPreferences;
     @Inject
@@ -272,23 +269,6 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
                     contextMenuTarget = CONTEXT_MENU_SETS;
                     menuInflater.inflate(R.menu.context_menu_accounts_sets, menu);
                     break;
-            }
-            final MenuItem item = menu.findItem(R.id.action_show_report);
-            if (item != null) {
-                item.setVisible(false);
-                ((ToolbarActivity) getActivity()).unsubscribeOnDestroy(
-                        mBillingService.get().getReportsIapInfo()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(
-                                        skuDetailsWrapper -> {
-                                            if (skuDetailsWrapper.isPurchased()) {
-                                                item.setVisible(true);
-                                            } else {
-                                                item.setVisible(false);
-                                            }
-                                        },
-                                        throwable -> item.setVisible(false)));
             }
         }
     }
