@@ -15,6 +15,7 @@ Android-приложение учёта доходов и расходов. Па
   - `android.nonFinalResIds=false` — `switch` по `R.id` требует константных id;
   - `android.enableAppCompileTimeRClass=false` — без него AGP 9 не компилирует `switch` по `R.id`.
 - `buildConfig` и `resValues` включаются явно в `buildFeatures`; `viewBinding` включён.
+- `keystore.properties` больше не требует `inAppLicenseKey` и `inAppLicenseSalt` (нужны `mapsApiKey`, `storeFile`, `storePassword`, `oAuthWebClientID`, `keyAlias`, `keyPassword`).
 - ProGuard/R8: `proguard-android-optimize.txt` и `-dontoptimize` в `app/proguard-rules.pro` — поведение release прежнее. Оптимизации выключены, release-сборка не проверялась.
 
 ### Библиотеки (актуальные)
@@ -37,10 +38,10 @@ Android-приложение учёта доходов и расходов. Па
 - ФНС-чеки (`fts/`, Retrofit, OkHttp logging, decoro, qrcodereaderview).
 - lollipin, materialdrawer, xpece support-preference, changeloglib, MaterialShowCase, HeaderDecor (aar), requery, ButterKnife, flipview (библиотека).
 - Мёртвые ресурсы materialdrawer и `material_drawer_*`.
+- Платные отчёты и биллинг: `iab` (anjlab), `ActivityPro`, XOR-ключ лицензии, `resValue` `inAppLicenseKey`/`inAppLicenseSalt`. Отчёты бесплатны для всех.
 
 ### Миграция в процессе (план)
 - Google Drive — отдельная фича позже.
-- Платные отчёты: сделать бесплатными, удалить `iab` (anjlab) и XOR-ключ.
 - `android-job` → WorkManager.
 - Заменить заброшенные библиотеки: slidinguppanel → BottomSheet, actionitembadge → BadgeDrawable, airmapview → play-services-maps, filepicker → SAF, MPAndroidChart → v3; colorpicker и licensesdialog — обновить.
 - RxJava 2 → 3, Dagger и RxAndroid до актуальных, commons-lang3 и bcprov (CVE), junit.

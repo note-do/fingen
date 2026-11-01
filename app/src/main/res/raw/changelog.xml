@@ -3,6 +3,7 @@
     <changelogversion versionName="2.7" changeDate=">2026.11.01">
         <changelogtext>Dropbox: switched to a new app; after update you need to sign in to Dropbox again</changelogtext>
         <changelogtext>Fixed Dropbox backup errors being reported as success</changelogtext>
+        <changelogtext>Reports are now free for everyone</changelogtext>
     </changelogversion>
     <changelogversion versionName="2.6.4" changeDate=">2019.01.14">
         <changelogtext>Restore FTS receipt downloading</changelogtext>
