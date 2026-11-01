@@ -1,57 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <notices>
     <notice>
+        <name>AndroidX (AppCompat, RecyclerView, CardView, ConstraintLayout, CoordinatorLayout, Preference, WorkManager)</name>
+        <url>https://developer.android.com/jetpack/androidx</url>
+        <copyright>The Android Open Source Project</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>Material Components for Android</name>
+        <url>https://github.com/material-components/material-components-android</url>
+        <copyright>The Android Open Source Project</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
         <name>PermissionsDispatcher</name>
-        <url>http://hotchemi.github.io/PermissionsDispatcher/</url>
+        <url>https://github.com/permissions-dispatcher/PermissionsDispatcher</url>
         <copyright>Shintaro Katafuchi, Marcel Schnelle, Yoshinori Isogai</copyright>
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
-        <name>MaterialDrawer</name>
-        <url>https://github.com/mikepenz/MaterialDrawer</url>
+        <name>EventBus for Android</name>
+        <url>https://greenrobot.org/eventbus/</url>
+        <copyright>Markus Junginger, greenrobot</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>Dropbox Core SDK for Java and Android</name>
+        <url>https://github.com/dropbox/dropbox-sdk-java</url>
+        <copyright>Dropbox, Inc.</copyright>
+        <license>MIT License</license>
+    </notice>
+    <notice>
+        <name>MPAndroidChart</name>
+        <url>https://github.com/PhilJay/MPAndroidChart</url>
+        <copyright>Philipp Jahoda</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>AirMapView</name>
+        <url>https://github.com/airbnb/AirMapView</url>
+        <copyright>Airbnb, Inc.</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>Android File Picker</name>
+        <url>https://github.com/Angads25/android-filepicker</url>
+        <copyright>Angad Singh</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>ColorPicker</name>
+        <url>https://github.com/QuadFlask/colorpicker</url>
+        <copyright>QuadFlask</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>TapTargetView</name>
+        <url>https://github.com/KeepSafe/TapTargetView</url>
+        <copyright>Keepsafe Software, Inc.</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>Sticky Headers RecyclerView</name>
+        <url>https://github.com/timehop/sticky-headers-recyclerview</url>
+        <copyright>Timehop</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>ActionItemBadge</name>
+        <url>https://github.com/mikepenz/ActionItemBadge</url>
         <copyright>Mike Penz</copyright>
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
-        <name>FloatingActionButton</name>
-        <url>https://github.com/Clans/FloatingActionButton</url>
-        <copyright>Dmytro Tarianyk</copyright>
+        <name>Android-Iconics</name>
+        <url>https://github.com/mikepenz/Android-Iconics</url>
+        <copyright>Mike Penz</copyright>
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
-        <name>Material DateTime Picker</name>
-        <url>https://github.com/wdullaer/MaterialDateTimePicker</url>
-        <copyright>Wouter Dullaert</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
-    <notice>
-        <name>Material Preference</name>
-        <url>https://github.com/consp1racy/android-support-preference</url>
-        <copyright>Eugen Pechanec</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
-    <notice>
-        <name>MaterialScrollBar</name>
-        <url>https://github.com/krimin-killr21/MaterialScrollBar</url>
-        <copyright>Turing Technologies</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
-    <notice>
-        <name>Lobsterpicker</name>
-        <url>https://github.com/LarsWerkman/Lobsterpicker</url>
-        <copyright>Marie Schweiz and Lars Werkman</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
-    <notice>
-        <name>Android NumberProgressBar</name>
-        <url>https://github.com/daimajia/NumberProgressBar</url>
-        <copyright>Moo Droid</copyright>
-        <license>MIT License</license>
-    </notice>
-    <notice>
-        <name>Header-decor</name>
-        <url>https://github.com/edubarr/header-decor</url>
-        <copyright>Eduardo Barrenechea</copyright>
+        <name>AndroidSlidingUpPanel</name>
+        <url>https://github.com/umano/AndroidSlidingUpPanel</url>
+        <copyright>Umano</copyright>
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
@@ -61,21 +91,21 @@
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
-        <name>LolliPin</name>
-        <url>https://github.com/OrangeGangsters/LolliPin</url>
-        <copyright>OrangeGangsters</copyright>
+        <name>Apache Commons Lang</name>
+        <url>https://commons.apache.org/proper/commons-lang/</url>
+        <copyright>The Apache Software Foundation</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>opencsv</name>
+        <url>http://opencsv.sourceforge.net/</url>
+        <copyright>Bytecode Pty Ltd</copyright>
+        <license>Apache Software License 2.0</license>
+    </notice>
+    <notice>
+        <name>Bouncy Castle Crypto APIs</name>
+        <url>https://www.bouncycastle.org/java.html</url>
+        <copyright>The Legion of the Bouncy Castle Inc.</copyright>
         <license>MIT License</license>
-    </notice>
-    <notice>
-        <name>Butter Knife</name>
-        <url>http://jakewharton.github.io/butterknife/</url>
-        <copyright>Jake Wharton</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
-    <notice>
-        <name>EventBus for Android</name>
-        <url>https://greenrobot.github.io/EventBus/</url>
-        <copyright>Markus Junginger, greenrobot</copyright>
-        <license>Apache Software License 2.0</license>
     </notice>
 </notices>

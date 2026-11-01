@@ -2,7 +2,11 @@ package com.yoshione.fingen;
 
 import android.app.Activity;
 import android.content.Intent;
+import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.Until;
 
 import com.yoshione.fingen.calc.CalculatorActivity;
 import com.yoshione.fingen.filters.AbstractFilter;
@@ -19,6 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Smoke tests: each Activity touched by the ViewBinding migration starts and does not crash.
@@ -62,6 +68,21 @@ public class ScreenLaunchTest {
     @Test
     public void about() throws Exception {
         check(ActivityAbout.class, null);
+    }
+
+    @Test
+    public void aboutLicensesDialog() throws Exception {
+        mActivity = ScreenTestUtils.launch(ActivityAbout.class, null);
+        final Activity about = mActivity;
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                about.findViewById(R.id.buttonLicenses).performClick();
+            }
+        });
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        assertTrue("Licenses dialog did not open",
+                device.wait(Until.hasObject(By.text("CLOSE")), ScreenTestUtils.TIMEOUT_MS));
     }
 
     @Test

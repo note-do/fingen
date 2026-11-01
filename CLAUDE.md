@@ -31,7 +31,8 @@ Android-приложение учёта доходов и расходов. Па
 - Липкие заголовки списка транзакций: `stickyheadersrecyclerview` 0.4.3 (вместо HeaderDecor).
 - Changelog: `res/raw/changelog.xml` (и `raw-ru`), диалог — `FragmentChangelog` (ListView).
 - Сканер и PIN-код: PIN-защита своя — `lock/PinLockManager` и `lock/PinActivity` (lollipin удалён, старые PIN сброшены).
-- Прочее: `fastscroll` (JitPack, `@aar`), `actionitembadge`, `iconics-core` (нужен `actionitembadge`), `slidinguppanel`, `airmapview`, `filepicker`, `colorpicker`, `licensesdialog`, `MPAndroidChart` — заброшенные, см. «Миграция в процессе».
+- Лицензии: `licensesdialog` 2.2.0 (`ActivityAbout`, `.show()`; `showAppCompat` в 2.x удалён), список — `res/raw/license.xml` (синхронизировать с зависимостями `app/build.gradle`).
+- Прочее: `fastscroll` (JitPack, `@aar`), `actionitembadge`, `iconics-core` (нужен `actionitembadge`), `slidinguppanel`, `airmapview`, `filepicker`, `colorpicker`, `MPAndroidChart` — заброшенные, см. «Миграция в процессе».
 - БД: `android.database.sqlite` (framework SQLite). requery удалён.
 
 ### Удалено (не возвращать)
@@ -44,7 +45,7 @@ Android-приложение учёта доходов и расходов. Па
 
 ### Миграция в процессе (план)
 - Google Drive — отдельная фича позже.
-- Заменить заброшенные библиотеки: slidinguppanel → BottomSheet, actionitembadge → BadgeDrawable, airmapview → play-services-maps, filepicker → SAF, MPAndroidChart → v3; colorpicker и licensesdialog — обновить.
+- Заменить заброшенные библиотеки: slidinguppanel → BottomSheet, actionitembadge → BadgeDrawable, airmapview → play-services-maps, filepicker → SAF, MPAndroidChart → v3; colorpicker — обновить.
 - RxJava 2 → 3, Dagger и RxAndroid до актуальных, commons-lang3 и bcprov (CVE), junit.
 - БД: тесты миграций с фикстурами версий 16, 21, 23, 30, 34 → 35; проверить `legacy_alter_table` (ALTER TABLE RENAME) и `journal_mode`.
 - Совместимость бэкапов: читать старые зашифрованные (WinZip AES, PBKDF2-SHA1) и незашифрованные бэкапы.
