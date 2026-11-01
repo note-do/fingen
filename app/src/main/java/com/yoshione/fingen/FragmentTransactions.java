@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -37,7 +38,6 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.yoshione.fingen.adapter.AdapterFilters;
 import com.yoshione.fingen.adapter.AdapterTransactions;
 import com.yoshione.fingen.classes.ListSumsByCabbage;
@@ -115,7 +115,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     FloatingActionButton mFabEditSelected;
     FloatingActionButton mFabExportSelected;
     FloatingActionButton mFabDeleteSelected;
-    SlidingUpPanelLayout mSlidingLayoutTransactions;
+    BottomSheetBehavior<LinearLayout> mBottomSheetBehavior;
     EditText mEditTextSearch;
     ImageButton mImageButtonClearSearchString;
     ConstraintLayout mCardViewSearch;
@@ -184,7 +184,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             mFabEditSelected = mBinding.fabEditSelected;
             mFabExportSelected = mBinding.fabExportSelected;
             mFabDeleteSelected = mBinding.fabDeleteSelected;
-            mSlidingLayoutTransactions = mBinding.slidingLayoutTransactions;
+            mBottomSheetBehavior = BottomSheetBehavior.from(mBinding.dragView);
             mEditTextSearch = mBinding.editTextSearch;
             mImageButtonClearSearchString = mBinding.imageButtonClearSearchString;
             mCardViewSearch = mBinding.cardViewSearch;
@@ -211,7 +211,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         if (getActivity() != null) {
             Intent intent = getActivity().getIntent();
             if (intent.getBooleanExtra(FgConst.LOCK_SLIDINGUP_PANEL, false) & !BuildConfig.DEBUG) {
-                mSlidingLayoutTransactions.setEnabled(false);
+                mBottomSheetBehavior.setDraggable(false);
             }
         }
 
@@ -263,23 +263,18 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             onFilterChange(true);
         }
 
-        mSlidingLayoutTransactions.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+        mBottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onPanelSlide(View panel, float slideOffset) {
-                float alpha = Math.max(0, Math.abs(1 - slideOffset * 25));
-                mImageViewPullMe.setAlpha(alpha);
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    onSelectionChange(adapterT.getSelectedCount());
+                }
             }
 
             @Override
-            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-                if (previousState != newState && newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    onSelectionChange(adapterT.getSelectedCount());
-                }
-//                if (previousState == SlidingUpPanelLayout.PanelState.HIDDEN & newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-//                    animatePullMe();
-//                } else if (previousState == SlidingUpPanelLayout.PanelState.COLLAPSED & newState == SlidingUpPanelLayout.PanelState.HIDDEN) {
-//                    animatePullMeReverse();
-//                }
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                float alpha = Math.max(0, Math.abs(1 - slideOffset * 25));
+                mImageViewPullMe.setAlpha(alpha);
             }
         });
 
@@ -311,7 +306,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         });
 
         layoutSumTable.getViewTreeObserver().addOnGlobalLayoutListener(
-                new SumsTableOnGlobalLayoutListener(getActivity(), layoutSumTable, mSlidingLayoutTransactions));
+                new SumsTableOnGlobalLayoutListener(getActivity(), layoutSumTable, mBottomSheetBehavior, mBinding.relativeLayout));
 
         if (getActivity() instanceof ActivityMain) {
             ((ActivityMain) getActivity()).mAppBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
@@ -586,7 +581,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         mButtonReports.setOnClickListener(new DebouncingOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ActivityReports.class);
             intent.putParcelableArrayListExtra("filter_list", adapterF.getFilterList());
-            mSlidingLayoutTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
             startActivity(intent);
         }));
     }
@@ -621,7 +616,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
 //                            new Handler().postDelayed(new Runnable() {
 //                                @Override
 //                                public void run() {
-//                                    mSlidingLayoutTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+//                                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 //                                    mSlidingLayoutTransactions.setAnchorPoint(0.5f);
 //                                }
 //                            }, 2000);
@@ -907,7 +902,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
 
     private void showSearchView() {
         mCardViewSearch.setVisibility(View.VISIBLE);
-        mSlidingLayoutTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         mEditTextSearch.requestFocus();
         if (getActivity() != null) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);

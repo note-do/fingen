@@ -52,6 +52,7 @@ import android.widget.Toast;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.yoshione.fingen.adapter.TransactionsArrayAdapter;
 import com.yoshione.fingen.dao.SendersDAO;
@@ -119,8 +120,6 @@ public class ActivityMain extends ToolbarActivity {
     private ActivityMainBinding mBinding;
     ViewPager viewPager;
     TabLayout tabLayout;
-    @Nullable
-    SlidingUpPanelLayout mSlidingUpTransactions;
     @Nullable
     SlidingUpPanelLayout mSlidingUpAccounts;
     CoordinatorLayout coordinatorLayout;
@@ -198,7 +197,6 @@ public class ActivityMain extends ToolbarActivity {
         mBinding = ActivityMainBinding.bind(getContentRoot());
         viewPager = mBinding.pager;
         tabLayout = findViewById(R.id.tabLayout);
-        mSlidingUpTransactions = findViewById(R.id.sliding_layout_transactions);
         mSlidingUpAccounts = findViewById(R.id.sliding_layout_accounts);
         coordinatorLayout = mBinding.coordinatorLayout;
         mAppBarLayout = findViewById(R.id.appbar);
@@ -617,7 +615,6 @@ public class ActivityMain extends ToolbarActivity {
                 mBinding = ActivityMainBinding.bind(getContentRoot());
         viewPager = mBinding.pager;
         tabLayout = findViewById(R.id.tabLayout);
-        mSlidingUpTransactions = findViewById(R.id.sliding_layout_transactions);
         mSlidingUpAccounts = findViewById(R.id.sliding_layout_accounts);
         coordinatorLayout = mBinding.coordinatorLayout;
         mAppBarLayout = findViewById(R.id.appbar);
@@ -644,9 +641,11 @@ public class ActivityMain extends ToolbarActivity {
         {
             mSlidingUpAccounts.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         }
-        else if (fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentTransactions.class) & (mSlidingUpTransactions != null &&
-                (mSlidingUpTransactions.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || mSlidingUpTransactions.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED))) {
-            mSlidingUpTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        else if (fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentTransactions.class) & (fragmentTransactions != null &&
+                fragmentTransactions.mBottomSheetBehavior != null &&
+                (fragmentTransactions.mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED ||
+                        fragmentTransactions.mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED))) {
+            fragmentTransactions.mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         } else if (fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentTransactions.class) && fragmentTransactions.mFabMenuController.isFABOpen()) {
             fragmentTransactions.mFabMenuController.closeFABMenu();
         } else if (fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentTransactions.class) && fragmentTransactions.mCardViewSearch != null && fragmentTransactions.mCardViewSearch.getVisibility() == View.VISIBLE) {

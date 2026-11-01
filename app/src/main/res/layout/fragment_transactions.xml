@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.sothree.slidinguppanel.SlidingUpPanelLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sliding_layout_transactions"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:umanoDragView="@+id/dragView"
-    app:umanoScrollableView="@+id/recycler_view_filters"
-    style="@style/StyleSlidingUpPanel">
+    android:layout_height="match_parent">
 
+    <!-- Bottom padding equals the bottom sheet peek height (updated in SumsTableOnGlobalLayoutListener) -->
     <RelativeLayout
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingBottom="48dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cardViewSearch"
@@ -205,13 +204,25 @@
     </RelativeLayout>
 
     <!-- SLIDING LAYOUT -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/dragView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="?listItemBackground"
+        android:elevation="8dp"
         android:orientation="vertical"
         android:clickable="true"
-        android:focusable="false">
+        android:focusable="false"
+        app:behavior_fitToContents="false"
+        app:behavior_halfExpandedRatio="0.5"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="48dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <include
             android:id="@+id/sliding_panel_header"
@@ -288,4 +299,6 @@
             android:visibility="gone"/>
     </LinearLayout>
 
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</FrameLayout>
