@@ -6,13 +6,18 @@ import android.database.sqlite.SQLiteDatabase;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
 public class DbSnapshotTest {
+
+    @Rule
+    public final TestRule systemDialogs = new SystemDialogsRule();
 
     @Test
     public void restore_removesRowsInsertedAfterSnapshot() {

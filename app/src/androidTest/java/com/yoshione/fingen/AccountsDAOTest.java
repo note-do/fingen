@@ -9,7 +9,9 @@ import com.yoshione.fingen.model.Account;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.util.List;
@@ -21,6 +23,9 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 public class AccountsDAOTest {
+
+    @Rule
+    public final TestRule systemDialogs = new SystemDialogsRule();
 
     private static final long CURRENCY_USD = 2;
 

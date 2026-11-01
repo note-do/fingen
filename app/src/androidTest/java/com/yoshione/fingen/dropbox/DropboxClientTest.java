@@ -8,10 +8,13 @@ import androidx.test.runner.AndroidJUnit4;
 import com.dropbox.core.oauth.DbxCredential;
 import com.dropbox.core.v2.DbxClientV2;
 import com.yoshione.fingen.FgConst;
+import com.yoshione.fingen.SystemDialogsRule;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
@@ -29,6 +32,9 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(AndroidJUnit4.class)
 public class DropboxClientTest {
+
+    @Rule
+    public final TestRule systemDialogs = new SystemDialogsRule();
 
     private static final String KEY_LEGACY_TOKEN_CLEARED = "legacy-token-cleared";
 

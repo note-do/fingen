@@ -20,7 +20,9 @@ import com.yoshione.fingen.model.Transaction;
 import com.yoshione.fingen.utils.CabbageFormatter;
 import com.yoshione.fingen.utils.SmsParser;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -42,6 +44,9 @@ import static org.junit.Assert.assertThat;
  * 1
  */
 public class SmsParserTest {
+
+    @Rule
+    public final TestRule systemDialogs = new SystemDialogsRule();
     private static final String TAG = "SmsParserTest";
 
     private List<SmsTest> smsTests;
