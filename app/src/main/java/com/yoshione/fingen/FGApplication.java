@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
 import com.evernote.android.job.JobManager;
+import com.yoshione.fingen.dropbox.DropboxClient;
 import com.yoshione.fingen.backup.BackupJob;
 import com.yoshione.fingen.backup.BackupJobCreator;
 import com.yoshione.fingen.backup.BackupTestJobCreator;
@@ -83,6 +84,8 @@ public class FGApplication extends Application implements ISyncAnimMethods {
                 .build();
 
         mContext = this;
+
+        DropboxClient.migrateLegacyToken(this);
 
         JobManager.create(this).addJobCreator(new BackupJobCreator());
         JobManager.create(this).addJobCreator(new BackupTestJobCreator());

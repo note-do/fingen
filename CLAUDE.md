@@ -23,6 +23,7 @@ Android-приложение учёта доходов и расходов. Па
 - Права: PermissionsDispatcher 4.9.2 (`@RuntimePermissions`).
 - DI: Dagger 2.16 (`di/`).
 - Реактивность: RxJava 2 (`io.reactivex.rxjava2`), RxAndroid 2.1.0. Переход на RxJava 3 — в плане.
+- Dropbox: `dropbox-core-sdk` и `dropbox-android-sdk` 8.0.2, вход через PKCE (`Auth.startOAuth2PKCE`), `DbxCredential` JSON в prefs `com.yoshione.fingen.dropbox`, ключ `dropbox-credential`. Приложение App folder `Fin_Gen`, ключ `zaqelu1694tr792` задан в `app/build.gradle` (resValue `DROPBOX_APP_KEY` и схема `db-<ключ>` в манифесте). Старые токены удаляются однократно (`DropboxClient.migrateLegacyToken`), нужен повторный вход. `dropbox-android-sdk` объявляет minSdk 26, в манифесте `tools:overrideLibrary`.
 - События: EventBus 3.1.1.
 - Справка: `taptargetview` через `utils/HelpSequence` (вместо MaterialShowCase).
 - Липкие заголовки списка транзакций: `stickyheadersrecyclerview` 0.4.3 (вместо HeaderDecor).
@@ -38,7 +39,7 @@ Android-приложение учёта доходов и расходов. Па
 - Мёртвые ресурсы materialdrawer и `material_drawer_*`.
 
 ### Миграция в процессе (план)
-- Dropbox SDK (3.0.6): обновить и перейти на PKCE, сохранив совместимость. Google Drive — отдельная фича позже.
+- Google Drive — отдельная фича позже.
 - Платные отчёты: сделать бесплатными, удалить `iab` (anjlab) и XOR-ключ.
 - `android-job` → WorkManager.
 - Заменить заброшенные библиотеки: slidinguppanel → BottomSheet, actionitembadge → BadgeDrawable, airmapview → play-services-maps, filepicker → SAF, MPAndroidChart → v3; colorpicker и licensesdialog — обновить.

@@ -24,6 +24,10 @@ android {
         checkReleaseBuilds false
     }
 
+    // Dropbox app key (App folder, Fin_Gen): single source for resValue and manifest scheme
+    def dropboxAppKey = "zaqelu1694tr792"
+    defaultConfig.resValue "string", "DROPBOX_APP_KEY", dropboxAppKey
+
     signingConfigs { config }
 
     def keystorePropertiesFile = rootProject.file('keystore.properties')
@@ -34,7 +38,6 @@ android {
     if (keystorePropertiesFile.exists() &&
             keystoreProperties.containsKey('inAppLicenseKey') &&
             keystoreProperties.containsKey('inAppLicenseSalt') &&
-            keystoreProperties.containsKey('dropboxApiKey') &&
             keystoreProperties.containsKey('mapsApiKey') &&
             keystoreProperties.containsKey('storeFile') && keystoreProperties['storeFile'] != "" &&
             keystoreProperties.containsKey('storePassword') &&
@@ -45,7 +48,7 @@ android {
         android.defaultConfig.resValue "string", "inAppLicenseKey", keystoreProperties["inAppLicenseKey"]
         android.defaultConfig.resValue "string", "inAppLicenseSalt", keystoreProperties["inAppLicenseSalt"]
         android.defaultConfig.manifestPlaceholders = [
-                dropboxApiKey: keystoreProperties["dropboxApiKey"],
+                dropboxApiKey: "db-" + dropboxAppKey,
                 mapsApiKey   : keystoreProperties["mapsApiKey"]
         ]
         android.signingConfigs.config.storeFile = file(keystoreProperties['storeFile'])
@@ -56,7 +59,7 @@ android {
         android.defaultConfig.resValue "string", "inAppLicenseKey", ""
         android.defaultConfig.resValue "string", "inAppLicenseSalt", ""
         android.defaultConfig.manifestPlaceholders = [
-                dropboxApiKey: "",
+                dropboxApiKey: "db-" + dropboxAppKey,
                 mapsApiKey   : ""
         ]
         android.buildTypes.release.signingConfig = null
@@ -123,7 +126,8 @@ dependencies {
     implementation "com.google.android.material:material:1.0.0"
 //    implementation "com.google.android.gms:play-services-auth:$play"
 //    implementation "com.google.android.gms:play-services-maps:$play"
-    implementation 'com.dropbox.core:dropbox-core-sdk:3.0.6'
+    implementation 'com.dropbox.core:dropbox-core-sdk:8.0.2'
+    implementation 'com.dropbox.core:dropbox-android-sdk:8.0.2'
     implementation 'com.evernote:android-job:1.2.5'
     implementation 'com.github.angads25:filepicker:1.1.1'
     implementation 'com.github.permissions-dispatcher:permissionsdispatcher:4.9.2'

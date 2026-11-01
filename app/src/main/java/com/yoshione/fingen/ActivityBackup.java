@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.android.Auth;
+import com.dropbox.core.oauth.DbxCredential;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.Metadata;
@@ -40,6 +41,7 @@ import com.dropbox.core.v2.users.FullAccount;
 import com.yoshione.fingen.dropbox.DropboxClient;
 import com.yoshione.fingen.dropbox.UploadTask;
 import com.yoshione.fingen.dropbox.UserAccountTask;
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.interfaces.IOnComplete;
 import com.yoshione.fingen.utils.DateTimeFormatter;
 import com.yoshione.fingen.utils.FabMenuController;
@@ -52,6 +54,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -66,6 +69,9 @@ import permissions.dispatcher.RuntimePermissions;
 public class ActivityBackup extends ToolbarActivity {
 
     private static final String TAG = "ActivityBackup";
+    private static final List<String> DROPBOX_SCOPES = Arrays.asList(
+            "account_info.read", "files.metadata.read", "files.content.read", "files.content.write");
+    private boolean mAuthInProgress = false;
 
     private static final int MSG_SHOW_DIALOG = 0;
     private static final int MSG_DOWNLOAD_FILE = 1;
@@ -166,29 +172,31 @@ public class ActivityBackup extends ToolbarActivity {
 
     private void initDropbox() {
         getUserAccount();
-        final String token = DropboxClient.getToken(this);
-        mEditTextDropboxAccount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (token == null) {
-                    Auth.startOAuth2Authentication(ActivityBackup.this, getString(R.string.DROPBOX_APP_KEY));
-                }
+        final boolean linked = DropboxClient.isLinked(this);
+        mEditTextDropboxAccount.setOnClickListener(new DebouncingOnClickListener(view -> {
+            if (!linked) {
+                mAuthInProgress = true;
+                Auth.startOAuth2PKCE(ActivityBackup.this, getString(R.string.DROPBOX_APP_KEY),
+                        DropboxClient.getRequestConfig(), DROPBOX_SCOPES);
             }
-        });
-        mButtonLogoutFromDropbox.setVisibility(token == null ? View.GONE : View.VISIBLE);
+        }));
+        mButtonLogoutFromDropbox.setVisibility(linked ? View.VISIBLE : View.GONE);
         mButtonLogoutFromDropbox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            DropboxClient.getClient(token).auth().tokenRevoke();
-                        } catch (DbxException e) {
-                            e.printStackTrace();
+                final DbxClientV2 client = DropboxClient.getClient(ActivityBackup.this);
+                if (client != null) {
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                client.auth().tokenRevoke();
+                            } catch (DbxException e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                });
+                    });
+                }
                 DropboxClient.unlink(ActivityBackup.this);
                 initDropbox();
             }
@@ -210,17 +218,20 @@ public class ActivityBackup extends ToolbarActivity {
         mTextViewLastBackupToDropbox.setText(title);
     }
 
-    public void saveAccessToken() {
-        String accessToken = Auth.getOAuth2Token(); //generate Access Token
-        if (accessToken != null) {
-            //Store accessToken in SharedPreferences
-            DropboxClient.saveToken(this, accessToken);
+    public void saveCredential() {
+        if (!mAuthInProgress) {
+            return;
+        }
+        mAuthInProgress = false;
+        DbxCredential credential = Auth.getDbxCredential(); //credential with refresh token
+        if (credential != null) {
+            DropboxClient.saveCredential(this, credential);
         }
     }
 
     @Override
     public void onResume() {
-        saveAccessToken();
+        saveCredential();
         initDropbox();
         super.onResume();
     }
@@ -313,11 +324,11 @@ public class ActivityBackup extends ToolbarActivity {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                String token = DropboxClient.getToken(getApplicationContext());
+                DbxClientV2 client = DropboxClient.getClient(getApplicationContext());
                 List<Metadata> metadataList;
                 List<MetadataItem> items = new ArrayList<>();
                 try {
-                    metadataList = DropboxClient.getListFiles(DropboxClient.getClient(token));
+                    metadataList = DropboxClient.getListFiles(client);
                     for (int i = metadataList.size() - 1; i >= 0; i--) {
                         if (metadataList.get(i).getName().toLowerCase().contains(".zip")) {
                             items.add(new MetadataItem((FileMetadata) metadataList.get(i)));
