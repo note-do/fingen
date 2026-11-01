@@ -2,6 +2,7 @@ package com.yoshione.fingen.backup;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
@@ -18,6 +19,7 @@ import com.yoshione.fingen.BuildConfig;
 import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.FgConst;
 import com.yoshione.fingen.dropbox.DropboxClient;
+import com.yoshione.fingen.utils.BackupFolder;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,11 +31,12 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Daily backup: local zip and upload to Dropbox.
+ * Daily backup: zip to the backup folder chosen by the user (if available) and upload to Dropbox.
  * Runs in the 1-6 AM window (local time). Each run schedules the next one (chain of OneTime requests).
  */
 public class BackupWorker extends Worker {
 
+    private static final String TAG = "BackupWorker";
     public static final String UNIQUE_NAME = "work_backup_daily";
 
     private static final int WINDOW_START_HOUR = 1;
@@ -94,24 +97,33 @@ public class BackupWorker extends Worker {
         if (!BuildConfig.FLAVOR.equals("nd")) {
             DbxClientV2 dbxClient = DropboxClient.getClient(context);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-            try {
-                File zip = DBHelper.getInstance(context).backupDB(true);
-                if (dbxClient != null && zip != null) {
-                    // Upload to Dropbox
-                    try (InputStream inputStream = new FileInputStream(zip)) {
-                        dbxClient.files().uploadBuilder("/" + zip.getName()) //Path in the user's Dropbox to save the file.
-                                .withMode(WriteMode.OVERWRITE) //always overwrite existing file
-                                .uploadAndFinish(inputStream);
-                        prefs.edit().putLong(FgConst.PREF_SHOW_LAST_SUCCESFUL_BACKUP_TO_DROPBOX, new Date().getTime()).apply();
-                    } catch (DbxException e) {
-                        e.printStackTrace();
-                        if (getRunAttemptCount() < MAX_ATTEMPTS) {
-                            return Result.retry();
+            boolean folderAvailable = BackupFolder.isAvailable(context);
+            if (!folderAvailable) {
+                // No folder or access revoked: skip the local copy, Dropbox goes on as usual
+                Log.w(TAG, "Backup folder is not available, local backup skipped");
+                prefs.edit().putBoolean(FgConst.PREF_BACKUP_FOLDER_UNAVAILABLE, true).apply();
+            }
+            if (folderAvailable || dbxClient != null) {
+                try {
+                    File zip = DBHelper.getInstance(context).backupDB(true, folderAvailable);
+                    if (dbxClient != null && zip != null) {
+                        // Upload to Dropbox
+                        try (InputStream inputStream = new FileInputStream(zip)) {
+                            dbxClient.files().uploadBuilder("/" + zip.getName()) //Path in the user's Dropbox to save the file.
+                                    .withMode(WriteMode.OVERWRITE) //always overwrite existing file
+                                    .uploadAndFinish(inputStream);
+                            prefs.edit().putLong(FgConst.PREF_SHOW_LAST_SUCCESFUL_BACKUP_TO_DROPBOX, new Date().getTime()).apply();
+                        } catch (DbxException e) {
+                            e.printStackTrace();
+                            if (getRunAttemptCount() < MAX_ATTEMPTS) {
+                                return Result.retry();
+                            }
                         }
                     }
+                    BackupFolder.cleanCache(context, zip);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
         scheduleNext(context);

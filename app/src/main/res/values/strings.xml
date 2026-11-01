@@ -1248,6 +1248,8 @@
 
     <string name="msg_backup_folder_selection_failed" formatted="false">Cannot get access to the selected folder</string>
 
+    <string name="msg_backup_folder_warning" formatted="false">Local backups are not being made: the backup folder is not selected or access to it is lost. Automatic Dropbox backup works as usual. Select a folder in the Backup and restore screen.</string>
+
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
     <string name="msg_confirm_restore_db" formatted="false">Restore database from the file? The program will be restarted.</string>

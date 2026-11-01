@@ -1248,6 +1248,8 @@
 
     <string name="msg_backup_folder_selection_failed" formatted="false">Не удалось получить доступ к выбранной папке</string>
 
+    <string name="msg_backup_folder_warning" formatted="false">Локальные резервные копии не создаются: папка не выбрана или доступ к ней потерян. Автокопия в Dropbox работает как обычно. Выберите папку в разделе «Резервное копирование».</string>
+
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
     <string name="msg_confirm_restore_db" formatted="false">Восстановить БД из файла? Программа будет перезапущена.</string>

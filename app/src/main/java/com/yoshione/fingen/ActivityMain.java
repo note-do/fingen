@@ -78,6 +78,7 @@ import com.yoshione.fingen.utils.ColorUtils;
 import com.yoshione.fingen.utils.Lg;
 import com.yoshione.fingen.utils.NotificationCounter;
 import com.yoshione.fingen.utils.NotificationHelper;
+import com.yoshione.fingen.utils.BackupFolder;
 import com.yoshione.fingen.utils.PrefUtils;
 import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.utils.ScreenUtils;
@@ -110,6 +111,9 @@ public class ActivityMain extends ToolbarActivity {
     public static final int ACTION_OPEN_TRANSACTIONS_LIST = 1;
     public static final int THEME_LIGHT = 0;
     public static final int THEME_DARK = 1;
+
+    // The backup folder warning is shown once per app launch
+    private static boolean sBackupFolderWarningChecked = false;
 
     private static final int MSG_UPDATE_LISTS = 1;
     private static final int MSG_UPDATE_SMS_COUNTERS = 3;
@@ -473,6 +477,7 @@ public class ActivityMain extends ToolbarActivity {
         }
 
         checkPermissionsAndShowAlert();
+        checkBackupFolder();
 
         List<String> tabs = PrefUtils.getTabsOrder(mPreferences);
         boolean actual = true;
@@ -701,6 +706,36 @@ public class ActivityMain extends ToolbarActivity {
                 .show();
     }
     //</editor-fold>
+
+    /**
+     * On app start warns the user if local backups can't be saved: the folder is not selected,
+     * access to it was revoked, or the last copy to it failed.
+     */
+    private void checkBackupFolder() {
+        if (sBackupFolderWarningChecked) {
+            return;
+        }
+        sBackupFolderWarningChecked = true;
+        final Context appContext = getApplicationContext();
+        new Thread(() -> {
+            boolean problem = !BackupFolder.isAvailable(appContext)
+                    || mPreferences.getBoolean(FgConst.PREF_BACKUP_FOLDER_UNAVAILABLE, false);
+            if (problem) {
+                runOnUiThread(() -> {
+                    if (isFinishing()) {
+                        return;
+                    }
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.ent_backup_data)
+                            .setMessage(R.string.msg_backup_folder_warning)
+                            .setPositiveButton(R.string.ent_backup_data, (dialog, which) ->
+                                    startActivity(new Intent(this, ActivityBackup.class)))
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show();
+                });
+            }
+        }).start();
+    }
 
     private void checkPermissionsAndShowAlert() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
