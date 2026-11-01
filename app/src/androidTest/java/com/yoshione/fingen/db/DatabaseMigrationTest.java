@@ -44,6 +44,8 @@ import static org.junit.Assert.assertTrue;
  * <li>v16 DateTime is the text "yyyy-MM-dd HH:mm:ss" in the time zone of the device; update18 converts it to
  * milliseconds with the same pattern and the default time zone, so the expected value is computed in the test with
  * the same pattern. The test does not depend on the time zone of the device.</li>
+ * <li>update18 recreates log_Transactions and inserts rows WITHOUT _id, so transactions of v16 get new ids 1, 2, 3
+ * (in the order of the old table); the v16 test finds them by Comment.</li>
  * <li>update18 reads Payee, Category, Project, Department, Location with getLong: NULL becomes 0; update22 then
  * changes Project, Department and Location 0 to -1, while Payee and Category stay 0.</li>
  * <li>update31 calls ColorUtils.getColor, which increments "color_ind" in the default SharedPreferences;
@@ -291,7 +293,7 @@ public class DatabaseMigrationTest {
         try {
             assertEquals(35, migrated.getVersion());
             assertMatchesCleanSchema(clean, migrated);
-            assertMigratedData(migrated, 1000, 2000, 4000);
+            assertMigratedData(migrated, 100, 101, 102, 1000, 2000, 4000);
 
             // update22: all rows of new hierarchy columns are set, update23: OrderNumber of currencies is 0
             assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Payees WHERE ParentID <> -1 OR OrderNumber <> 0"));
@@ -354,16 +356,23 @@ public class DatabaseMigrationTest {
 
             // update18 parses "yyyy-MM-dd HH:mm:ss" in the default time zone, expected values use the same pattern
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            assertMigratedData(migrated,
+            // update18 inserts transactions without _id: they get new ids 1, 2, 3 in the old order; found by Comment
+            long id100 = queryLong(migrated, "SELECT _id FROM log_Transactions WHERE Comment = 'Кофе'");
+            long id101 = queryLong(migrated, "SELECT _id FROM log_Transactions WHERE Comment = 'Salary'");
+            long id102 = queryLong(migrated, "SELECT _id FROM log_Transactions WHERE Comment = 'Transfer'");
+            assertEquals(1, id100);
+            assertEquals(2, id101);
+            assertEquals(3, id102);
+            assertMigratedData(migrated, id100, id101, id102,
                     format.parse("2016-05-17 10:30:00").getTime(),
                     format.parse("2016-05-18 11:00:00").getTime(),
                     format.parse("2016-05-19 12:00:00").getTime());
             assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions"));
             // update18: NULL Payee and Category become 0 (getLong), not -1
-            assertEquals(0, queryLong(migrated, "SELECT Payee FROM log_Transactions WHERE _id = 100"));
-            assertEquals(0, queryLong(migrated, "SELECT Category FROM log_Transactions WHERE _id = 100"));
-            assertEquals(100, queryLong(migrated, "SELECT Payee FROM log_Transactions WHERE _id = 101"));
-            assertEquals(101, queryLong(migrated, "SELECT Category FROM log_Transactions WHERE _id = 101"));
+            assertEquals(0, queryLong(migrated, "SELECT Payee FROM log_Transactions WHERE _id = " + id100));
+            assertEquals(0, queryLong(migrated, "SELECT Category FROM log_Transactions WHERE _id = " + id100));
+            assertEquals(100, queryLong(migrated, "SELECT Payee FROM log_Transactions WHERE _id = " + id101));
+            assertEquals(101, queryLong(migrated, "SELECT Category FROM log_Transactions WHERE _id = " + id101));
             // update18 sets Deleted = 0 for all rows
             assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE Deleted = 0"));
             assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Accounts WHERE Deleted <> 0 OR Deleted IS NULL"));
@@ -429,7 +438,8 @@ public class DatabaseMigrationTest {
      * Checks the data that SEED_V21 and SEED_V16 describe in the same way (see both seeds). Dates of the
      * transactions are passed in milliseconds, the rest of the expectations is the same for both versions.
      */
-    private static void assertMigratedData(SQLiteDatabase migrated, long date100, long date101, long date102) {
+    private static void assertMigratedData(SQLiteDatabase migrated, long id100, long id101, long id102,
+                                           long date100, long date101, long date102) {
         assertEquals("Migration account", queryString(migrated, "SELECT Name FROM ref_Accounts WHERE _id = 100"));
         assertEquals(12.5, queryDouble(migrated, "SELECT StartBalance FROM ref_Accounts WHERE _id = 100"), 0.0001);
         assertEquals(100, queryLong(migrated, "SELECT Currency FROM ref_Accounts WHERE _id = 100"));
@@ -481,46 +491,46 @@ public class DatabaseMigrationTest {
         assertEquals(50, queryDouble(migrated, "SELECT Amount FROM ref_budget_debts WHERE _id = 100"), 0.0001);
 
         // transactions: dates, update22: 0 -> -1 for Project/Department/Location, update24: NULL Lat/Lon/Accuracy/SimpleDebt
-        assertEquals(date100, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = 100"));
-        assertEquals(date101, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = 101"));
-        assertEquals(date102, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = 102"));
-        assertEquals(-100, queryDouble(migrated, "SELECT Amount FROM log_Transactions WHERE _id = 100"), 0.0001);
-        assertEquals(250, queryDouble(migrated, "SELECT Amount FROM log_Transactions WHERE _id = 101"), 0.0001);
-        assertEquals(101, queryLong(migrated, "SELECT DestAccount FROM log_Transactions WHERE _id = 102"));
-        assertEquals(-1, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = 100"));
-        assertEquals(-1, queryLong(migrated, "SELECT Department FROM log_Transactions WHERE _id = 100"));
-        assertEquals(-1, queryLong(migrated, "SELECT Location FROM log_Transactions WHERE _id = 100"));
-        assertEquals(100, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = 101"));
-        assertEquals(100, queryLong(migrated, "SELECT Department FROM log_Transactions WHERE _id = 101"));
-        assertEquals(100, queryLong(migrated, "SELECT Location FROM log_Transactions WHERE _id = 101"));
-        assertEquals(-1, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = 102"));
-        assertEquals(0, queryDouble(migrated, "SELECT Lat FROM log_Transactions WHERE _id = 100"), 0.0001);
-        assertEquals(0, queryDouble(migrated, "SELECT Lon FROM log_Transactions WHERE _id = 100"), 0.0001);
-        assertEquals(-1, queryLong(migrated, "SELECT Accuracy FROM log_Transactions WHERE _id = 100"));
-        assertEquals(100, queryLong(migrated, "SELECT SimpleDebt FROM log_Transactions WHERE _id = 100"));
-        assertEquals(1.5, queryDouble(migrated, "SELECT Lat FROM log_Transactions WHERE _id = 101"), 0.0001);
-        assertEquals(2.5, queryDouble(migrated, "SELECT Lon FROM log_Transactions WHERE _id = 101"), 0.0001);
-        assertEquals(10, queryLong(migrated, "SELECT Accuracy FROM log_Transactions WHERE _id = 101"));
-        assertEquals(-1, queryLong(migrated, "SELECT SimpleDebt FROM log_Transactions WHERE _id = 101"));
-        assertEquals("Кофе", queryString(migrated, "SELECT Comment FROM log_Transactions WHERE _id = 100"));
-        assertEquals("kofe", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 100"));
-        assertEquals("salary", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 101"));
-        assertEquals("transfer", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 102"));
-        assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE _id IN (100, 101, 102) AND FN = 0 AND FD = 0 AND FP = 0 AND Split = 0"));
+        assertEquals(date100, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = " + id100));
+        assertEquals(date101, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = " + id101));
+        assertEquals(date102, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = " + id102));
+        assertEquals(-100, queryDouble(migrated, "SELECT Amount FROM log_Transactions WHERE _id = " + id100), 0.0001);
+        assertEquals(250, queryDouble(migrated, "SELECT Amount FROM log_Transactions WHERE _id = " + id101), 0.0001);
+        assertEquals(101, queryLong(migrated, "SELECT DestAccount FROM log_Transactions WHERE _id = " + id102));
+        assertEquals(-1, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = " + id100));
+        assertEquals(-1, queryLong(migrated, "SELECT Department FROM log_Transactions WHERE _id = " + id100));
+        assertEquals(-1, queryLong(migrated, "SELECT Location FROM log_Transactions WHERE _id = " + id100));
+        assertEquals(100, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = " + id101));
+        assertEquals(100, queryLong(migrated, "SELECT Department FROM log_Transactions WHERE _id = " + id101));
+        assertEquals(100, queryLong(migrated, "SELECT Location FROM log_Transactions WHERE _id = " + id101));
+        assertEquals(-1, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = " + id102));
+        assertEquals(0, queryDouble(migrated, "SELECT Lat FROM log_Transactions WHERE _id = " + id100), 0.0001);
+        assertEquals(0, queryDouble(migrated, "SELECT Lon FROM log_Transactions WHERE _id = " + id100), 0.0001);
+        assertEquals(-1, queryLong(migrated, "SELECT Accuracy FROM log_Transactions WHERE _id = " + id100));
+        assertEquals(100, queryLong(migrated, "SELECT SimpleDebt FROM log_Transactions WHERE _id = " + id100));
+        assertEquals(1.5, queryDouble(migrated, "SELECT Lat FROM log_Transactions WHERE _id = " + id101), 0.0001);
+        assertEquals(2.5, queryDouble(migrated, "SELECT Lon FROM log_Transactions WHERE _id = " + id101), 0.0001);
+        assertEquals(10, queryLong(migrated, "SELECT Accuracy FROM log_Transactions WHERE _id = " + id101));
+        assertEquals(-1, queryLong(migrated, "SELECT SimpleDebt FROM log_Transactions WHERE _id = " + id101));
+        assertEquals("Кофе", queryString(migrated, "SELECT Comment FROM log_Transactions WHERE _id = " + id100));
+        assertEquals("kofe", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = " + id100));
+        assertEquals("salary", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = " + id101));
+        assertEquals("transfer", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = " + id102));
+        assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE _id IN (" + id100 + ", " + id101 + ", " + id102 + ") AND FN = 0 AND FD = 0 AND FP = 0 AND Split = 0"));
 
         // update32: one product per not deleted transaction, price equals the amount
         assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Products"));
-        assertProducts(migrated, 100, -100);
-        assertProducts(migrated, 101, 250);
-        assertProducts(migrated, 102, -40);
+        assertProducts(migrated, id100, -100);
+        assertProducts(migrated, id101, 250);
+        assertProducts(migrated, id102, -40);
         assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Products"));
 
         // update27/28: running balance of not deleted transactions, transfer adds a row for the destination account
         assertEquals(4, queryLong(migrated, "SELECT COUNT(*) FROM log_Running_Balance"));
-        assertBalance(migrated, 100, 100, 0, -100);
-        assertBalance(migrated, 100, 101, 250, -100);
-        assertBalance(migrated, 100, 102, 250, -140);
-        assertBalance(migrated, 101, 102, 40, 0);
+        assertBalance(migrated, 100, id100, 0, -100);
+        assertBalance(migrated, 100, id101, 250, -100);
+        assertBalance(migrated, 100, id102, 250, -140);
+        assertBalance(migrated, 101, id102, 40, 0);
     }
 
     private static final String TRANSACTION_V30 = "INSERT INTO log_Transactions (_id, Deleted, DateTime, SrcAccount, Payee, Category, Amount, "
