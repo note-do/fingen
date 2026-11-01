@@ -1,3 +1,7 @@
+# Keep behaviour of the previous proguard-android.txt (AGP 9 uses the optimize variant).
+# Remove this line to enable R8 optimizations and check release builds.
+-dontoptimize
+
 # Add project specific ProGuard rules here.
 # By default, the flags in this file are appended to flags specified
 # in C:\Users\Leonid\AppData\Local\Android\sdk/tools/proguard/proguard-android.txt

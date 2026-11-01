@@ -9,8 +9,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace "com.yoshione.fingen"
-    compileSdkVersion 28
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 36
     defaultConfig {
         applicationId "com.yoshione.fingen"
         minSdkVersion 21
@@ -66,7 +65,7 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.config
         }
         debug {
@@ -95,6 +94,7 @@ android {
     buildFeatures {
         buildConfig true
         viewBinding true
+        resValues true
     }
 
     compileOptions {
