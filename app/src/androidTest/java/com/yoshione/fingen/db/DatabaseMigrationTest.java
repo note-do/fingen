@@ -1,9 +1,11 @@
 package com.yoshione.fingen.db;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import androidx.preference.PreferenceManager;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -15,6 +17,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,20 +29,43 @@ import static org.junit.Assert.assertTrue;
  * Migration tests on separate database files. DBHelper.onUpgrade makes a zip backup of the real
  * fingen.db when the storage permission is granted; such files are removed after each test.
  * <p>
- * Fixtures of versions 23 and 30 (assets/migrations) are RECONSTRUCTED from UpdateHelper, not taken
+ * Fixtures of versions 16, 21, 23 and 30 (assets/migrations) are RECONSTRUCTED from UpdateHelper, not taken
  * from real databases, see the header of each fixture. For them the schema is compared with a clean
  * database by tables, columns (ignoring identifier case) and indexes, not by the SQL text of tables:
  * ALTER TABLE ADD COLUMN changes that text and the column order.
+ * <p>
+ * Assumptions of the v21 and v16 tests (in addition to the fixture headers):
+ * <ul>
+ * <li>v21 = tableInfo21 (schema after update18..update20); update21 (NULL Comment of templates -> '') is already applied.</li>
+ * <li>v16 = columns of tableInfo17 with types of tableInfo18, no sync columns, no constraints, no ref_Senders.
+ * It is the least accurate fixture: a real v16 database may differ in types, constraints and column order.</li>
+ * <li>v16 data has no sender markers (ref_Sms_Parser_Patterns.Type = 5), so update17 creates no senders and drops
+ * ALL rows of log_Incoming_SMS (it keeps only SMS of known senders). This is the behaviour of update17, it is asserted.</li>
+ * <li>v16 DateTime is the text "yyyy-MM-dd HH:mm:ss" in the time zone of the device; update18 converts it to
+ * milliseconds with the same pattern and the default time zone, so the expected value is computed in the test with
+ * the same pattern. The test does not depend on the time zone of the device.</li>
+ * <li>update18 reads Payee, Category, Project, Department, Location with getLong: NULL becomes 0; update22 then
+ * changes Project, Department and Location 0 to -1, while Payee and Category stay 0.</li>
+ * <li>update31 calls ColorUtils.getColor, which increments "color_ind" in the default SharedPreferences;
+ * the value is saved before each test and restored after it.</li>
+ * <li>Not covered: the real v16 with sender markers (see the ignored test), backups of other versions,
+ * the effect of legacy_alter_table on the SQL text of foreign keys (only columns and indexes are compared).</li>
+ * </ul>
  */
 @RunWith(AndroidJUnit4.class)
 public class DatabaseMigrationTest {
 
     private Context mContext;
     private Set<String> mBackupsBefore;
+    private boolean mHadColorInd;
+    private int mColorInd;
 
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mHadColorInd = preferences.contains("color_ind");
+        mColorInd = preferences.getInt("color_ind", 0);
         MigrationTestHelper.deleteTestDatabases(mContext);
         mBackupsBefore = MigrationTestHelper.listBackups();
     }
@@ -48,6 +74,14 @@ public class DatabaseMigrationTest {
     public void tearDown() {
         MigrationTestHelper.deleteTestDatabases(mContext);
         MigrationTestHelper.deleteNewBackups(mBackupsBefore);
+        // update31 moves the color index of projects (ColorUtils.getColor)
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+        if (mHadColorInd) {
+            editor.putInt("color_ind", mColorInd);
+        } else {
+            editor.remove("color_ind");
+        }
+        editor.apply();
     }
 
     @Test
@@ -247,6 +281,248 @@ public class DatabaseMigrationTest {
         }
     }
 
+    /** 21 -> 35 runs update22 ... update33 (renamed ParentID, new hierarchy columns, currency order, then as for 23). */
+    @Test
+    public void upgrade21To35_migratesDataByAllSteps() throws Exception {
+        MigrationTestHelper.createFixture(mContext, 21, SEED_V21);
+
+        SQLiteDatabase migrated = MigrationTestHelper.openMigrated(mContext, MigrationTestHelper.dbName("21"));
+        SQLiteDatabase clean = MigrationTestHelper.openClean(mContext, MigrationTestHelper.dbName("clean"));
+        try {
+            assertEquals(35, migrated.getVersion());
+            assertMatchesCleanSchema(clean, migrated);
+            assertMigratedData(migrated, 1000, 2000, 4000);
+
+            // update22: all rows of new hierarchy columns are set, update23: OrderNumber of currencies is 0
+            assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Payees WHERE ParentID <> -1 OR OrderNumber <> 0"));
+            assertEquals(0, queryLong(migrated, "SELECT OrderNumber FROM ref_Currencies WHERE _id = 100"));
+
+            // tables that no step after 21 touches keep their rows
+            assertEquals("Bank", queryString(migrated, "SELECT Name FROM ref_Senders WHERE _id = 100"));
+            assertEquals(0, queryLong(migrated, "SELECT AddCreditLimitToBalance FROM ref_Senders WHERE _id = 100"));
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Incoming_SMS"));
+            assertEquals(100, queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 100"));
+            assertEquals("sms body", queryString(migrated, "SELECT Body FROM log_Incoming_SMS WHERE _id = 100"));
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Sms_Parser_Patterns"));
+            assertEquals("pattern", queryString(migrated, "SELECT Pattern FROM ref_Sms_Parser_Patterns WHERE _id = 100"));
+
+            // deleted transaction with NULL Comment: update29 does not touch it, update32/33 give it no product
+            assertEquals(4, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions"));
+            assertNull(queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 103"));
+            assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM log_Products WHERE TransactionID = 103"));
+            assertEquals(-1, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = 103"));
+        } finally {
+            migrated.close();
+            clean.close();
+        }
+    }
+
+    /**
+     * EXPECTED DEFECT, not fixed in this step: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on a not
+     * deleted transaction with NULL Comment. Same defect as in upgrade23To35_nullCommentInNotDeletedTransaction.
+     */
+    @Ignore("Known defect: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on NULL Comment of a not deleted transaction")
+    @Test
+    public void upgrade21To35_nullCommentInNotDeletedTransaction() throws Exception {
+        MigrationTestHelper.createFixture(mContext, 21,
+                "INSERT INTO ref_Currencies (_id, Deleted, Code, Symbol, Name, DecimalCount) VALUES (100, 0, 'TST', 'T', 'Test', 2)",
+                "INSERT INTO ref_Accounts (_id, Deleted, Type, Name, Currency, StartBalance, IsClosed) VALUES (100, 0, 0, 'Migration account', 100, 12.5, 0)",
+                TRANSACTION_V23 + " VALUES (100, 0, 1000, 100, NULL, NULL, -100, -1, -1, -1, -1, NULL, NULL, -1, 1, 0, 0, 0, -1)");
+
+        SQLiteDatabase migrated = MigrationTestHelper.openMigrated(mContext, MigrationTestHelper.dbName("21"));
+        try {
+            assertEquals(35, migrated.getVersion());
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE _id = 100"));
+        } finally {
+            migrated.close();
+        }
+    }
+
+    /**
+     * 16 -> 35 runs update17 ... update33. The fixture has no sender markers, so update17 drops all SMS
+     * (see the class comment). DateTime is converted from the text to milliseconds by update18.
+     */
+    @Test
+    public void upgrade16To35_migratesDataByAllSteps() throws Exception {
+        MigrationTestHelper.createFixture(mContext, 16, SEED_V16);
+
+        SQLiteDatabase migrated = MigrationTestHelper.openMigrated(mContext, MigrationTestHelper.dbName("16"));
+        SQLiteDatabase clean = MigrationTestHelper.openClean(mContext, MigrationTestHelper.dbName("clean"));
+        try {
+            assertEquals(35, migrated.getVersion());
+            assertMatchesCleanSchema(clean, migrated);
+
+            // update18 parses "yyyy-MM-dd HH:mm:ss" in the default time zone, expected values use the same pattern
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            assertMigratedData(migrated,
+                    format.parse("2016-05-17 10:30:00").getTime(),
+                    format.parse("2016-05-18 11:00:00").getTime(),
+                    format.parse("2016-05-19 12:00:00").getTime());
+            assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions"));
+            // update18: NULL Payee and Category become 0 (getLong), not -1
+            assertEquals(0, queryLong(migrated, "SELECT Payee FROM log_Transactions WHERE _id = 100"));
+            assertEquals(0, queryLong(migrated, "SELECT Category FROM log_Transactions WHERE _id = 100"));
+            assertEquals(100, queryLong(migrated, "SELECT Payee FROM log_Transactions WHERE _id = 101"));
+            assertEquals(101, queryLong(migrated, "SELECT Category FROM log_Transactions WHERE _id = 101"));
+            // update18 sets Deleted = 0 for all rows
+            assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE Deleted = 0"));
+            assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Accounts WHERE Deleted <> 0 OR Deleted IS NULL"));
+            assertEquals(-1, queryLong(migrated, "SELECT TS FROM ref_Accounts WHERE _id = 100"));
+
+            // update17: no sender markers -> no senders, SMS of unknown senders are dropped
+            assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Senders"));
+            assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM log_Incoming_SMS"));
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Sms_Parser_Patterns"));
+            assertEquals("pattern", queryString(migrated, "SELECT Pattern FROM ref_Sms_Parser_Patterns WHERE _id = 100"));
+        } finally {
+            migrated.close();
+            clean.close();
+        }
+    }
+
+    /**
+     * EXPECTED DEFECT, not fixed in this step: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on NULL
+     * Comment. After update18 every transaction of v16 is not deleted (Deleted = 0), so any NULL Comment hits it.
+     */
+    @Ignore("Known defect: UpdateHelper.update29 (UpdateHelper.java:738) throws NPE on NULL Comment of a transaction (all v16 rows are not deleted after update18)")
+    @Test
+    public void upgrade16To35_nullCommentInTransaction() throws Exception {
+        MigrationTestHelper.createFixture(mContext, 16,
+                "INSERT INTO ref_Currencies (_id, Code, Symbol, Name, DecimalCount) VALUES (100, 'TST', 'T', 'Test', 2)",
+                "INSERT INTO ref_Accounts (_id, Type, Name, Currency, StartBalance, IsClosed) VALUES (100, 0, 'Migration account', 100, 12.5, 0)",
+                TRANSACTION_V16 + " VALUES (100, '2016-05-17 10:30:00', 100, NULL, NULL, -100, NULL, NULL, NULL, NULL, -1, 1, 0, NULL, NULL, NULL, NULL, NULL)");
+
+        SQLiteDatabase migrated = MigrationTestHelper.openMigrated(mContext, MigrationTestHelper.dbName("16"));
+        try {
+            assertEquals(35, migrated.getVersion());
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE _id = 100"));
+        } finally {
+            migrated.close();
+        }
+    }
+
+    /**
+     * EXPECTED DEFECT, not fixed in this step: UpdateHelper.update17 (UpdateHelper.java:394) creates senders through
+     * SendersDAO.getInstance(context).createItem(values, -1, true) while DBHelper is upgrading (the flag isUpgrading),
+     * which hangs (ANR) for a v16 database with sender markers (ref_Sms_Parser_Patterns.Type = 5). Not run, because
+     * a hang would block the whole instrumentation run. The test describes the expected result after a fix.
+     */
+    @Ignore("Known defect: UpdateHelper.update17 (UpdateHelper.java:394) hangs in SendersDAO.createItem during upgrade for sender markers (Type = 5)")
+    @Test
+    public void upgrade16To35_senderMarkers() throws Exception {
+        MigrationTestHelper.createFixture(mContext, 16,
+                "INSERT INTO ref_Sms_Parser_Patterns (_id, Type, Object, Pattern) VALUES (100, 5, 'Bank', '+1000')",
+                "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (100, '2016-05-17 10:30:00', '+1000', 'sms body')");
+
+        SQLiteDatabase migrated = MigrationTestHelper.openMigrated(mContext, MigrationTestHelper.dbName("16"));
+        try {
+            assertEquals(35, migrated.getVersion());
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Senders"));
+            assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Incoming_SMS"));
+            assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Sms_Parser_Patterns WHERE Type = 5"));
+        } finally {
+            migrated.close();
+        }
+    }
+
+    /**
+     * Checks the data that SEED_V21 and SEED_V16 describe in the same way (see both seeds). Dates of the
+     * transactions are passed in milliseconds, the rest of the expectations is the same for both versions.
+     */
+    private static void assertMigratedData(SQLiteDatabase migrated, long date100, long date101, long date102) {
+        assertEquals("Migration account", queryString(migrated, "SELECT Name FROM ref_Accounts WHERE _id = 100"));
+        assertEquals(12.5, queryDouble(migrated, "SELECT StartBalance FROM ref_Accounts WHERE _id = 100"), 0.0001);
+        assertEquals(100, queryLong(migrated, "SELECT Currency FROM ref_Accounts WHERE _id = 100"));
+        assertEquals("migration account", queryString(migrated, "SELECT SearchString FROM ref_Accounts WHERE _id = 100"));
+        assertEquals("TST", queryString(migrated, "SELECT Code FROM ref_Currencies WHERE _id = 100"));
+        assertEquals(0, queryLong(migrated, "SELECT OrderNumber FROM ref_Currencies WHERE _id = 100"));
+
+        // update22 renames ParentCategory to ParentID, update24: NULL becomes -1, update27: FullName and SearchString
+        assertEquals(-1, queryLong(migrated, "SELECT ParentID FROM ref_Categories WHERE _id = 100"));
+        assertEquals(100, queryLong(migrated, "SELECT ParentID FROM ref_Categories WHERE _id = 101"));
+        assertEquals("Parent", queryString(migrated, "SELECT FullName FROM ref_Categories WHERE _id = 100"));
+        assertEquals("Parent\\Child", queryString(migrated, "SELECT FullName FROM ref_Categories WHERE _id = 101"));
+        assertEquals("parent\\child", queryString(migrated, "SELECT SearchString FROM ref_Categories WHERE _id = 101"));
+
+        // update22: ParentID -1 and OrderNumber 0 in the new columns of payees, projects, locations, departments
+        assertEquals(-1, queryLong(migrated, "SELECT ParentID FROM ref_Payees WHERE _id = 100"));
+        assertEquals(0, queryLong(migrated, "SELECT OrderNumber FROM ref_Payees WHERE _id = 100"));
+        assertEquals("Кофе", queryString(migrated, "SELECT FullName FROM ref_Payees WHERE _id = 100"));
+        assertEquals("kofe", queryString(migrated, "SELECT SearchString FROM ref_Payees WHERE _id = 100"));
+        assertEquals(-1, queryLong(migrated, "SELECT ParentID FROM ref_Projects WHERE _id = 100"));
+        assertEquals(0, queryLong(migrated, "SELECT OrderNumber FROM ref_Projects WHERE _id = 100"));
+        assertEquals("Project A", queryString(migrated, "SELECT FullName FROM ref_Projects WHERE _id = 100"));
+        assertEquals(1, queryLong(migrated, "SELECT isActive FROM ref_Projects WHERE _id = 100"));
+        String color = queryString(migrated, "SELECT Color FROM ref_Projects WHERE _id = 100");
+        assertTrue("Color: " + color, color != null && color.matches("#[0-9A-F]{6}"));
+        assertEquals(-1, queryLong(migrated, "SELECT ParentID FROM ref_Departments WHERE _id = 100"));
+        assertEquals("Department A", queryString(migrated, "SELECT FullName FROM ref_Departments WHERE _id = 100"));
+        assertEquals(-1, queryLong(migrated, "SELECT ParentID FROM ref_Locations WHERE _id = 100"));
+        assertEquals("Place A", queryString(migrated, "SELECT FullName FROM ref_Locations WHERE _id = 100"));
+        assertEquals(2.5, queryDouble(migrated, "SELECT Lon FROM ref_Locations WHERE _id = 100"), 0.0001);
+        assertEquals(1.5, queryDouble(migrated, "SELECT Lat FROM ref_Locations WHERE _id = 100"), 0.0001);
+
+        assertEquals("template", queryString(migrated, "SELECT SearchString FROM log_Templates WHERE _id = 100"));
+        assertEquals("", queryString(migrated, "SELECT Comment FROM log_Templates WHERE _id = 100"));
+
+        // update25: debt with transactions gets the currency of the account, debt without transactions is deleted
+        assertEquals(100, queryLong(migrated, "SELECT Currency FROM ref_SimpleDebts WHERE _id = 100"));
+        assertEquals(0, queryDouble(migrated, "SELECT StartAmount FROM ref_SimpleDebts WHERE _id = 100"), 0.0001);
+        assertEquals("debt with tx", queryString(migrated, "SELECT SearchString FROM ref_SimpleDebts WHERE _id = 100"));
+        assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_SimpleDebts"));
+
+        // debts and budgets are not touched by the steps
+        assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Debts"));
+        assertEquals(101, queryLong(migrated, "SELECT Account FROM ref_Debts WHERE _id = 100"));
+        assertEquals(100, queryLong(migrated, "SELECT Payee FROM ref_Debts WHERE _id = 100"));
+        assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_budget"));
+        assertEquals(300, queryDouble(migrated, "SELECT Amount FROM ref_budget WHERE _id = 100"), 0.0001);
+        assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_budget_debts"));
+        assertEquals(50, queryDouble(migrated, "SELECT Amount FROM ref_budget_debts WHERE _id = 100"), 0.0001);
+
+        // transactions: dates, update22: 0 -> -1 for Project/Department/Location, update24: NULL Lat/Lon/Accuracy/SimpleDebt
+        assertEquals(date100, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = 100"));
+        assertEquals(date101, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = 101"));
+        assertEquals(date102, queryLong(migrated, "SELECT DateTime FROM log_Transactions WHERE _id = 102"));
+        assertEquals(-100, queryDouble(migrated, "SELECT Amount FROM log_Transactions WHERE _id = 100"), 0.0001);
+        assertEquals(250, queryDouble(migrated, "SELECT Amount FROM log_Transactions WHERE _id = 101"), 0.0001);
+        assertEquals(101, queryLong(migrated, "SELECT DestAccount FROM log_Transactions WHERE _id = 102"));
+        assertEquals(-1, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = 100"));
+        assertEquals(-1, queryLong(migrated, "SELECT Department FROM log_Transactions WHERE _id = 100"));
+        assertEquals(-1, queryLong(migrated, "SELECT Location FROM log_Transactions WHERE _id = 100"));
+        assertEquals(100, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = 101"));
+        assertEquals(100, queryLong(migrated, "SELECT Department FROM log_Transactions WHERE _id = 101"));
+        assertEquals(100, queryLong(migrated, "SELECT Location FROM log_Transactions WHERE _id = 101"));
+        assertEquals(-1, queryLong(migrated, "SELECT Project FROM log_Transactions WHERE _id = 102"));
+        assertEquals(0, queryDouble(migrated, "SELECT Lat FROM log_Transactions WHERE _id = 100"), 0.0001);
+        assertEquals(0, queryDouble(migrated, "SELECT Lon FROM log_Transactions WHERE _id = 100"), 0.0001);
+        assertEquals(-1, queryLong(migrated, "SELECT Accuracy FROM log_Transactions WHERE _id = 100"));
+        assertEquals(100, queryLong(migrated, "SELECT SimpleDebt FROM log_Transactions WHERE _id = 100"));
+        assertEquals(1.5, queryDouble(migrated, "SELECT Lat FROM log_Transactions WHERE _id = 101"), 0.0001);
+        assertEquals(2.5, queryDouble(migrated, "SELECT Lon FROM log_Transactions WHERE _id = 101"), 0.0001);
+        assertEquals(10, queryLong(migrated, "SELECT Accuracy FROM log_Transactions WHERE _id = 101"));
+        assertEquals(-1, queryLong(migrated, "SELECT SimpleDebt FROM log_Transactions WHERE _id = 101"));
+        assertEquals("Кофе", queryString(migrated, "SELECT Comment FROM log_Transactions WHERE _id = 100"));
+        assertEquals("kofe", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 100"));
+        assertEquals("salary", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 101"));
+        assertEquals("transfer", queryString(migrated, "SELECT SearchString FROM log_Transactions WHERE _id = 102"));
+        assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Transactions WHERE _id IN (100, 101, 102) AND FN = 0 AND FD = 0 AND FP = 0 AND Split = 0"));
+
+        // update32: one product per not deleted transaction, price equals the amount
+        assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Products"));
+        assertProducts(migrated, 100, -100);
+        assertProducts(migrated, 101, 250);
+        assertProducts(migrated, 102, -40);
+        assertEquals(3, queryLong(migrated, "SELECT COUNT(*) FROM log_Products"));
+
+        // update27/28: running balance of not deleted transactions, transfer adds a row for the destination account
+        assertEquals(4, queryLong(migrated, "SELECT COUNT(*) FROM log_Running_Balance"));
+        assertBalance(migrated, 100, 100, 0, -100);
+        assertBalance(migrated, 100, 101, 250, -100);
+        assertBalance(migrated, 100, 102, 250, -140);
+        assertBalance(migrated, 101, 102, 40, 0);
+    }
+
     private static final String TRANSACTION_V30 = "INSERT INTO log_Transactions (_id, Deleted, DateTime, SrcAccount, Payee, Category, Amount, "
             + "Project, SimpleDebt, Department, Location, Comment, DestAccount, ExchangeRate, AutoCreated, Lon, Lat, Accuracy, FN, FD, FP, SearchString)";
 
@@ -269,6 +545,67 @@ public class DatabaseMigrationTest {
             TRANSACTION_V23 + " VALUES (101, 0, 2000, 100, NULL, NULL, 250, -1, NULL, -1, -1, 'Salary', NULL, -1, 1, 0, 2.5, 1.5, 10)",
             TRANSACTION_V23 + " VALUES (102, 0, 4000, 100, NULL, NULL, -40, -1, NULL, -1, -1, 'Transfer', NULL, 101, 1, 0, 0, 0, -1)",
             TRANSACTION_V23 + " VALUES (103, 1, 3000, 100, NULL, NULL, -5, -1, NULL, -1, -1, NULL, NULL, -1, 1, 0, 0, 0, -1)"
+    };
+
+    private static final String TRANSACTION_V16 = "INSERT INTO log_Transactions (_id, DateTime, SrcAccount, Payee, Category, Amount, "
+            + "Project, Location, Comment, File, DestAccount, ExchangeRate, AutoCreated, Lat, Lon, Accuracy, Department, SimpleDebt)";
+
+    /**
+     * Version 21 (tableInfo21): ParentCategory instead of ParentID, no hierarchy columns in payees, projects, locations,
+     * departments, no OrderNumber in currencies. Transaction 100: Project/Department/Location 0 (become -1),
+     * NULL Lat/Lon/Accuracy; 101: has all references; 102: transfer; 103: deleted, NULL Comment (allowed for deleted).
+     */
+    private static final String[] SEED_V21 = new String[]{
+            "INSERT INTO ref_Currencies (_id, Deleted, Code, Symbol, Name, DecimalCount) VALUES (100, 0, 'TST', 'T', 'Test', 2)",
+            "INSERT INTO ref_Accounts (_id, Deleted, Type, Name, Currency, StartBalance, IsClosed) VALUES (100, 0, 0, 'Migration account', 100, 12.5, 0)",
+            "INSERT INTO ref_Accounts (_id, Deleted, Type, Name, Currency, StartBalance, IsClosed) VALUES (101, 0, 0, 'Second account', 100, 0, 0)",
+            "INSERT INTO ref_Categories (_id, Deleted, Name, ParentCategory, OrderNumber, Sign) VALUES (100, 0, 'Parent', NULL, 0, 1)",
+            "INSERT INTO ref_Categories (_id, Deleted, Name, ParentCategory, OrderNumber, Sign) VALUES (101, 0, 'Child', 100, 0, 1)",
+            "INSERT INTO ref_Payees (_id, Deleted, Name) VALUES (100, 0, 'Кофе')",
+            "INSERT INTO ref_Projects (_id, Deleted, Name, isActive) VALUES (100, 0, 'Project A', 1)",
+            "INSERT INTO ref_Departments (_id, Deleted, Name, isActive) VALUES (100, 0, 'Department A', 1)",
+            "INSERT INTO ref_Locations (_id, Deleted, Name, Lon, Lat) VALUES (100, 0, 'Place A', 2.5, 1.5)",
+            "INSERT INTO ref_SimpleDebts (_id, Deleted, Name, isActive) VALUES (100, 0, 'Debt with tx', 1)",
+            "INSERT INTO ref_SimpleDebts (_id, Deleted, Name, isActive) VALUES (101, 0, 'Debt without tx', 1)",
+            "INSERT INTO log_Templates (_id, Deleted, SrcAccount, Amount, Name, DestAccount, ExchangeRate, Type, Comment) VALUES (100, 0, 100, -10, 'Template', -1, 1, 0, '')",
+            "INSERT INTO ref_Senders (_id, Deleted, Name, PhoneNo, isActive) VALUES (100, 0, 'Bank', '+1000', 1)",
+            "INSERT INTO log_Incoming_SMS (_id, Deleted, DateTime, Sender, Body) VALUES (100, 0, '2020-01-01 10:00:00', 100, 'sms body')",
+            "INSERT INTO ref_Sms_Parser_Patterns (_id, Deleted, Type, Object, Pattern) VALUES (100, 0, 1, 'object', 'pattern')",
+            "INSERT INTO ref_Debts (_id, Deleted, Account, Payee, Category, Closed) VALUES (100, 0, 101, 100, 100, 0)",
+            "INSERT INTO ref_budget (_id, Deleted, Year, Month, Category, Amount, Currency) VALUES (100, 0, 2020, 1, 100, 300, 100)",
+            "INSERT INTO ref_budget_debts (_id, Deleted, Year, Month, Debt, Amount) VALUES (100, 0, 2020, 1, 100, 50)",
+            TRANSACTION_V23 + " VALUES (100, 0, 1000, 100, 100, NULL, -100, 0, 100, 0, 0, 'Кофе', NULL, -1, 1, 0, NULL, NULL, NULL)",
+            TRANSACTION_V23 + " VALUES (101, 0, 2000, 100, 100, 101, 250, 100, NULL, 100, 100, 'Salary', NULL, -1, 1, 0, 2.5, 1.5, 10)",
+            TRANSACTION_V23 + " VALUES (102, 0, 4000, 100, NULL, NULL, -40, -1, NULL, -1, -1, 'Transfer', NULL, 101, 1, 0, 0, 0, -1)",
+            TRANSACTION_V23 + " VALUES (103, 1, 3000, 100, NULL, NULL, -5, -1, NULL, -1, -1, NULL, NULL, -1, 1, 0, 0, 0, -1)"
+    };
+
+    /**
+     * Version 16 (columns of tableInfo17, no sync columns, DateTime as text). Same entities as SEED_V21 except the SMS,
+     * senders and the deleted transaction (there is no Deleted). Payee/Category/Project/... NULL: update18 turns them into 0.
+     * No sender markers (Type = 5), see the class comment.
+     */
+    private static final String[] SEED_V16 = new String[]{
+            "INSERT INTO ref_Currencies (_id, Code, Symbol, Name, DecimalCount) VALUES (100, 'TST', 'T', 'Test', 2)",
+            "INSERT INTO ref_Accounts (_id, Type, Name, Currency, StartBalance, IsClosed) VALUES (100, 0, 'Migration account', 100, 12.5, 0)",
+            "INSERT INTO ref_Accounts (_id, Type, Name, Currency, StartBalance, IsClosed) VALUES (101, 0, 'Second account', 100, 0, 0)",
+            "INSERT INTO ref_Categories (_id, Name, ParentCategory, OrderNumber, Sign) VALUES (100, 'Parent', NULL, 0, 1)",
+            "INSERT INTO ref_Categories (_id, Name, ParentCategory, OrderNumber, Sign) VALUES (101, 'Child', 100, 0, 1)",
+            "INSERT INTO ref_Payees (_id, Name) VALUES (100, 'Кофе')",
+            "INSERT INTO ref_Projects (_id, Name, isActive) VALUES (100, 'Project A', 1)",
+            "INSERT INTO ref_Departments (_id, Name, isActive) VALUES (100, 'Department A', 1)",
+            "INSERT INTO ref_Locations (_id, Name, Lon, Lat) VALUES (100, 'Place A', 2.5, 1.5)",
+            "INSERT INTO ref_SimpleDebts (_id, Name, isActive) VALUES (100, 'Debt with tx', 1)",
+            "INSERT INTO ref_SimpleDebts (_id, Name, isActive) VALUES (101, 'Debt without tx', 1)",
+            "INSERT INTO log_Templates (_id, SrcAccount, Amount, Name, DestAccount, ExchangeRate, Type) VALUES (100, 100, -10, 'Template', -1, 1, 0)",
+            "INSERT INTO log_Incoming_SMS (_id, DateTime, Sender, Body) VALUES (100, '2016-05-17 09:00:00', '+1000', 'sms body')",
+            "INSERT INTO ref_Sms_Parser_Patterns (_id, Type, Object, Pattern) VALUES (100, 1, 'object', 'pattern')",
+            "INSERT INTO ref_Debts (_id, Account, Payee, Category, Closed) VALUES (100, 101, 100, 100, 0)",
+            "INSERT INTO ref_budget (_id, Year, Month, Category, Amount, Currency) VALUES (100, 2016, 5, 100, 300, 100)",
+            "INSERT INTO ref_budget_debts (_id, Year, Month, Debt, Amount) VALUES (100, 2016, 5, 100, 50)",
+            TRANSACTION_V16 + " VALUES (100, '2016-05-17 10:30:00', 100, NULL, NULL, -100, 0, 0, 'Кофе', NULL, -1, 1, 0, NULL, NULL, NULL, 0, 100)",
+            TRANSACTION_V16 + " VALUES (101, '2016-05-18 11:00:00', 100, 100, 101, 250, 100, 100, 'Salary', NULL, -1, 1, 0, 1.5, 2.5, 10, 100, NULL)",
+            TRANSACTION_V16 + " VALUES (102, '2016-05-19 12:00:00', 100, NULL, NULL, -40, NULL, NULL, 'Transfer', NULL, 101, 1, 0, 0, 0, -1, NULL, NULL)"
     };
 
     private static void assertMatchesCleanSchema(SQLiteDatabase clean, SQLiteDatabase migrated) {
