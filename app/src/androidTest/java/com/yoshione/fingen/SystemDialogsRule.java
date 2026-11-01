@@ -32,8 +32,6 @@ public class SystemDialogsRule implements TestRule {
     private static final long POLL_INTERVAL_MS = 500;
 
     private final TestRule mGrantRule = GrantPermissionRule.grant(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_FINE_LOCATION);
 
     @Override
