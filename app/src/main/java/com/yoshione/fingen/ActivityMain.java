@@ -12,6 +12,7 @@ import android.graphics.Rect;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -743,6 +744,10 @@ public class ActivityMain extends ToolbarActivity {
             }
             if (smsMarkers.size() > 0 | senders.size() > 0) {
                 ActivityMainPermissionsDispatcher.getReceiveSmsPermissionWithPermissionCheck(this);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, RequestCodes.REQUEST_CODE_POST_NOTIFICATIONS);
+                }
             }
         }
         ActivityMainPermissionsDispatcher.getExternalStoragepermissionWithPermissionCheck(this);

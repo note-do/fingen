@@ -411,6 +411,7 @@ public class CalculatorActivity extends ToolbarActivity {
             result = "";
         }
 
+        broadcastIntent.setPackage(getPackageName());
         broadcastIntent.putExtra(RESULT, result);
         sendBroadcast(broadcastIntent);
         resultIntent.putExtra(RESULT, result);

@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.animation.RotateAnimation;
@@ -206,7 +207,7 @@ public class FGApplication extends Application implements ISyncAnimMethods {
                 IntentFilter intentFilter = new IntentFilter();
                 intentFilter.addAction("com.yoshione.fingen.intent.action.CREATE_TRANSACTION");
                 intentFilter.addAction("com.yoshione.fingen.intent.action.CREATE_SMS");
-                registerReceiver(mCustomIntentReceiver, intentFilter);
+                ContextCompat.registerReceiver(FGApplication.this, mCustomIntentReceiver, intentFilter, ContextCompat.RECEIVER_EXPORTED);
             }
         }
 

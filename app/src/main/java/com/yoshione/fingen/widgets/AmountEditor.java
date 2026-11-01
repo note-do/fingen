@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
+import androidx.core.content.ContextCompat;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -353,7 +354,7 @@ public class AmountEditor extends LinearLayout {
 
     void onCalculatorClick() {
         CalcReciever receiver = new CalcReciever(this, activity);
-        activity.registerReceiver(receiver, new IntentFilter(FgConst.ACT_CALC_DONE));
+        ContextCompat.registerReceiver(activity, receiver, new IntentFilter(FgConst.ACT_CALC_DONE), ContextCompat.RECEIVER_NOT_EXPORTED);
         new CalculatorBuilder()
                 .withTitle("calc")
                 .withValue(getAmount().toString())

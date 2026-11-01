@@ -108,7 +108,7 @@ public class SMSReceiver extends BroadcastReceiver {
                     notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     notificationIntent.putExtra("action", ActivityMain.ACTION_OPEN_TRANSACTIONS_LIST);
                     PendingIntent contentIntent = PendingIntent.getActivity(context,
-                            0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                            0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                     Resources res = context.getResources();
                     Notification.Builder builder = NotificationHelper.getInstance(context).getNotification();
@@ -129,7 +129,7 @@ public class SMSReceiver extends BroadcastReceiver {
                         intentEdit.putExtra("transaction", transaction);
                         intentEdit.putExtra("EXIT", true);
                         PendingIntent pIntentEdit = PendingIntent.getActivity(context,
-                                RequestCodes.REQUEST_CODE_EDIT_TRANSACTION_FROM_NOTIFYCATION, intentEdit, PendingIntent.FLAG_CANCEL_CURRENT);
+                                RequestCodes.REQUEST_CODE_EDIT_TRANSACTION_FROM_NOTIFYCATION, intentEdit, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                         builder//.setContentTitle(res.getString(R.string.notif_ticker_transaction_auto_created))// Заголовок уведомления
                                 .setContentText(TransactionManager.transactionToString(transaction, context))// Текст уведомления
@@ -163,7 +163,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
                         /*Pending intent*/
                         contentIntent = PendingIntent.getActivity(context,
-                                RequestCodes.REQUEST_CODE_EDIT_TRANSACTION, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                                RequestCodes.REQUEST_CODE_EDIT_TRANSACTION, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                         /*Строим уведомление*/
                         String s = res.getString(R.string.notif_create_correcting_transaction);
