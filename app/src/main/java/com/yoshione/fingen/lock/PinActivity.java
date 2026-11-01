@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import com.yoshione.fingen.utils.WindowInsetsHelper;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
@@ -45,7 +47,9 @@ public class PinActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowInsetsHelper.enable(this);
         setContentView(R.layout.activity_pin_code);
+        WindowInsetsHelper.applyToRoot(((ViewGroup) findViewById(android.R.id.content)).getChildAt(0), null);
 
         mStepTextView = findViewById(R.id.pin_code_step_textview);
         mDotsTextView = findViewById(R.id.pin_code_dots_textview);

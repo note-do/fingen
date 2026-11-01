@@ -42,6 +42,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import com.yoshione.fingen.utils.WindowInsetsHelper;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -172,6 +176,26 @@ public class ActivityMain extends ToolbarActivity {
     @Override
     protected String getLayoutTitle() {
         return getString(R.string.app_name);
+    }
+
+    @Override
+    protected void setupWindowInsets() {
+        // The root is DrawerLayout: insets go to the AppBar (top) and the bottom buttons bar,
+        // the rest is left unconsumed so that NavigationView handles its own insets
+        final View root = getContentRoot();
+        final View content = ((ViewGroup) root).getChildAt(0);
+        final View appBar = root.findViewById(R.id.appbar);
+        final View buttonsBar = root.findViewById(R.id.buttonsBarContainer);
+        final int appBarTop = appBar.getPaddingTop();
+        final int buttonsBottom = buttonsBar.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+            Insets i = WindowInsetsHelper.contentInsets(insets);
+            appBar.setPadding(appBar.getPaddingLeft(), appBarTop + i.top, appBar.getPaddingRight(), appBar.getPaddingBottom());
+            buttonsBar.setPadding(buttonsBar.getPaddingLeft(), buttonsBar.getPaddingTop(), buttonsBar.getPaddingRight(), buttonsBottom + i.bottom);
+            content.setPadding(i.left, 0, i.right, 0);
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(root);
     }
 
     @Override

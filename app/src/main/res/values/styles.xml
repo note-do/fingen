@@ -18,6 +18,8 @@
         <item name="colorPrimaryDark">@color/ColorPrimaryDark</item>
         <item name="colorAccent">@color/ColorAccent</item>
         <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
 
         <item name="android:textColor">@color/fg_black_color</item>
         <item name="android:textColorSecondary">@color/lightColorSecondaryText</item>
@@ -46,6 +48,8 @@
         <item name="listItemBackground">@color/darkGrayBackground</item>
         <item name="barBackground">@color/darkGrayBackground</item>
         <item name="listDividerBackground">@color/fg_black_color</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">@color/ColorPrimary</item>
         <item name="colorPrimaryDark">@color/ColorPrimaryDark</item>

@@ -23,6 +23,7 @@ import com.yoshione.fingen.FGApplication;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.interfaces.IUnsubscribeOnDestroy;
 import com.yoshione.fingen.utils.ViewServer;
+import com.yoshione.fingen.utils.WindowInsetsHelper;
 
 import javax.inject.Inject;
 
@@ -54,8 +55,10 @@ public abstract class ToolbarActivity extends AppCompatActivity implements IUnsu
 
 //        getMvpDelegate().onCreate(savedInstanceState);
 
+        WindowInsetsHelper.enable(this);
         setContentView(getLayoutResourceId());
         toolbar = findViewById(R.id.toolbar);
+        setupWindowInsets();
         setSupportActionBar(toolbar);
 
         FGApplication.getAppComponent().inject(this);
@@ -76,6 +79,14 @@ public abstract class ToolbarActivity extends AppCompatActivity implements IUnsu
         });
 
         ViewServer.get(this).addWindow(this);
+    }
+
+    /**
+     * Edge-to-edge: by default AppBar gets the top inset, root gets the rest.
+     * Screens with their own structure (ActivityMain) override this method.
+     */
+    protected void setupWindowInsets() {
+        WindowInsetsHelper.applyToRoot(getContentRoot(), toolbar != null ? (View) toolbar.getParent() : null);
     }
 
     @Override

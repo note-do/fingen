@@ -14,6 +14,8 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import com.yoshione.fingen.utils.WindowInsetsHelper;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
@@ -42,7 +44,10 @@ public class ActivitySettings extends AppCompatActivity implements
             default: setTheme(R.style.AppThemeLight); break;
         }
         super.onCreate(savedInstanceState);
+        WindowInsetsHelper.enable(this);
         setContentView(R.layout.activity_settings);
+        WindowInsetsHelper.applyToRoot(((ViewGroup) findViewById(android.R.id.content)).getChildAt(0),
+                (View) findViewById(R.id.toolbar).getParent());
 
         if (savedInstanceState == null) {
             mSettingsFragment = FragmentSettings.newInstance(null);
