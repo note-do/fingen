@@ -2,8 +2,7 @@ package com.yoshione.fingen;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -978,12 +977,9 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
                         File restored = new File(db.getParent() + "/fingen.db.ex");
                         restored.renameTo(db);
                     }
-                    Intent mStartActivity = new Intent(mContext, ActivityMain.class);
-                    int mPendingIntentId = 123456;
-                    PendingIntent mPendingIntent = PendingIntent.getActivity(mContext, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                    AlarmManager mgr = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-                    mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
-                    System.exit(0);
+                    Intent restartIntent = Intent.makeRestartActivityTask(new ComponentName(mContext, ActivityMain.class));
+                    activity.startActivity(restartIntent);
+                    Runtime.getRuntime().exit(0);
                 }
 
                 @Override
