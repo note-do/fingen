@@ -20,7 +20,8 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.formatter.IValueFormatter;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
@@ -52,6 +53,9 @@ import java.util.Random;
  */
 public class FragmentTimeBarChart extends Fragment implements OnChartValueSelectedListener {
 
+    private static final float BAR_WIDTH_SINGLE = 0.8f;
+    private static final float BAR_WIDTH_PAIR = 0.4f;
+    private static final float BAR_OFFSET = 0.2f;
     public static final String TAG = "FragmentBarChart";
     private final boolean mDrawBarLabels = false;
     HorizontalBarChart mBarChart;
@@ -76,19 +80,19 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Highlight highlight[] = mBarChart.getHighlighted();
+                List<Highlight> highlight = mBarChart.getHighlighted();
 
-                if (highlight == null || highlight.length == 0) {
+                if (highlight == null || highlight.isEmpty()) {
                     return;
                 }
 
-                List<Entry> entries = mBarChart.getEntriesAtIndex(highlight[0].getXIndex());
+                Entry<?> entry = mBarChart.getData().getEntryForHighlight(highlight.get(0));
 
-                if (entries == null || entries.size() == 0) {
+                if (entry == null) {
                     return;
                 }
 
-                DateRangeSum range = (DateRangeSum) entries.get(0).getData();
+                DateRangeSum range = (DateRangeSum) entry.getData();
                 ReportBuilder reportBuilder = ReportBuilder.getInstance(getActivity());
                 ArrayList<AbstractFilter> filters = new ArrayList<>();
 
@@ -147,7 +151,7 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
         }
     }
 
-    private ValueFormatter getValueFormatter() {
+    private IValueFormatter getValueFormatter() {
         if (isShrinkValues()) {
             return largeValuesFormatter;
         } else {
@@ -168,12 +172,12 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
     }
 
     private void setupBarChart() {
-        mBarChart.setDrawBarShadow(false);
-        mBarChart.setDrawValueAboveBar(true);
-        mBarChart.setDescription("");
-        mBarChart.setMaxVisibleValueCount(Integer.MAX_VALUE);
-        mBarChart.setPinchZoom(false);
-        mBarChart.setDrawGridBackground(false);
+        mBarChart.setDrawBarShadowEnabled(false);
+        mBarChart.setDrawValueAboveBarEnabled(true);
+        mBarChart.getDescription().setEnabled(false);
+        mBarChart.setMaxVisibleCount(Integer.MAX_VALUE);
+        mBarChart.setPinchZoomEnabled(false);
+        mBarChart.setDrawGridBackgroundEnabled(false);
         mBarChart.setOnChartValueSelectedListener(this);
         mBarChart.setHighlightPerDragEnabled(false);
 
@@ -181,52 +185,50 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
 
         XAxis xl = mBarChart.getXAxis();
         xl.setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
-        xl.setDrawAxisLine(true);
-        xl.setDrawGridLines(true);
+        xl.setDrawAxisLineEnabled(true);
+        xl.setDrawGridLinesEnabled(true);
         xl.setGridLineWidth(0.3f);
         xl.setTextColor(textColor);
 
         YAxis yl = mBarChart.getAxisLeft();
-        yl.setDrawAxisLine(true);
-        yl.setDrawGridLines(true);
+        yl.setDrawAxisLineEnabled(true);
+        yl.setDrawGridLinesEnabled(true);
         yl.setGridLineWidth(0.3f);
-        yl.setAxisMinValue(0f);
+        yl.setAxisMinimum(0f);
         yl.setTextColor(textColor);
 
         YAxis yr = mBarChart.getAxisRight();
-        yr.setDrawAxisLine(true);
-        yr.setDrawGridLines(false);
-        yr.setAxisMinValue(0f);
+        yr.setDrawAxisLineEnabled(true);
+        yr.setDrawGridLinesEnabled(false);
+        yr.setAxisMinimum(0f);
         yr.setTextColor(textColor);
 
-        mBarChart.setXAxisRenderer(new FgHorizontalBarChartRenderer(getActivity(), mBarChart.getViewPortHandler(),
+        mBarChart.setRendererXAxis(new FgHorizontalBarChartRenderer(getActivity(), mBarChart.getViewPortHandler(),
                 mBarChart.getXAxis(), mBarChart.getTransformer(YAxis.AxisDependency.LEFT), mBarChart));
         mBarChart.getLegend().setEnabled(false);
     }
 
-    private Pair<ArrayList<IBarDataSet>, ArrayList<String>> getDatasetsInAndEx(List<DateEntry> entries) {
+    private Pair<ArrayList<IBarDataSet<?>>, ArrayList<String>> getDatasetsInAndEx(List<DateEntry> entries) {
         int i = 0;
-        ArrayList<BarEntry> yValsExpense = new ArrayList<>();
-        ArrayList<BarEntry> yValsIncome = new ArrayList<>();
+        ArrayList<BarEntry<DateRangeSum>> yValsExpense = new ArrayList<>();
+        ArrayList<BarEntry<DateRangeSum>> yValsIncome = new ArrayList<>();
         ArrayList<String> xVals = new ArrayList<>();
         DateFormat df = ReportBuilder.getInstance(getActivity()).getDateFormatter();
-        BarEntry barEntry;
+        BarEntry<DateRangeSum> barEntry;
         DateRangeSum rangeSum;
         Pair<Date, Date> datePair;
 
         for (DateEntry entry : entries) {
             if (entry.getExpense().compareTo(BigDecimal.ZERO) > 0) {
-                barEntry = new BarEntry(entry.getExpense().setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
                 datePair = getPairDates(entry.getDate());
                 rangeSum = new DateRangeSum(datePair.first, datePair.second, entry.getExpense());
-                barEntry.setData(rangeSum);
+                barEntry = new BarEntry<>(i + BAR_OFFSET, entry.getExpense().setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, rangeSum);
                 yValsExpense.add(barEntry);
             }
             if (entry.getIncome().compareTo(BigDecimal.ZERO) > 0) {
-                barEntry = new BarEntry(entry.getIncome().setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
                 datePair = getPairDates(entry.getDate());
                 rangeSum = new DateRangeSum(datePair.first, datePair.second, entry.getIncome());
-                barEntry.setData(rangeSum);
+                barEntry = new BarEntry<>(i - BAR_OFFSET, entry.getIncome().setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, rangeSum);
                 yValsIncome.add(barEntry);
             }
             if (entry.getExpense().compareTo(BigDecimal.ZERO) > 0 | entry.getIncome().compareTo(BigDecimal.ZERO) > 0) {
@@ -235,20 +237,20 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
             }
         }
 
-        BarDataSet setExpense = new BarDataSet(yValsExpense, getString(R.string.ent_outcome));
+        BarDataSet<DateRangeSum> setExpense = new BarDataSet<>(yValsExpense, getString(R.string.ent_outcome));
         setExpense.setColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.negative_color));
         setExpense.setValueFormatter(getValueFormatter());
-        setExpense.setDrawValues(mDrawBarLabels);
-        BarDataSet setIncome = new BarDataSet(yValsIncome, getString(R.string.ent_income));
+        setExpense.setDrawValuesEnabled(mDrawBarLabels);
+        BarDataSet<DateRangeSum> setIncome = new BarDataSet<>(yValsIncome, getString(R.string.ent_income));
         setIncome.setColor(ContextCompat.getColor(getActivity(), R.color.positive_color));
         setIncome.setValueFormatter(getValueFormatter());
-        setIncome.setDrawValues(mDrawBarLabels);
+        setIncome.setDrawValuesEnabled(mDrawBarLabels);
 
         int textColor = ColorUtils.getTextColor(getActivity());
         setExpense.setValueTextColor(textColor);
         setIncome.setValueTextColor(textColor);
 
-        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        ArrayList<IBarDataSet<?>> dataSets = new ArrayList<>();
         dataSets.add(setIncome);
         dataSets.add(setExpense);
 
@@ -256,23 +258,22 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
         return new Pair<>(dataSets, xVals);
     }
 
-    private Pair<ArrayList<IBarDataSet>, ArrayList<String>> getDatasetsInMinusEx(List<DateEntry> entries) {
+    private Pair<ArrayList<IBarDataSet<?>>, ArrayList<String>> getDatasetsInMinusEx(List<DateEntry> entries) {
         int i = 0;
-        ArrayList<BarEntry> yValsSum = new ArrayList<>();
+        ArrayList<BarEntry<DateRangeSum>> yValsSum = new ArrayList<>();
         ArrayList<String> xVals = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
         DateFormat df = ReportBuilder.getInstance(getActivity()).getDateFormatter();
-        BarEntry barEntry;
+        BarEntry<DateRangeSum> barEntry;
         DateRangeSum rangeSum;
         Pair<Date, Date> datePair;
 
         BigDecimal sum;
         for (DateEntry entry : entries) {
             sum = entry.getIncome().subtract(entry.getExpense());
-            barEntry = new BarEntry(sum.abs().floatValue(), i);
             datePair = getPairDates(entry.getDate());
             rangeSum = new DateRangeSum(datePair.first, datePair.second, sum);
-            barEntry.setData(rangeSum);
+            barEntry = new BarEntry<>(i, sum.abs().floatValue(), null, rangeSum);
             yValsSum.add(barEntry);
             xVals.add(String.format("%s (%s)", df.format(entry.getDate()), formatValue(sum.abs().floatValue())));
             if (sum.compareTo(BigDecimal.ZERO) >= 0) {
@@ -283,26 +284,26 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
             i++;
         }
 
-        BarDataSet setSum = new BarDataSet(yValsSum, getString(R.string.ent_income) + " - " + getString(R.string.ent_outcome));
+        BarDataSet<DateRangeSum> setSum = new BarDataSet<>(yValsSum, getString(R.string.ent_income) + " - " + getString(R.string.ent_outcome));
         setSum.setColors(colors);
         setSum.setValueFormatter(getValueFormatter());
-        setSum.setDrawValues(mDrawBarLabels);
+        setSum.setDrawValuesEnabled(mDrawBarLabels);
 
         int textColor = ColorUtils.getTextColor(getActivity());
         setSum.setValueTextColor(textColor);
 
-        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        ArrayList<IBarDataSet<?>> dataSets = new ArrayList<>();
         dataSets.add(setSum);
         mBarChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
         return new Pair<>(dataSets, xVals);
     }
 
-    private Pair<ArrayList<IBarDataSet>, ArrayList<String>> getDatasetsSingle(List<DateEntry> entries, boolean expense) {
+    private Pair<ArrayList<IBarDataSet<?>>, ArrayList<String>> getDatasetsSingle(List<DateEntry> entries, boolean expense) {
         int i = 0;
-        ArrayList<BarEntry> yVals = new ArrayList<>();
+        ArrayList<BarEntry<DateRangeSum>> yVals = new ArrayList<>();
         ArrayList<String> xVals = new ArrayList<>();
         DateFormat df = ReportBuilder.getInstance(getActivity()).getDateFormatter();
-        BarEntry barEntry;
+        BarEntry<DateRangeSum> barEntry;
         BigDecimal value;
         DateRangeSum rangeSum;
         Pair<Date, Date> datePair;
@@ -310,24 +311,22 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
         for (DateEntry entry : entries) {
             value = (expense ? entry.getExpense() : entry.getIncome()).setScale(2, RoundingMode.HALF_EVEN);
             if (value.compareTo(BigDecimal.ZERO) > 0) {
-                barEntry = new BarEntry(value.floatValue(), i);
                 datePair = getPairDates(entry.getDate());
                 rangeSum = new DateRangeSum(datePair.first, datePair.second, value);
-//                barEntry.setData(getPairDates(entry.getDate()));
-                barEntry.setData(rangeSum);
+                barEntry = new BarEntry<>(i, value.floatValue(), null, rangeSum);
                 yVals.add(barEntry);
                 xVals.add(String.format("%s (%s)", df.format(entry.getDate()), formatValue(value.floatValue())));
                 i++;
             }
         }
 
-        BarDataSet set = new BarDataSet(yVals, getString(expense ? R.string.ent_outcome : R.string.ent_income));
+        BarDataSet set = new BarDataSet<>(yVals, getString(expense ? R.string.ent_outcome : R.string.ent_income));
         set.setColor(ContextCompat.getColor(getActivity(), expense ? R.color.negative_color : R.color.positive_color));
         set.setValueFormatter(getValueFormatter());
         set.setValueTextColor(ColorUtils.getTextColor(getActivity()));
-        set.setDrawValues(mDrawBarLabels);
+        set.setDrawValuesEnabled(mDrawBarLabels);
 
-        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        ArrayList<IBarDataSet<?>> dataSets = new ArrayList<>();
         dataSets.add(set);
         mBarChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
         return new Pair<>(dataSets, xVals);
@@ -343,7 +342,7 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
             mBarChart.clear();
             return;
         }
-        Pair<ArrayList<IBarDataSet>, ArrayList<String>> pair;
+        Pair<ArrayList<IBarDataSet<?>>, ArrayList<String>> pair;
         switch (reportBuilder.getActiveShowIndex()) {
             case ReportBuilder.SHOW_INCOME_AND_EXPENSE:
                 pair = getDatasetsInAndEx(entries);
@@ -366,9 +365,20 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
             return;
         }
 
-        BarData data = new BarData(pair.second, pair.first);
+        BarData data = new BarData(pair.first);
         data.setValueTextSize(10f);
-        data.setGroupSpace(80f);
+        // two sets (income and expense) share a category: bars are placed side by side by hand (see BAR_OFFSET),
+        // BarData.groupBars is not used because it needs dense data sets
+        data.setBarWidth(pair.first.size() > 1 ? BAR_WIDTH_PAIR : BAR_WIDTH_SINGLE);
+
+        int categories = pair.second.size();
+        XAxis xAxis = mBarChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(pair.second));
+        xAxis.setGranularity(1f);
+        xAxis.setGranularityEnabled(true);
+        xAxis.setAxisMinimum(-0.5f);
+        xAxis.setAxisMaximum(categories - 0.5f);
+        xAxis.setLabelCount(Math.min(categories, 15));
 //        data.setValueTypeface(tf);
 
         mBarChart.setData(data);
@@ -376,7 +386,8 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
         mBarChart.animateY(1000);
         mBarChart.highlightValues(null);
 
-        if (mBarChart.getHighlighted() == null) {
+        List<Highlight> highlighted = mBarChart.getHighlighted();
+        if (highlighted == null || highlighted.isEmpty()) {
             mFabLayout.setVisibility(View.GONE);
         } else {
             mFabLayout.setVisibility(View.VISIBLE);
@@ -405,7 +416,7 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
     }
 
     @Override
-    public void onValueSelected(Entry e, int dataSetIndex, Highlight h) {CabbageFormatter cabbageFormatter = null;
+    public void onValueSelected(Entry<?> e, Highlight h) {CabbageFormatter cabbageFormatter = null;
         try {
             cabbageFormatter = new CabbageFormatter(ReportBuilder.getInstance(getActivity()).getActiveCabbage());
             DateRangeSum rangeSum = (DateRangeSum) e.getData();

@@ -24,10 +24,11 @@ import com.github.mikephil.charting.animation.ChartAnimator;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.formatter.PercentFormatter;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IPieDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
@@ -134,7 +135,7 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
         }
     }
 
-    private ValueFormatter getValueFormatter() {
+    private IValueFormatter getValueFormatter() {
         if (isShrinkValues()) {
             return largeValuesFormatter;
         } else {
@@ -169,7 +170,7 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
     }
 
     private void setupPieChart() {
-        mPieChart.setDescription("");
+        mPieChart.getDescription().setEnabled(false);
         mPieChart.setExtraOffsets(40, 10, 40, 5);
 
         mPieChart.setDragDecelerationFrictionCoef(0.95f);
@@ -188,6 +189,7 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
         mPieChart.setOnChartValueSelectedListener(this);
 
         mPieChart.setRenderer(new FgPieChartRenderer(mPieChart, mPieChart.getAnimator(), mPieChart.getViewPortHandler()));
+        mPieChart.setEntryLabelTextSize(11f);
         mPieChart.getLegend().setEnabled(false);
     }
 
@@ -199,42 +201,45 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
 
         @Override
         public void drawValues(Canvas c) {
-            Paint.Style oldStyle = mValuePaint.getStyle();
-            mValuePaint.setStyle(Paint.Style.STROKE);
-            float oldStrokeWidth = mValuePaint.getStrokeWidth();
-            mValuePaint.setStrokeWidth(ScreenUtils.dpToPx(3f, FGApplication.getContext()));
+            Paint valuePaint = getValuePaint();
+            Paint labelPaint = getPaintEntryLabels();
+            Paint.Style oldStyle = valuePaint.getStyle();
+            valuePaint.setStyle(Paint.Style.STROKE);
+            float oldStrokeWidth = valuePaint.getStrokeWidth();
+            valuePaint.setStrokeWidth(ScreenUtils.dpToPx(3f, FGApplication.getContext()));
+            Paint.Style oldLabelStyle = labelPaint.getStyle();
+            float oldLabelStrokeWidth = labelPaint.getStrokeWidth();
+            int oldLabelColor = labelPaint.getColor();
             int color1 = ColorUtils.getTextColor(getActivity());
             int color2 = ColorUtils.getTextInverseColor(getActivity());
 
-            PieData data = mChart.getData();
-            List<IPieDataSet> dataSets = data.getDataSets();
+            PieData data = getChart().getData();
+            List<IPieDataSet<?>> dataSets = data.getDataSets();
 
-            for (int i = 0; i < dataSets.size(); i++) {
-                IPieDataSet dataSet = dataSets.get(i);
-                mValueLinePaint.setColor(ColorUtils.ContrastColor(dataSet.getValueLineColor()));
-
-                int entryCount = dataSet.getEntryCount();
-                for (int j = 0; j < entryCount; j++) {
-                    dataSet.setValueTextColor(color2);
-                }
+            labelPaint.setStyle(Paint.Style.STROKE);
+            labelPaint.setStrokeWidth(ScreenUtils.dpToPx(3f, FGApplication.getContext()));
+            labelPaint.setColor(color2);
+            for (IPieDataSet<?> dataSet : dataSets) {
+                getValueLinePaint().setColor(ColorUtils.ContrastColor(dataSet.getValueLineColor()));
+                dataSet.setValueTextColor(color2);
             }
 
             super.drawValues(c);
 
-            mValuePaint.setStyle(oldStyle);
-            mValuePaint.setStrokeWidth(oldStrokeWidth);
+            valuePaint.setStyle(oldStyle);
+            valuePaint.setStrokeWidth(oldStrokeWidth);
+            labelPaint.setStyle(oldLabelStyle);
+            labelPaint.setStrokeWidth(oldLabelStrokeWidth);
+            labelPaint.setColor(color1);
 
-            for (int i = 0; i < dataSets.size(); i++) {
-                IPieDataSet dataSet = dataSets.get(i);
-                mValueLinePaint.setColor(ColorUtils.ContrastColor(dataSet.getValueLineColor()));
-
-                int entryCount = dataSet.getEntryCount();
-                for (int j = 0; j < entryCount; j++) {
-                    dataSet.setValueTextColor(color1);
-                }
+            for (IPieDataSet<?> dataSet : dataSets) {
+                getValueLinePaint().setColor(ColorUtils.ContrastColor(dataSet.getValueLineColor()));
+                dataSet.setValueTextColor(color1);
             }
 
             super.drawValues(c);
+
+            labelPaint.setColor(oldLabelColor);
         }
     }
 
@@ -250,12 +255,10 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
             return;
         }
 
-        ArrayList<Entry> yVals = new ArrayList<>();
-        ArrayList<String> xVals = new ArrayList<>();
+        ArrayList<PieEntry<IAbstractModel>> yVals = new ArrayList<>();
         ArrayList<IAbstractModel> models = new ArrayList<>();
         BigDecimal val;
         BigDecimal totalSum = BigDecimal.ZERO;
-        int i = 0;
         for (BaseNode node : tree.getChildren()) {
             switch (reportBuilder.getActiveShowIndex()) {
                 case ReportBuilder.SHOW_INCOME:
@@ -341,13 +344,10 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
             } else {
                 v = model.getExpense();
             }
-            Entry pieEntry = new Entry(v.floatValue(), i++);
-            pieEntry.setData(model);
-            yVals.add(pieEntry);
-            xVals.add(model.toString());
+            yVals.add(new PieEntry<>(v.floatValue(), model.toString(), null, model));
         }
 
-        PieDataSet dataSet = new PieDataSet(yVals, "");
+        PieDataSet<IAbstractModel> dataSet = new PieDataSet<>(yVals, "");
         dataSet.setSliceSpace(0f);
         dataSet.setValueTextColor(ColorUtils.getTextColor(getActivity()));
 //        dataSet.setSelectionShift(5f);
@@ -370,21 +370,21 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
 
         ArrayList<Integer> colors = new ArrayList<>();
 
-        for (int c : ColorTemplate.VORDIPLOM_COLORS) colors.add(c);
-        for (int c : ColorTemplate.JOYFUL_COLORS) colors.add(c);
-        for (int c : ColorTemplate.COLORFUL_COLORS) colors.add(c);
-        for (int c : ColorTemplate.LIBERTY_COLORS) colors.add(c);
-        for (int c : ColorTemplate.PASTEL_COLORS) colors.add(c);
-        colors.add(ColorTemplate.getHoloBlue());
+        colors.addAll(ColorTemplate.INSTANCE.getVORDIPLOM_COLORS());
+        colors.addAll(ColorTemplate.INSTANCE.getJOYFUL_COLORS());
+        colors.addAll(ColorTemplate.INSTANCE.getCOLORFUL_COLORS());
+        colors.addAll(ColorTemplate.INSTANCE.getLIBERTY_COLORS());
+        colors.addAll(ColorTemplate.INSTANCE.getPASTEL_COLORS());
+        colors.add(ColorTemplate.INSTANCE.getHoloBlue());
 
         dataSet.setColors(colors);
 
-        PieData data = new PieData(xVals, dataSet);
+        PieData data = new PieData(dataSet);
         if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(FgConst.PREF_SHOW_PIE_PERCENTS, true)) {
-            mPieChart.setUsePercentValues(true);
+            mPieChart.setUsePercentValuesEnabled(true);
             data.setValueFormatter(new PercentFormatter());
         } else {
-            mPieChart.setUsePercentValues(false);
+            mPieChart.setUsePercentValuesEnabled(false);
             data.setValueFormatter(getValueFormatter());
         }
         data.setValueTextSize(11f);
@@ -396,7 +396,7 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
         mTextViewSelected.setVisibility(View.INVISIBLE);
 
         if (animate) {
-            mPieChart.animateY(1000, Easing.EasingOption.EaseInOutQuad);
+            mPieChart.animateY(1000, Easing.INSTANCE.getEaseInOutQuad());
             mFabLayout.setVisibility(View.GONE);
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -410,7 +410,8 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
 
         } else {
             mPieChart.invalidate();
-            if (mPieChart.getHighlighted() == null) {
+            List<Highlight> highlighted = mPieChart.getHighlighted();
+            if (highlighted == null || highlighted.isEmpty()) {
                 mFabLayout.setVisibility(View.GONE);
             } else {
                 mFabLayout.setVisibility(View.VISIBLE);
@@ -420,7 +421,7 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
     }
 
     @Override
-    public void onValueSelected(Entry e, int dataSetIndex, Highlight h) {
+    public void onValueSelected(Entry<?> e, Highlight h) {
         ReportBuilder reportBuilder = ReportBuilder.getInstance(getActivity());
         IAbstractModel model = (IAbstractModel) e.getData();
         if (reportBuilder.getParentID() != model.getID() && AbstractModelManager.getAllChildren(model, getActivity()).size() > 0) {
@@ -434,9 +435,9 @@ public class FragmentPieChart extends Fragment implements OnChartValueSelectedLi
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        String s = String.format("%s %s", e.getData().toString(), cabbageFormatter.format(new BigDecimal(e.getVal())));
+        String s = String.format("%s %s", e.getData().toString(), cabbageFormatter.format(new BigDecimal(e.getY())));
         GradientDrawable bgShape = (GradientDrawable) mImageViewColor.getBackground();
-        IPieDataSet dataSet = mPieChart.getData().getDataSet();
+        IPieDataSet<?> dataSet = mPieChart.getData().getDataSet();
         bgShape.setColor(dataSet.getColor(dataSet.getEntryIndex(e)));
         mTextViewSelected.setText(s);
 

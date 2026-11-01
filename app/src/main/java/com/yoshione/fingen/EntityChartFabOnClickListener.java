@@ -23,10 +23,10 @@ import java.util.Random;
  */
 
 public class EntityChartFabOnClickListener implements View.OnClickListener {
-    private final Chart mChart;
+    private final Chart<?> mChart;
     private final Activity mActivity;
 
-    EntityChartFabOnClickListener(Chart chart, Activity activity) {
+    EntityChartFabOnClickListener(Chart<?> chart, Activity activity) {
         mChart = chart;
         mActivity = activity;
     }
@@ -34,19 +34,19 @@ public class EntityChartFabOnClickListener implements View.OnClickListener {
     @SuppressWarnings("unchecked")
     @Override
     public void onClick(View v) {
-        Highlight highlight[] = mChart.getHighlighted();
+        List<Highlight> highlight = mChart.getHighlighted();
 
-        if (highlight == null || highlight.length == 0) {
+        if (highlight == null || highlight.isEmpty()) {
             return;
         }
 
-        List<Entry> entries = mChart.getEntriesAtIndex(highlight[0].getXIndex());
+        Entry<?> entry = mChart.getData().getEntryForHighlight(highlight.get(0));
 
-        if (entries == null || entries.size() == 0) {
+        if (entry == null) {
             return;
         }
 
-        IAbstractModel model = (IAbstractModel) entries.get(0).getData();
+        IAbstractModel model = (IAbstractModel) entry.getData();
 
         ReportBuilder reportBuilder = ReportBuilder.getInstance(mActivity);
         ArrayList<AbstractFilter> filters = new ArrayList<>();

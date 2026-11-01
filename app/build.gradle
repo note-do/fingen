@@ -125,7 +125,7 @@ dependencies {
     implementation 'com.dropbox.core:dropbox-android-sdk:8.0.2'
     implementation 'androidx.work:work-runtime:2.12.0'
     implementation 'com.github.permissions-dispatcher:permissionsdispatcher:4.9.2'
-    implementation 'com.github.PhilJay:MPAndroidChart:v2.2.5'
+    implementation 'com.github.PhilJay.MPAndroidChart:MPChartLib:v4.0.1'
     implementation 'com.github.skydoves:colorpickerview:2.5.0'
     implementation 'com.github.l4digital:fastscroll:1.0.4@aar'
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.13.3'

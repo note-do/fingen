@@ -19,7 +19,8 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.formatter.IValueFormatter;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
@@ -39,6 +40,7 @@ import com.yoshione.fingen.utils.ParcelableHelper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Leonid on 16.08.2015.
@@ -46,6 +48,9 @@ import java.util.ArrayList;
  */
 public class FragmentBarChart extends Fragment implements OnChartValueSelectedListener {
 
+    private static final float BAR_WIDTH_SINGLE = 0.8f;
+    private static final float BAR_WIDTH_PAIR = 0.4f;
+    private static final float BAR_OFFSET = 0.2f;
     public static final String TAG = "FragmentBarChart";
     private final boolean mDrawBarLabels = false;
     HorizontalBarChart mBarChart;
@@ -88,7 +93,7 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
         }
     }
 
-    private ValueFormatter getValueFormatter() {
+    private IValueFormatter getValueFormatter() {
         if (isShrinkValues()) {
             return largeValuesFormatter;
         } else {
@@ -109,12 +114,12 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
     }
 
     private void setupBarChart() {
-        mBarChart.setDrawBarShadow(false);
-        mBarChart.setDrawValueAboveBar(true);
-        mBarChart.setDescription("");
-        mBarChart.setMaxVisibleValueCount(Integer.MAX_VALUE);
-        mBarChart.setPinchZoom(false);
-        mBarChart.setDrawGridBackground(false);
+        mBarChart.setDrawBarShadowEnabled(false);
+        mBarChart.setDrawValueAboveBarEnabled(true);
+        mBarChart.getDescription().setEnabled(false);
+        mBarChart.setMaxVisibleCount(Integer.MAX_VALUE);
+        mBarChart.setPinchZoomEnabled(false);
+        mBarChart.setDrawGridBackgroundEnabled(false);
         mBarChart.setOnChartValueSelectedListener(this);
         mBarChart.setHighlightPerDragEnabled(false);
 
@@ -122,51 +127,49 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
 
         XAxis xl = mBarChart.getXAxis();
         xl.setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
-        xl.setDrawAxisLine(true);
-        xl.setDrawGridLines(true);
+        xl.setDrawAxisLineEnabled(true);
+        xl.setDrawGridLinesEnabled(true);
         xl.setGridLineWidth(0.3f);
         xl.setTextColor(textColor);
 
         YAxis yl = mBarChart.getAxisLeft();
-        yl.setDrawAxisLine(true);
-        yl.setDrawGridLines(true);
+        yl.setDrawAxisLineEnabled(true);
+        yl.setDrawGridLinesEnabled(true);
         yl.setGridLineWidth(0.3f);
-        yl.setAxisMinValue(0f);
+        yl.setAxisMinimum(0f);
         yl.setTextColor(textColor);
 
         YAxis yr = mBarChart.getAxisRight();
-        yr.setDrawAxisLine(true);
-        yr.setDrawGridLines(false);
-        yr.setAxisMinValue(0f);
+        yr.setDrawAxisLineEnabled(true);
+        yr.setDrawGridLinesEnabled(false);
+        yr.setAxisMinimum(0f);
         yr.setTextColor(textColor);
 
-        mBarChart.setXAxisRenderer(new FgHorizontalBarChartRenderer(getActivity(), mBarChart.getViewPortHandler(),
+        mBarChart.setRendererXAxis(new FgHorizontalBarChartRenderer(getActivity(), mBarChart.getViewPortHandler(),
                 mBarChart.getXAxis(), mBarChart.getTransformer(YAxis.AxisDependency.LEFT), mBarChart));
         mBarChart.getLegend().setEnabled(false);
     }
 
 
-    private Pair<ArrayList<IBarDataSet>, ArrayList<String>> getDatasetsInAndEx(BaseNode tree) {
+    private Pair<ArrayList<IBarDataSet<?>>, ArrayList<String>> getDatasetsInAndEx(BaseNode tree) {
         int i = 0;
-        ArrayList<BarEntry> yValsExpense = new ArrayList<>();
-        ArrayList<BarEntry> yValsIncome = new ArrayList<>();
+        ArrayList<BarEntry<IAbstractModel>> yValsExpense = new ArrayList<>();
+        ArrayList<BarEntry<IAbstractModel>> yValsIncome = new ArrayList<>();
         ArrayList<String> xVals = new ArrayList<>();
 
-        BarEntry barEntry;
+        BarEntry<IAbstractModel> barEntry;
         IAbstractModel model;
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpense = BigDecimal.ZERO;
         for (BaseNode node : tree.getChildren()) {
             model = node.getModel();
             if (model.getExpense().compareTo(BigDecimal.ZERO) > 0) {
-                barEntry = new BarEntry(model.getExpense().setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
-                barEntry.setData(model);
+                barEntry = new BarEntry<>(i + BAR_OFFSET, model.getExpense().setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, model);
                 yValsExpense.add(barEntry);
                 totalExpense = totalExpense.add(model.getExpense());
             }
             if (model.getIncome().compareTo(BigDecimal.ZERO) > 0) {
-                barEntry = new BarEntry(model.getIncome().setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
-                barEntry.setData(model);
+                barEntry = new BarEntry<>(i - BAR_OFFSET, model.getIncome().setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, model);
                 yValsIncome.add(barEntry);
                 totalIncome = totalIncome.add(model.getIncome());
             }
@@ -183,54 +186,51 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
             rootDuplicate.setName(dao.getModelById(rootDuplicate.getID()).getName());
 
             if (rootDuplicate.getExpense().compareTo(BigDecimal.ZERO) > 0) {
-                barEntry = new BarEntry(rootDuplicate.getExpense().setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
-                barEntry.setData(rootDuplicate);
+                barEntry = new BarEntry<>(i + BAR_OFFSET, rootDuplicate.getExpense().setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, rootDuplicate);
                 yValsExpense.add(barEntry);
             }
             if (rootDuplicate.getIncome().compareTo(BigDecimal.ZERO) > 0) {
-                barEntry = new BarEntry(rootDuplicate.getIncome().setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
-                barEntry.setData(rootDuplicate);
+                barEntry = new BarEntry<>(i - BAR_OFFSET, rootDuplicate.getIncome().setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, rootDuplicate);
                 yValsIncome.add(barEntry);
             }
             xVals.add(String.format("%s (%s)", rootDuplicate.getName(),
                     formatValue(rootDuplicate.getIncome().subtract(rootDuplicate.getExpense()).abs().floatValue())));
         }
 
-        BarDataSet setExpense = new BarDataSet(yValsExpense, getString(R.string.ent_outcome));
+        BarDataSet<IAbstractModel> setExpense = new BarDataSet<>(yValsExpense, getString(R.string.ent_outcome));
         setExpense.setColor(ContextCompat.getColor(getActivity(), R.color.negative_color));
         setExpense.setValueFormatter(getValueFormatter());
-        setExpense.setDrawValues(mDrawBarLabels);
-        BarDataSet setIncome = new BarDataSet(yValsIncome, getString(R.string.ent_income));
+        setExpense.setDrawValuesEnabled(mDrawBarLabels);
+        BarDataSet<IAbstractModel> setIncome = new BarDataSet<>(yValsIncome, getString(R.string.ent_income));
         setIncome.setColor(ContextCompat.getColor(getActivity(), R.color.positive_color));
         setIncome.setValueFormatter(getValueFormatter());
-        setIncome.setDrawValues(mDrawBarLabels);
+        setIncome.setDrawValuesEnabled(mDrawBarLabels);
 
         int textColor = ColorUtils.getTextColor(getActivity());
         setExpense.setValueTextColor(textColor);
         setIncome.setValueTextColor(textColor);
 
-        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        ArrayList<IBarDataSet<?>> dataSets = new ArrayList<>();
         dataSets.add(setIncome);
         dataSets.add(setExpense);
         return new Pair<>(dataSets, xVals);
     }
 
-    private Pair<ArrayList<IBarDataSet>, ArrayList<String>> getDatasetsInMinusEx(BaseNode tree) {
+    private Pair<ArrayList<IBarDataSet<?>>, ArrayList<String>> getDatasetsInMinusEx(BaseNode tree) {
         int i = 0;
-        ArrayList<BarEntry> yValsSum = new ArrayList<>();
+        ArrayList<BarEntry<IAbstractModel>> yValsSum = new ArrayList<>();
         ArrayList<String> xVals = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
 
         BigDecimal sum;
-        BarEntry barEntry;
+        BarEntry<IAbstractModel> barEntry;
         IAbstractModel model;
         BigDecimal totalSum = BigDecimal.ZERO;
         for (BaseNode node : tree.getChildren()) {
             model = node.getModel();
             sum = model.getIncome().subtract(model.getExpense());
             if (sum.compareTo(BigDecimal.ZERO) != 0) {
-                barEntry = new BarEntry(sum.abs().floatValue(), i);
-                barEntry.setData(model);
+                barEntry = new BarEntry<>(i, sum.abs().floatValue(), null, model);
                 yValsSum.add(barEntry);
                 xVals.add(String.format("%s (%s)", model.getName(), formatValue(model.getIncome().subtract(model.getExpense()).abs().floatValue())));
                 if (sum.compareTo(BigDecimal.ZERO) >= 0) {
@@ -250,8 +250,7 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
             if (sum.compareTo(BigDecimal.ZERO) != 0) {
                 AbstractDAO dao = BaseDAO.getDAO(rootDuplicate.getModelType(), getActivity());
                 rootDuplicate.setName(dao.getModelById(rootDuplicate.getID()).getName());
-                barEntry = new BarEntry(sum.abs().floatValue(), i);
-                barEntry.setData(rootDuplicate);
+                barEntry = new BarEntry<>(i, sum.abs().floatValue(), null, rootDuplicate);
                 yValsSum.add(barEntry);
                 xVals.add(String.format("%s (%s)", rootDuplicate.getName(), formatValue(sum.abs().floatValue())));
                 if (sum.compareTo(BigDecimal.ZERO) >= 0) {
@@ -262,32 +261,31 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
             }
         }
 
-        BarDataSet setSum = new BarDataSet(yValsSum, getString(R.string.ent_income) + " - " + getString(R.string.ent_outcome));
+        BarDataSet<IAbstractModel> setSum = new BarDataSet<>(yValsSum, getString(R.string.ent_income) + " - " + getString(R.string.ent_outcome));
         setSum.setColors(colors);
         setSum.setValueFormatter(getValueFormatter());
-        setSum.setDrawValues(mDrawBarLabels);
+        setSum.setDrawValuesEnabled(mDrawBarLabels);
 
         int textColor = ColorUtils.getTextColor(getActivity());
         setSum.setValueTextColor(textColor);
 
-        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        ArrayList<IBarDataSet<?>> dataSets = new ArrayList<>();
         dataSets.add(setSum);
         return new Pair<>(dataSets, xVals);
     }
 
-    private Pair<ArrayList<IBarDataSet>, ArrayList<String>> getDatasetsSingle(BaseNode tree, boolean expense) {
+    private Pair<ArrayList<IBarDataSet<?>>, ArrayList<String>> getDatasetsSingle(BaseNode tree, boolean expense) {
         int i = 0;
-        ArrayList<BarEntry> yVals = new ArrayList<>();
+        ArrayList<BarEntry<IAbstractModel>> yVals = new ArrayList<>();
         ArrayList<String> xVals = new ArrayList<>();
-        BarEntry barEntry;
+        BarEntry<IAbstractModel> barEntry;
         IAbstractModel model;
         BigDecimal totalSum = BigDecimal.ZERO;
         for (BaseNode node : tree.getChildren()) {
             model = node.getModel();
             if (expense) {
                 if (model.getExpense().compareTo(BigDecimal.ZERO) > 0) {
-                    barEntry = new BarEntry(model.getExpense().setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
-                    barEntry.setData(model);
+                    barEntry = new BarEntry<>(i, model.getExpense().setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, model);
                     yVals.add(barEntry);
                     xVals.add(String.format("%s (%s)", model.getName(), formatValue(model.getExpense().abs().floatValue())));
                     totalSum = totalSum.add(model.getExpense());
@@ -295,8 +293,7 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
                 }
             } else {
                 if (model.getIncome().compareTo(BigDecimal.ZERO) > 0) {
-                    barEntry = new BarEntry(model.getIncome().setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
-                    barEntry.setData(model);
+                    barEntry = new BarEntry<>(i, model.getIncome().setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, model);
                     yVals.add(barEntry);
                     xVals.add(String.format("%s (%s)", model.getName(), formatValue(model.getIncome().abs().floatValue())));
                     totalSum = totalSum.add(model.getIncome());
@@ -313,38 +310,36 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
             if (expense) {
                 if (model.getExpense().compareTo(BigDecimal.ZERO) > 0) {
                     totalSum = model.getExpense().subtract(totalSum);
-                    barEntry = new BarEntry(totalSum.setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
-                    barEntry.setData(model);
+                    barEntry = new BarEntry<>(i, totalSum.setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, model);
                     yVals.add(barEntry);
                     xVals.add(String.format("%s (%s)", model.getName(), formatValue(totalSum.abs().floatValue())));
                 }
             } else {
                 if (model.getIncome().compareTo(BigDecimal.ZERO) > 0) {
                     totalSum = model.getIncome().subtract(totalSum);
-                    barEntry = new BarEntry(totalSum.setScale(2, RoundingMode.HALF_EVEN).floatValue(), i);
-                    barEntry.setData(model);
+                    barEntry = new BarEntry<>(i, totalSum.setScale(2, RoundingMode.HALF_EVEN).floatValue(), null, model);
                     yVals.add(barEntry);
                     xVals.add(String.format("%s (%s)", model.getName(), formatValue(totalSum.abs().floatValue())));
                 }
             }
         }
 
-        BarDataSet set;
+        BarDataSet<IAbstractModel> set;
         if (expense) {
-            set = new BarDataSet(yVals, getString(R.string.ent_outcome));
+            set = new BarDataSet<>(yVals, getString(R.string.ent_outcome));
             set.setColor(ContextCompat.getColor(getActivity(), R.color.negative_color));
             set.setValueFormatter(getValueFormatter());
         } else {
-            set = new BarDataSet(yVals, getString(R.string.ent_income));
+            set = new BarDataSet<>(yVals, getString(R.string.ent_income));
             set.setColor(ContextCompat.getColor(getActivity(), R.color.positive_color));
             set.setValueFormatter(getValueFormatter());
         }
 
         int textColor = ColorUtils.getTextColor(getActivity());
         set.setValueTextColor(textColor);
-        set.setDrawValues(mDrawBarLabels);
+        set.setDrawValuesEnabled(mDrawBarLabels);
 
-        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+        ArrayList<IBarDataSet<?>> dataSets = new ArrayList<>();
         dataSets.add(set);
         return new Pair<>(dataSets, xVals);
     }
@@ -360,7 +355,7 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
             return;
         }
 
-        Pair<ArrayList<IBarDataSet>, ArrayList<String>> pair;
+        Pair<ArrayList<IBarDataSet<?>>, ArrayList<String>> pair;
         switch (reportBuilder.getActiveShowIndex()) {
             case ReportBuilder.SHOW_INCOME_AND_EXPENSE:
                 pair = getDatasetsInAndEx(tree);
@@ -383,9 +378,20 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
             return;
         }
 
-        BarData data = new BarData(pair.second, pair.first);
+        BarData data = new BarData(pair.first);
         data.setValueTextSize(10f);
-        data.setGroupSpace(80f);
+        // two sets (income and expense) share a category: bars are placed side by side by hand (see BAR_OFFSET),
+        // BarData.groupBars is not used because it needs dense data sets
+        data.setBarWidth(pair.first.size() > 1 ? BAR_WIDTH_PAIR : BAR_WIDTH_SINGLE);
+
+        int categories = pair.second.size();
+        XAxis xAxis = mBarChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(pair.second));
+        xAxis.setGranularity(1f);
+        xAxis.setGranularityEnabled(true);
+        xAxis.setAxisMinimum(-0.5f);
+        xAxis.setAxisMaximum(categories - 0.5f);
+        xAxis.setLabelCount(Math.min(categories, 15));
 //        data.setValueTypeface(tf);
 
         mBarChart.setData(data);
@@ -393,7 +399,8 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
         mBarChart.animateY(1000);
         mBarChart.highlightValues(null);
 
-        if (mBarChart.getHighlighted() == null) {
+        List<Highlight> highlighted = mBarChart.getHighlighted();
+        if (highlighted == null || highlighted.isEmpty()) {
             mFabLayout.setVisibility(View.GONE);
         } else {
             mFabLayout.setVisibility(View.VISIBLE);
@@ -401,7 +408,7 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
     }
 
     @Override
-    public void onValueSelected(Entry e, int dataSetIndex, Highlight h) {
+    public void onValueSelected(Entry<?> e, Highlight h) {
         ReportBuilder reportBuilder = ReportBuilder.getInstance(getActivity());
                 IAbstractModel model = (IAbstractModel) e.getData();
                 if (reportBuilder.getParentID() != model.getID() && AbstractModelManager.getAllChildren(model, getActivity()).size() > 0) {
@@ -415,7 +422,7 @@ public class FragmentBarChart extends Fragment implements OnChartValueSelectedLi
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        String s = String.format("%s %s", e.getData().toString(), cabbageFormatter.format(new BigDecimal(e.getVal())));
+        String s = String.format("%s %s", e.getData().toString(), cabbageFormatter.format(new BigDecimal(e.getY())));
         Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
         mFabLayout.setVisibility(View.VISIBLE);
     }
