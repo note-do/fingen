@@ -34,8 +34,7 @@ public class SystemDialogsRule implements TestRule {
     private final TestRule mGrantRule = GrantPermissionRule.grant(
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.CAMERA);
+            Manifest.permission.ACCESS_FINE_LOCATION);
 
     @Override
     public Statement apply(Statement base, Description description) {
