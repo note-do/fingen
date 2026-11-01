@@ -13,11 +13,11 @@ import java.util.Map;
  * Remembers the highest _id of every table before a test and deletes everything inserted after it.
  * Rows are removed physically: the DAOs only mark rows as deleted.
  */
-final class DbSnapshot {
+public final class DbSnapshot {
 
     private final Map<String, Long> mMaxIds = new HashMap<>();
 
-    static DbSnapshot take(Context context) {
+    public static DbSnapshot take(Context context) {
         SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
         DbSnapshot snapshot = new DbSnapshot();
         for (String table : tablesWithId(db)) {
@@ -26,7 +26,7 @@ final class DbSnapshot {
         return snapshot;
     }
 
-    void restore(Context context) {
+    public void restore(Context context) {
         SQLiteDatabase db = DBHelper.getInstance(context).getWritableDatabase();
         // Roll back a transaction left open by the code under test, so its rows are not kept.
         if (db.inTransaction()) {
