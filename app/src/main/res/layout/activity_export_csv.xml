@@ -27,21 +27,6 @@
             android:visibility="invisible" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayoutDir"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?listItemBackground"
-            android:hint="@string/ent_path_to_dir_or_file">
-
-            <EditText
-                android:id="@+id/editTextDirectory"
-                style="@style/NotEditableEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textMultiLine"/>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayoutFileName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

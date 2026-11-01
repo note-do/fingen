@@ -45,6 +45,8 @@
 
 
     <color name="colorInversePrimaryText">#FFFFFF</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorPrimaryButton">#2196F3</color>
     <color name="colorSuccessButton">#0F9D58</color>
     <color name="colorDangerButton">#FF5252</color>

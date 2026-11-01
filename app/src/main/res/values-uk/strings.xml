@@ -1316,11 +1316,9 @@
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_select_csv_file" formatted="false">Выберите файл CSV</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_select_export_dir" formatted="false">Выберите файл или каталог</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->

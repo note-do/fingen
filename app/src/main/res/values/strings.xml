@@ -1316,11 +1316,9 @@
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_select_csv_file" formatted="false">Select CSV file</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_select_export_dir" formatted="false">Select file or directory</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->

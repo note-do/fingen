@@ -1,20 +1,17 @@
 package com.yoshione.fingen.utils;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
 import androidx.core.app.ActivityCompat;
 
-import com.github.angads25.filepicker.controller.DialogSelectionListener;
-import com.github.angads25.filepicker.model.DialogConfigs;
-import com.github.angads25.filepicker.model.DialogProperties;
-import com.github.angads25.filepicker.view.FilePickerDialog;
 import android.util.Log;
 
-import com.yoshione.fingen.R;
 import com.yoshione.fingen.interfaces.IOnUnzipComplete;
 import com.yoshione.fingen.utils.winzipaes.AesZipFileDecrypter;
 import com.yoshione.fingen.utils.winzipaes.AesZipFileEncrypter;
@@ -28,6 +25,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -212,36 +211,84 @@ public class FileUtils {
         return inFiles;
     }
 
-    public static void SelectFileFromStorage(Activity activity, int selectionType, final IOnSelectFile onSelectFileListener) {
-        final DialogProperties properties=new DialogProperties();
-        properties.selection_mode = DialogConfigs.SINGLE_MODE;
-        properties.selection_type = selectionType;
-        properties.root = new File(DialogConfigs.DEFAULT_DIR);
-        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
-        properties.offset = new File(DialogConfigs.DEFAULT_DIR);
-        properties.extensions = new String[] {"csv", "CSV"};
-
-        FilePickerDialog dialog=new FilePickerDialog(activity,properties);
-        String title = "";
-        title = selectionType == DialogConfigs.FILE_SELECT ? activity.getString(R.string.ttl_select_csv_file) : activity.getString(R.string.ttl_select_export_dir);
-        dialog.setTitle(title);
-        dialog.setPositiveBtnName("Select");
-        dialog.setNegativeBtnName("Cancel");
-
-        dialog.setDialogSelectionListener(new DialogSelectionListener() {
-            @Override
-            public void onSelectedFilePaths(String[] files) {
-                if (files.length == 1 && !files[0].isEmpty()) {
-                    onSelectFileListener.OnSelectFile(files[0]);
+    /**
+     * Display name of a document (SAF Uri), or empty string if it can't be resolved.
+     */
+    public static String getDisplayName(Context context, Uri uri) {
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                String name = cursor.getString(0);
+                if (name != null) {
+                    return name;
                 }
             }
-        });
-
-        dialog.show();
+        } catch (Exception e) {
+            Log.e(TAG, "getDisplayName: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        String last = uri.getLastPathSegment();
+        return last == null ? "" : last;
     }
 
-    public interface IOnSelectFile {
-        void OnSelectFile(String FileName);
+    /**
+     * Copies content of a document (SAF Uri) to a new temporary file in the app cache dir.
+     * The caller must delete the file.
+     */
+    public static File copyUriToCache(Context context, Uri uri) throws IOException {
+        File tmp = File.createTempFile("csv_import", ".csv", context.getCacheDir());
+        InputStream in = context.getContentResolver().openInputStream(uri);
+        if (in == null) {
+            tmp.delete();
+            throw new IOException("Can't open " + uri);
+        }
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(tmp);
+            copyStream(in, out);
+        } catch (IOException e) {
+            tmp.delete();
+            throw e;
+        } finally {
+            in.close();
+            if (out != null) {
+                out.close();
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Copies a local file to a document (SAF Uri).
+     */
+    public static void copyFileToUri(Context context, File file, Uri uri) throws IOException {
+        OutputStream out = context.getContentResolver().openOutputStream(uri);
+        if (out == null) {
+            throw new IOException("Can't open " + uri);
+        }
+        InputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            copyStream(in, out);
+        } finally {
+            out.close();
+            if (in != null) {
+                in.close();
+            }
+        }
+    }
+
+    private static void copyStream(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[8192];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+            out.write(buffer, 0, n);
+        }
+        out.flush();
     }
 
 }

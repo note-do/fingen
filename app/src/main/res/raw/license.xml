@@ -43,12 +43,6 @@
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
-        <name>Android File Picker</name>
-        <url>https://github.com/Angads25/android-filepicker</url>
-        <copyright>Angad Singh</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
-    <notice>
         <name>ColorPickerView</name>
         <url>https://github.com/skydoves/ColorPickerView</url>
         <copyright>2017 skydoves (Jaewoong Eum)</copyright>
