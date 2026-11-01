@@ -40,7 +40,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 
 import static com.yoshione.fingen.DBHelper.C_ID;
 import static com.yoshione.fingen.DBHelper.T_LOG_TRANSACTIONS;

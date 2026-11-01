@@ -33,8 +33,8 @@ import com.yoshione.fingen.utils.CabbageFormatter;
 import java.math.BigDecimal;
 
 import com.yoshione.fingen.widgets.FlipView;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class TransactionViewHolder extends RecyclerView.ViewHolder {
 
