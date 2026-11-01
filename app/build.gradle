@@ -98,15 +98,11 @@ android {
 }
 
 //def play = '15.0.1'
-def retrofit = '2.4.0'
 def dagger = '2.16'
 def butterKnife = "10.2.3"
 //def moxy = "1.5.5"
 
 dependencies {
-    repositories {
-        mavenCentral()
-    }
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation files('libs/opencsv-2.4.jar')
     implementation files('libs/juniversalchardet-1.0.3.jar')
