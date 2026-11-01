@@ -37,12 +37,6 @@
         <license>Apache Software License 2.0</license>
     </notice>
     <notice>
-        <name>AirMapView</name>
-        <url>https://github.com/airbnb/AirMapView</url>
-        <copyright>Airbnb, Inc.</copyright>
-        <license>Apache Software License 2.0</license>
-    </notice>
-    <notice>
         <name>ColorPickerView</name>
         <url>https://github.com/skydoves/ColorPickerView</url>
         <copyright>2017 skydoves (Jaewoong Eum)</copyright>

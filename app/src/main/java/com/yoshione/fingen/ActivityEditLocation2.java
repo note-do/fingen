@@ -5,7 +5,6 @@ import com.yoshione.fingen.databinding.ActivityEditLocation2Binding;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -18,16 +17,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.airbnb.android.airmapview.AirMapMarker;
-import com.airbnb.android.airmapview.AirMapView;
-import com.airbnb.android.airmapview.listeners.OnCameraChangeListener;
-import com.airbnb.android.airmapview.listeners.OnCameraMoveListener;
-import com.airbnb.android.airmapview.listeners.OnInfoWindowClickListener;
-import com.airbnb.android.airmapview.listeners.OnLatLngScreenLocationCallback;
-import com.airbnb.android.airmapview.listeners.OnMapClickListener;
-import com.airbnb.android.airmapview.listeners.OnMapInitializedListener;
-import com.airbnb.android.airmapview.listeners.OnMapMarkerClickListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.yoshione.fingen.dao.LocationsDAO;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
@@ -45,13 +41,12 @@ import permissions.dispatcher.RuntimePermissions;
  * a
  */
 @RuntimePermissions
-public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraChangeListener, OnMapInitializedListener,
-        OnMapClickListener, OnCameraMoveListener, OnMapMarkerClickListener,
-        OnInfoWindowClickListener, OnLatLngScreenLocationCallback {
+public class ActivityEditLocation2 extends ToolbarActivity implements OnMapReadyCallback,
+        GoogleMap.OnMapClickListener, GoogleMap.OnCameraMoveStartedListener {
     private ActivityEditLocation2Binding mBinding;
     EditText editTextName;
     Button mButtonSaveLocation;
-    AirMapView map;
+    GoogleMap map;
     private com.yoshione.fingen.model.Location location;
 
     private double lat = 0;
@@ -106,7 +101,6 @@ public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraCh
         mBinding = ActivityEditLocation2Binding.bind(getContentRoot());
         editTextName = mBinding.editTextName;
         mButtonSaveLocation = mBinding.buttonSaveLocation;
-        map = mBinding.map;
         mBinding.buttonSaveLocation.setOnClickListener(new DebouncingOnClickListener(v -> onSaveClick()));
 
         if (savedInstanceState != null) {
@@ -137,27 +131,30 @@ public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraCh
             }
         });
 
-        map.setOnMapClickListener(this);
-        map.setOnCameraChangeListener(this);
-        map.setOnCameraMoveListener(this);
-        map.setOnMarkerClickListener(this);
-        map.setOnMapInitializedListener(this);
-        map.setOnInfoWindowClickListener(this);
-        map.setOnMapInitializedListener(new OnMapInitializedListener() {
-            @Override
-            public void onMapInitialized() {
-                map.setMyLocationEnabled(true);
-                map.setMyLocationButtonEnabled(true);
-                if (location != null && !location.isUndefined()) {
-                    LatLng latLng = new LatLng(location.getLat(), location.getLon());
-                    map.clearMarkers();
-                    addMarker(latLng);
-                    map.setCenterZoom(latLng, 16);
-                }
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+    }
 
-            }
-        });
-        map.initialize(getSupportFragmentManager());
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        map.setOnMapClickListener(this);
+        map.setOnCameraMoveStartedListener(this);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        enableMyLocation();
+        if (location != null && !location.isUndefined()) {
+            LatLng latLng = new LatLng(location.getLat(), location.getLon());
+            addMarker(latLng);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+        }
+    }
+
+    private void enableMyLocation() {
+        if (map != null && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            map.setMyLocationEnabled(true);
+        }
     }
 
     @Override
@@ -199,7 +196,9 @@ public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraCh
     private void updateLocationOnMap() {
         if (location.getID() < 0) {
             final LatLng latLng = new LatLng(lat, lon);
-            map.setCenterZoom(latLng, 16);
+            if (map != null) {
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+            }
         }
     }
 
@@ -213,23 +212,10 @@ public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraCh
     }
 
     @Override
-    public void onCameraChanged(LatLng latLng, int zoom) {
-        removeUpdates();
-    }
-
-    @Override
-    public void onCameraMove() {
-        removeUpdates();
-    }
-
-    @Override
-    public void onInfoWindowClick(AirMapMarker<?> airMarker) {
-
-    }
-
-    @Override
-    public void onLatLngScreenLocationReady(Point point) {
-
+    public void onCameraMoveStarted(int reason) {
+        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+            removeUpdates();
+        }
     }
 
     @Override
@@ -243,32 +229,22 @@ public class ActivityEditLocation2 extends ToolbarActivity implements OnCameraCh
     }
 
     @Override
-    public void onMapInitialized() {
-        map.setMyLocationButtonEnabled(true);
-    }
-
-    @Override
-    public void onMapMarkerClick(AirMapMarker<?> airMarker) {
-
-    }
-
-    @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
 
     }
 
     private void addMarker(LatLng latLng) {
-        map.clearMarkers();
+        map.clear();
         location.setLat(latLng.latitude);
         location.setLon(latLng.longitude);
-        map.addMarker(new AirMapMarker.Builder()
+        map.addMarker(new MarkerOptions()
                 .position(latLng)
-                .iconId(R.mipmap.icon_location_pin)
-                .build());
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.icon_location_pin)));
     }
 
     @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     void startDetectCoords() {
+        enableMyLocation();
         if (location.getID() < 0) {
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 

@@ -34,7 +34,8 @@ Android-приложение учёта доходов и расходов. Па
 - Лицензии: `licensesdialog` 2.2.0 (`ActivityAbout`, `.show()`; `showAppCompat` в 2.x удалён), список — `res/raw/license.xml` (синхронизировать с зависимостями `app/build.gradle`).
 - Выбор цвета: skydoves `colorpickerview` 2.5.0 (Maven Central, `ColorPickerDialog.Builder`).
 - CSV импорт и экспорт: Storage Access Framework (`ACTION_OPEN_DOCUMENT` / `ACTION_CREATE_DOCUMENT`), файл передаётся в `CsvImporter` через временную копию в `getCacheDir()`. Бэкапы пока на `File` и `READ/WRITE_EXTERNAL_STORAGE` — пункт 10.
-- Прочее: `fastscroll` (JitPack, `@aar`), `airmapview` — заброшенные, см. «Миграция в процессе».
+- Карта выбора места: `play-services-maps` 20.1.0 (`SupportMapFragment` + `OnMapReadyCallback` в `ActivityEditLocation2`, маркер `R.mipmap.icon_location_pin`). Ключ Google Maps не задан: тайлы не грузятся, пока в `keystore.properties` нет `mapsApiKey` (см. «Известные особенности»).
+- Прочее: `fastscroll` (JitPack, `@aar`) — заброшенная, см. «Миграция в процессе».
 - Графики отчётов: MPAndroidChart v4.0.1 (`com.github.PhilJay.MPAndroidChart:MPChartLib`, JitPack; API Kotlin: `Easing.INSTANCE`, `ColorTemplate.INSTANCE`, `highlightValues` не принимает null). Подписи баров — `IndexAxisValueFormatter`, пары доход/расход смещены вручную (±0,2, ширина 0,4). Правило ProGuard `-keep class com.github.mikephil.charting.** { *; }` оставлено (consumer rules в aar нет).
 - БД: `android.database.sqlite` (framework SQLite). requery удалён.
 
@@ -44,12 +45,12 @@ Android-приложение учёта доходов и расходов. Па
 - lollipin, materialdrawer, xpece support-preference, changeloglib, MaterialShowCase, HeaderDecor (aar), requery, ButterKnife, flipview (библиотека), QuadFlask colorpicker, slidinguppanel (заменён на `BottomSheetBehavior`), filepicker (angads25; заменён на SAF).
 - `com.evernote:android-job` (`BackupJob`, `BackupTestJob` и их creator-ы), его компоненты в манифесте и ProGuard-правила.
 - actionitembadge, iconics-core (бейдж SMS теперь `BadgeDrawable` из Material, создаётся в обёртке темы MaterialComponents, `ActivityMain`).
+- `com.airbnb.android:airmapview` (заменён на `play-services-maps`), его запись в `res/raw/license.xml`.
 - Мёртвые ресурсы materialdrawer и `material_drawer_*`.
 - Платные отчёты и биллинг: `iab` (anjlab), `ActivityPro`, XOR-ключ лицензии, `resValue` `inAppLicenseKey`/`inAppLicenseSalt`. Отчёты бесплатны для всех.
 
 ### Миграция в процессе (план)
 - Google Drive — отдельная фича позже.
-- Заменить заброшенные библиотеки: airmapview → play-services-maps.
 - RxJava 2 → 3, Dagger и RxAndroid до актуальных, commons-lang3 и bcprov (CVE), junit.
 - БД: тесты миграций с фикстурами версий 16, 21, 23, 30, 34 → 35; проверить `legacy_alter_table` (ALTER TABLE RENAME) и `journal_mode`.
 - Совместимость бэкапов: читать старые зашифрованные (WinZip AES, PBKDF2-SHA1) и незашифрованные бэкапы.
@@ -58,6 +59,7 @@ Android-приложение учёта доходов и расходов. Па
 - Убрать `android.enableJetifier`, `nonFinalResIds`, `enableAppCompileTimeRClass` после перехода (предупреждения AGP).
 
 ### Известные особенности
+- Ключ Google Maps: `manifestPlaceholders.mapsApiKey` в `app/build.gradle` берётся из `keystore.properties` только если там есть все ключи подписи вместе с `mapsApiKey`, иначе пустая строка. Без ключа экран выбора места открывается, но карта пустая (в logcat `Authorization failure`), маркер и тап по карте не проверялись. Для карты: добавить `mapsApiKey` в `keystore.properties`. `my location` включается только при выданном `ACCESS_FINE_LOCATION`.
 - Обработчики нажатий, которые раньше были `@OnClick`, используют `utils/DebouncingOnClickListener` (защита от двойного нажатия, как у ButterKnife). Новые обработчики, которые открывают экран или сохраняют данные, тоже оборачивать.
 - В `AndroidManifest.xml` у `<application>` убран `tools:node="replace"`: компоненты библиотек (WorkManager и др.) попадают в итоговый манифест от самих библиотек.
 - Однократная очистка задач старого android-job: `FGApplication.cancelLegacyJobs()` через `JobScheduler`, флаг `PREF_ANDROID_JOB_MIGRATED`. Можно удалить, когда у пользователей не останется версий с android-job.
