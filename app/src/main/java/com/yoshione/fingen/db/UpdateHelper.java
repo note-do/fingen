@@ -7,7 +7,6 @@ import android.util.Pair;
 
 import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.classes.TableInfo;
-import com.yoshione.fingen.dao.SendersDAO;
 import com.yoshione.fingen.utils.ColorUtils;
 import com.yoshione.fingen.utils.DateTimeFormatter;
 import com.yoshione.fingen.utils.Translit;
@@ -385,15 +384,15 @@ public class UpdateHelper {
                         phoneNo = cursor.getString(cursor.getColumnIndex("Pattern"));
                         values.put("PhoneNo", phoneNo);
                         values.put("AmountPos", 0);
-                        values.put("BalcancePos", 1);
+                        values.put("BalancePos", 1);
                         values.put("DateFormat", "");
                         values.put("LeadingCurrencySymbol", false);
                         values.put("IsActive", 1);
 
-                        try {
-                            senders.add(new Pair<>(phoneNo, SendersDAO.getInstance(context).createItem(values, -1, true)));
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        //Пишем напрямую в той же транзакции миграции: SendersDAO во время апгрейда ждет конца миграции
+                        long senderId = db.insert("ref_Senders", null, values);
+                        if (senderId >= 0) {
+                            senders.add(new Pair<>(phoneNo, senderId));
                         }
 
                         cursor.moveToNext();

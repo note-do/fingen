@@ -13,7 +13,6 @@ import com.yoshione.fingen.DBHelper;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -408,12 +407,9 @@ public class DatabaseMigrationTest {
     }
 
     /**
-     * EXPECTED DEFECT, not fixed in this step: UpdateHelper.update17 (UpdateHelper.java:394) creates senders through
-     * SendersDAO.getInstance(context).createItem(values, -1, true) while DBHelper is upgrading (the flag isUpgrading),
-     * which hangs (ANR) for a v16 database with sender markers (ref_Sms_Parser_Patterns.Type = 5). Not run, because
-     * a hang would block the whole instrumentation run. The test describes the expected result after a fix.
+     * update17 writes the senders of markers (Type = 5) directly with SQL, without SendersDAO (it waits for the end
+     * of the upgrade). SMS of the marker sender refers to the new ref_Senders row.
      */
-    @Ignore("Known defect: UpdateHelper.update17 (UpdateHelper.java:394) hangs in SendersDAO.createItem during upgrade for sender markers (Type = 5)")
     @Test
     public void upgrade16To35_senderMarkers() throws Exception {
         MigrationTestHelper.createFixture(mContext, 16,
@@ -426,6 +422,13 @@ public class DatabaseMigrationTest {
             assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM ref_Senders"));
             assertEquals(1, queryLong(migrated, "SELECT COUNT(*) FROM log_Incoming_SMS"));
             assertEquals(0, queryLong(migrated, "SELECT COUNT(*) FROM ref_Sms_Parser_Patterns WHERE Type = 5"));
+            assertEquals("Bank", queryString(migrated, "SELECT Name FROM ref_Senders"));
+            assertEquals("+1000", queryString(migrated, "SELECT PhoneNo FROM ref_Senders"));
+            assertEquals(0, queryLong(migrated, "SELECT AmountPos FROM ref_Senders"));
+            assertEquals(1, queryLong(migrated, "SELECT BalancePos FROM ref_Senders"));
+            assertEquals(1, queryLong(migrated, "SELECT isActive FROM ref_Senders"));
+            assertEquals(queryLong(migrated, "SELECT _id FROM ref_Senders"),
+                    queryLong(migrated, "SELECT Sender FROM log_Incoming_SMS WHERE _id = 100"));
         } finally {
             migrated.close();
         }
