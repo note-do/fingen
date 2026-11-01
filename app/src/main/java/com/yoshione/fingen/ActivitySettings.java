@@ -132,7 +132,7 @@ public class ActivitySettings extends AppCompatActivity implements
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home: {
-                onBackPressed();
+                getOnBackPressedDispatcher().onBackPressed();
                 return true;
             }
 //            case R.id.github: {

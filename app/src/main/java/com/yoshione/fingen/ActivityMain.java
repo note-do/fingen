@@ -23,6 +23,7 @@ import androidx.annotation.StringRes;
 import com.google.android.material.appbar.AppBarLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import com.google.android.material.tabs.TabLayout;
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -193,6 +194,12 @@ public class ActivityMain extends ToolbarActivity {
         mPreferences.edit().putBoolean(FgConst.PREF_SWITCH_TAB_ON_START, true).apply();
 
         mBinding = ActivityMainBinding.bind(getContentRoot());
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                handleBackPressed();
+            }
+        });
         viewPager = mBinding.pager;
         tabLayout = findViewById(R.id.tabLayout);
         coordinatorLayout = mBinding.coordinatorLayout;
@@ -606,8 +613,7 @@ public class ActivityMain extends ToolbarActivity {
 
     private long mLastBackPressed;
 
-    @Override
-    public void onBackPressed() {
+    private void handleBackPressed() {
         // Закрываем Navigation Drawer по нажатию системной кнопки "Назад" если он открыт
                 mBinding = ActivityMainBinding.bind(getContentRoot());
         viewPager = mBinding.pager;
@@ -654,7 +660,6 @@ public class ActivityMain extends ToolbarActivity {
                 mLastBackPressed = System.currentTimeMillis();
                 Toast.makeText(this, getString(R.string.msg_press_back_again_to_exit), Toast.LENGTH_SHORT).show();
             } else {
-                super.onBackPressed();
                 finishAndRemoveTask();
             }
         }

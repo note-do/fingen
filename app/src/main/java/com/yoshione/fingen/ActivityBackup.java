@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -100,6 +101,17 @@ public class ActivityBackup extends ToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityBackupBinding.bind(getContentRoot());
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (mFabMenuController.isFABOpen()) {
+                    mFabMenuController.closeFABMenu();
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
         fabBackup = mBinding.fabBackup;
         fabRestore = mBinding.fabRestore;
         fabRestoreFromDropbox = mBinding.fabRestoreFromDropbox;
@@ -282,15 +294,6 @@ public class ActivityBackup extends ToolbarActivity {
                 mFabMenuController.closeFABMenu();
             }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mFabMenuController.isFABOpen()) {
-            mFabMenuController.closeFABMenu();
-        } else {
-            super.onBackPressed();
-        }
     }
 
     @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})

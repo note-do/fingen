@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
+import androidx.activity.OnBackPressedCallback;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -83,6 +84,18 @@ public class ActivityReports extends ToolbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivityReportsBinding.bind(getContentRoot());
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (mReportBuilder.getParentID() >= 0 & viewPager.getCurrentItem() != FRAGMENT_TIME_CHART) {
+                    mReportBuilder.levelUp(ActivityReports.this);
+                    updateCharts();
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
         mTextInputLayoutData = mBinding.textInputLayoutData;
         mTextInputLayoutDateRange = mBinding.textInputLayoutDateRange;
         viewPager = mBinding.pager;
@@ -320,16 +333,6 @@ public class ActivityReports extends ToolbarActivity {
         FragmentTimeBarChart fragmentTimeBarChart = (FragmentTimeBarChart) getFragment(FragmentTimeBarChart.class);
         if (fragmentTimeBarChart != null) {
             fragmentTimeBarChart.updateChart();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mReportBuilder.getParentID() >= 0 & viewPager.getCurrentItem() != FRAGMENT_TIME_CHART) {
-            mReportBuilder.levelUp(this);
-            updateCharts();
-        } else {
-            super.onBackPressed();
         }
     }
 

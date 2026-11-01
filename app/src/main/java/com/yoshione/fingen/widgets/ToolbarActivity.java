@@ -71,7 +71,7 @@ public abstract class ToolbarActivity extends AppCompatActivity implements IUnsu
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ToolbarActivity.this.onBackPressed();
+                getOnBackPressedDispatcher().onBackPressed();
             }
         });
 

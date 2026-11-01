@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.yoshione.fingen.R;
@@ -53,6 +54,20 @@ public class PinActivity extends AppCompatActivity {
         mMode = getIntent().getIntExtra(EXTRA_MODE, MODE_UNLOCK);
         mPinLength = PinLockManager.getPinLength(this);
         goToStep(mMode == MODE_ENABLE ? STEP_CREATE : STEP_VERIFY);
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (mMode == MODE_UNLOCK) {
+                    // Keep the app locked and leave it in background.
+                    moveTaskToBack(true);
+                } else {
+                    setResult(RESULT_CANCELED);
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
     }
 
     public void onKeyClick(View view) {
@@ -68,17 +83,6 @@ public class PinActivity extends AppCompatActivity {
         updateDots();
         if (mInput.length() == mPinLength) {
             onPinEntered();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mMode == MODE_UNLOCK) {
-            // Keep the app locked and leave it in background.
-            moveTaskToBack(true);
-        } else {
-            setResult(RESULT_CANCELED);
-            super.onBackPressed();
         }
     }
 
