@@ -5,7 +5,11 @@ package com.yoshione.fingen;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Build;
@@ -21,11 +25,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
-import com.evernote.android.job.JobManager;
 import com.yoshione.fingen.dropbox.DropboxClient;
-import com.yoshione.fingen.backup.BackupJob;
-import com.yoshione.fingen.backup.BackupJobCreator;
-import com.yoshione.fingen.backup.BackupTestJobCreator;
+import com.yoshione.fingen.backup.BackupWorker;
 import com.yoshione.fingen.di.AppComponent;
 import com.yoshione.fingen.di.DaggerAppComponent;
 import com.yoshione.fingen.di.modules.ContextModule;
@@ -87,8 +88,7 @@ public class FGApplication extends Application implements ISyncAnimMethods {
 
         DropboxClient.migrateLegacyToken(this);
 
-        JobManager.create(this).addJobCreator(new BackupJobCreator());
-        JobManager.create(this).addJobCreator(new BackupTestJobCreator());
+        cancelLegacyJobs();
 
         mUpdateUIHandler = new UpdateUIHandler(this);
 
@@ -100,7 +100,24 @@ public class FGApplication extends Application implements ISyncAnimMethods {
 
         mCustomIntentReceiver = new CustomIntentReceiver();
 
-        BackupJob.schedule();
+        BackupWorker.schedule(this);
+    }
+
+    // One-time cleanup of jobs left by the removed android-job library
+    private void cancelLegacyJobs() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean(FgConst.PREF_ANDROID_JOB_MIGRATED, false)) {
+            return;
+        }
+        JobScheduler scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (scheduler != null) {
+            for (JobInfo job : scheduler.getAllPendingJobs()) {
+                if (job.getService().getClassName().startsWith("com.evernote.android.job")) {
+                    scheduler.cancel(job.getId());
+                }
+            }
+        }
+        prefs.edit().putBoolean(FgConst.PREF_ANDROID_JOB_MIGRATED, true).apply();
     }
 
     public static AppComponent getAppComponent() {
