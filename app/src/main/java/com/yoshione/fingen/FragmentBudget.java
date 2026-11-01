@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import androidx.annotation.Nullable;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
@@ -27,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.Toast;
 
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.yoshione.fingen.adapter.AdapterBudget;
 import com.yoshione.fingen.classes.ListSumsByCabbage;
 import com.yoshione.fingen.classes.SumsByCabbage;
@@ -82,7 +82,7 @@ public class FragmentBudget extends Fragment implements AdapterBudget.IOnItemCli
     FloatingActionButton fabCopyBudget;
     FloatingActionButton fabCreateFromFact;
     FloatingActionButton fabClearBudget;
-    SlidingUpPanelLayout mSlidingUpPanelLayout;
+    BottomSheetBehavior<LinearLayout> mBottomSheetBehavior;
     ImageView mImageViewPullMe;
     View mFabBGLayout;
     LinearLayout mFabAddModelLayout;
@@ -134,7 +134,7 @@ public class FragmentBudget extends Fragment implements AdapterBudget.IOnItemCli
         fabCopyBudget = mBinding.fabCopyBudget;
         fabCreateFromFact = mBinding.fabCreateFromFact;
         fabClearBudget = mBinding.fabClearBudget;
-        mSlidingUpPanelLayout = mBinding.slidingLayout;
+        mBottomSheetBehavior = BottomSheetBehavior.from(mBinding.dragView);
         mImageViewPullMe = mBinding.imageViewPullMe;
         mFabBGLayout = mBinding.fabBGLayout;
         mFabAddModelLayout = mBinding.fabAddModelLayout;
@@ -178,7 +178,7 @@ public class FragmentBudget extends Fragment implements AdapterBudget.IOnItemCli
         fullUpdate();
 
         layoutSumTable.getViewTreeObserver().addOnGlobalLayoutListener(
-                new SumsTableOnGlobalLayoutListener(getActivity(), layoutSumTable, mSlidingUpPanelLayout));
+                new SumsTableOnGlobalLayoutListener(getActivity(), layoutSumTable, mBottomSheetBehavior, mBinding.relativeLayoutBudget));
 
 //        if (getActivity() instanceof ActivityBudget) {
 //            ((ActivityBudget) getActivity()).mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {

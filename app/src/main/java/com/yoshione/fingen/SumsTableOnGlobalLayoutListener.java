@@ -5,8 +5,6 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.TableLayout;
 
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yoshione.fingen.utils.ScreenUtils;
 
@@ -20,13 +18,6 @@ public class SumsTableOnGlobalLayoutListener implements ViewTreeObserver.OnGloba
     private TableLayout mLayoutSumTable;
     private BottomSheetBehavior<?> mBottomSheetBehavior;
     private View mContentView;
-    private SlidingUpPanelLayout mSlidingUpPanelLayout; // TODO removed with slidinguppanel
-
-    SumsTableOnGlobalLayoutListener(Context context, TableLayout layoutSumTable, SlidingUpPanelLayout slidingUpPanelLayout) {
-        mContext = context;
-        mLayoutSumTable = layoutSumTable;
-        mSlidingUpPanelLayout = slidingUpPanelLayout;
-    }
 
     /**
      * @param contentView view with the main content, its bottom padding is kept equal to the sheet peek height
@@ -40,15 +31,6 @@ public class SumsTableOnGlobalLayoutListener implements ViewTreeObserver.OnGloba
 
     @Override
     public void onGlobalLayout() {
-        if (mSlidingUpPanelLayout != null && mLayoutSumTable != null && mLayoutSumTable.getChildCount() >= 2) {
-            int height = mLayoutSumTable.getChildAt(0).getHeight()
-                    + mLayoutSumTable.getChildAt(1).getHeight()
-                    + ScreenUtils.dpToPx(4, mContext);
-            if (height != 0) {
-                mSlidingUpPanelLayout.setPanelHeight(height);
-            }
-            return;
-        }
         if (mLayoutSumTable != null && mBottomSheetBehavior != null && mLayoutSumTable.getChildCount() >= 2) {
             int height = mLayoutSumTable.getChildAt(0).getHeight()
                     + mLayoutSumTable.getChildAt(1).getHeight()
