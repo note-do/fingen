@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
@@ -41,40 +41,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/drag_handle" />
 
-    <eu.davidea.flipview.FlipView
+    <com.yoshione.fingen.widgets.FlipView
         android:id="@+id/flip_view_visible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:inAnimation="@anim/grow_from_middle_x_axis"
-        android:outAnimation="@anim/grow_from_middle_x_axis"
         android:padding="16dp"
-        app:checked="false"
-        app:enableInitialAnimation="false"
-        app:frontBackgroundColor="@android:color/transparent"
         app:rearImage="@drawable/ic_visibile_blue"
         app:frontImage="@drawable/ic_visibility_off_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@id/flip_view_hide_under_more"
-        app:rearBackgroundColor="@android:color/transparent" />
+        />
 
-    <eu.davidea.flipview.FlipView
+    <com.yoshione.fingen.widgets.FlipView
         android:id="@+id/flip_view_hide_under_more"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:inAnimation="@anim/grow_from_middle_x_axis"
-        android:outAnimation="@anim/grow_from_middle_x_axis"
         android:padding="16dp"
-        app:checked="false"
-        app:enableInitialAnimation="false"
-        app:frontBackgroundColor="@android:color/transparent"
         app:rearImage="@drawable/ic_tridot_blue"
         app:frontImage="@drawable/ic_tridot_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:rearBackgroundColor="@android:color/transparent" />
+        />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

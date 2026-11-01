@@ -13,7 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.animation.RotateAnimation;
@@ -22,17 +22,15 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
 import com.evernote.android.job.JobManager;
-import com.github.omadahealth.lollipin.lib.managers.LockManager;
 import com.yoshione.fingen.backup.BackupJob;
 import com.yoshione.fingen.backup.BackupJobCreator;
 import com.yoshione.fingen.backup.BackupTestJobCreator;
 import com.yoshione.fingen.di.AppComponent;
 import com.yoshione.fingen.di.DaggerAppComponent;
 import com.yoshione.fingen.di.modules.ContextModule;
-import com.yoshione.fingen.fts.FtsApi;
 import com.yoshione.fingen.interfaces.ISyncAnimMethods;
 import com.yoshione.fingen.receivers.CustomIntentReceiver;
-import com.yoshione.fingen.widgets.CustomPinActivity;
+import com.yoshione.fingen.lock.PinLockManager;
 
 import java.lang.ref.WeakReference;
 
@@ -93,15 +91,7 @@ public class FGApplication extends Application implements ISyncAnimMethods {
 
         mAppPaused = true;
 
-        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-        lockManager.enableAppLock(this, CustomPinActivity.class);
-        lockManager.getAppLock().setOnlyBackgroundTimeout(true);
-        lockManager.getAppLock().setLogoId(R.drawable.ic_main);
-        long timeout = Integer.valueOf(
-                PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(
-                        FgConst.PREF_PIN_LOCK_TIMEOUT, "10"))*1000;
-        lockManager.getAppLock().setTimeout(timeout);
-        lockManager.getAppLock().setOnlyBackgroundTimeout(true);
+        PinLockManager.init(this);
 
         registerActivityLifecycleCallbacks(new FgActivityLifecycleCallbacks());
 

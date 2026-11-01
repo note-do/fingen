@@ -250,7 +250,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".widgets.CustomPinActivity"
+            android:name=".lock.PinActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
@@ -264,23 +264,10 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".fts.ActivityScanQR"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeLight"
-            android:noHistory="true"/>
-        <activity
-            android:name=".fts.ActivityFtsLogin"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeLight"
-            android:noHistory="true"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${mapsApiKey}"/>
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="${fabricApiKey}"/>
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

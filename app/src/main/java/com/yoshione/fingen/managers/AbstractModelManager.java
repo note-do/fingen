@@ -3,7 +3,7 @@ package com.yoshione.fingen.managers;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.text.InputType;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;

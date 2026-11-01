@@ -2108,4 +2108,6 @@
     <!-- 28. EditorConstructor -->
     <!-- Actions -->
     <string name="act_tune_editor" formatted="false">Tune the editor</string>
+    <string name="pin_code_wrong" formatted="false">Wrong PIN</string>
+    <string name="pin_code_mismatch" formatted="false">PINs do not match</string>
 </resources>

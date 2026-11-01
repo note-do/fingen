@@ -14,21 +14,21 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import com.google.android.material.appbar.AppBarLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import com.google.android.material.tabs.TabLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -44,7 +44,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.mikepenz.actionitembadge.library.utils.BadgeStyle;
 import com.mikepenz.actionitembadge.library.utils.NumberUtils;
@@ -62,7 +61,6 @@ import com.yoshione.fingen.dao.SmsMarkersDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
-import com.yoshione.fingen.fts.ActivityScanQR;
 import com.yoshione.fingen.iab.BillingService;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.ITransactionItemEventListener;
@@ -100,7 +98,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import dagger.Lazy;
-import io.fabric.sdk.android.Fabric;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -151,8 +148,6 @@ public class ActivityMain extends ToolbarActivity {
     TextView mTextViewActiveSet;
     @BindView(R.id.buttonTemplates)
     Button mButtonTemplates;
-    @BindView(R.id.buttonScanQR)
-    Button mButtonScanQR;
     @BindView(R.id.buttonNewExpense)
     Button mButtonNewExpense;
     @BindView(R.id.buttonNewIncome)
@@ -223,10 +218,6 @@ public class ActivityMain extends ToolbarActivity {
         super.onCreate(null);
 
         mUpdateUIHandler = new UpdateUIHandler(this);
-
-        if (!BuildConfig.DEBUG) {
-            Fabric.with(this, new Crashlytics());
-        }
 
         mPreferences.edit().putBoolean(FgConst.PREF_SWITCH_TAB_ON_START, true).apply();
 
@@ -1030,11 +1021,7 @@ public class ActivityMain extends ToolbarActivity {
     private void setupBottomBar() {
         BottomButtonClickListener clickListener = new BottomButtonClickListener();
 
-        boolean scanQR = mPreferences.getBoolean(FgConst.PREF_ENABLE_SCAN_QR, true);
-        mButtonScanQR.setVisibility(scanQR ? View.VISIBLE : View.GONE);
-
         mButtonTemplates.setOnClickListener(clickListener);
-        mButtonScanQR.setOnClickListener(clickListener);
         mButtonNewExpense.setOnClickListener(clickListener);
         mButtonNewIncome.setOnClickListener(clickListener);
         mButtonNewTransfer.setOnClickListener(clickListener);
@@ -1049,9 +1036,6 @@ public class ActivityMain extends ToolbarActivity {
                 intent.putExtra("model", new Template());
                 intent.putExtra("requestCode", RequestCodes.REQUEST_CODE_SELECT_MODEL);
                 ActivityMain.this.startActivityForResult(intent, RequestCodes.REQUEST_CODE_SELECT_MODEL);
-            } else if (v.getId() == R.id.buttonScanQR) {
-                Intent intent = new Intent(ActivityMain.this, ActivityScanQR.class);
-                startActivityForResult(intent, RequestCodes.REQUEST_CODE_SCAN_QR);
             } else {
                 Transaction transaction = new Transaction(PrefUtils.getDefDepID(ActivityMain.this));
                 Intent intent = new Intent(ActivityMain.this, ActivityEditTransaction.class);

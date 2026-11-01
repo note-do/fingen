@@ -11,7 +11,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.design.widget.TextInputLayout;
+import com.google.android.material.textfield.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -161,7 +161,7 @@ public class AmountEditor extends LinearLayout {
 
                     arrayAdapterCabbages.addAll(cabbages);
 
-                    android.support.v7.app.AlertDialog.Builder builderSingle = new android.support.v7.app.AlertDialog.Builder(activity);
+                    androidx.appcompat.app.AlertDialog.Builder builderSingle = new androidx.appcompat.app.AlertDialog.Builder(activity);
                     builderSingle.setSingleChoiceItems(arrayAdapterCabbages, index,
                             new DialogInterface.OnClickListener() {
                                 @Override
@@ -170,7 +170,7 @@ public class AmountEditor extends LinearLayout {
                                         @Override
                                         public void run() {
                                             dialog.cancel();
-                                            ListView lw = ((android.support.v7.app.AlertDialog) dialog).getListView();
+                                            ListView lw = ((androidx.appcompat.app.AlertDialog) dialog).getListView();
                                             Cabbage cabbage = (Cabbage) lw.getAdapter().getItem(which);
                                             setCabbage(cabbage);
                                         }

@@ -2108,4 +2108,6 @@
     <!-- 28. EditorConstructor -->
     <!-- Actions -->
     <string name="act_tune_editor" formatted="false">Настроить редактор</string>
+    <string name="pin_code_wrong" formatted="false">Неверный PIN</string>
+    <string name="pin_code_mismatch" formatted="false">PIN-коды не совпадают</string>
 </resources>

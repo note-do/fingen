@@ -3,8 +3,8 @@ package com.yoshione.fingen;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v4.util.LongSparseArray;
-import android.support.v7.preference.PreferenceManager;
+import androidx.collection.LongSparseArray;
+import androidx.preference.PreferenceManager;
 import android.util.Pair;
 
 import com.yoshione.fingen.dao.AbstractDAO;

@@ -71,11 +71,6 @@
 }
 -keep enum org.greenrobot.eventbus.ThreadMode { *; }
 
-#Crashlytics
--keepattributes SourceFile,LineNumberTable
--keep class com.crashlytics.** { *; }
--dontwarn com.crashlytics.**
-
 #Dropbox OkHttp and Servlet optional dependencies
 -dontwarn okio.**
 -dontwarn okhttp3.**
@@ -103,7 +98,7 @@
 -keep public class com.evernote.android.job.JobRescheduleService
 -keep public class com.evernote.android.job.gcm.PlatformGcmService
 
--keep class android.support.v7.widget.SearchView { *; }
+-keep class androidx.appcompat.widget.SearchView { *; }
 
 -dontwarn com.sothree.**
 -keep class com.sothree.**

@@ -48,13 +48,6 @@
             android:defaultValue="true"
             android:key="expand_lists"
             android:title="@string/pref_expand_lists"/>
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="enable_scan_qr"
-            android:title="@string/pref_enable_scan_qr"/>
-        <Preference
-            android:key="fts_credentials"
-            android:title="@string/pref_fts_credentials"/>
     </PreferenceScreen>
 
     <PreferenceScreen

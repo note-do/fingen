@@ -4,7 +4,6 @@ import android.os.Looper;
 import android.util.Log;
 //import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.yoshione.fingen.BuildConfig;
 
 import java.util.concurrent.TimeUnit;
@@ -15,9 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Lg {
     public static void d(String tag, String msg) {
-        if (!BuildConfig.DEBUG) {
-//            Crashlytics.log(android.util.Log.DEBUG, tag, msg);
-        } else {
+        if (BuildConfig.DEBUG) {
             try {
                 TimeUnit.MILLISECONDS.sleep(1);
             } catch (InterruptedException e) {

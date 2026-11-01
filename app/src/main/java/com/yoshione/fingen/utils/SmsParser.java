@@ -3,8 +3,8 @@ package com.yoshione.fingen.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
+import androidx.annotation.NonNull;
+import androidx.core.util.Pair;
 
 import com.yoshione.fingen.dao.AccountsDAO;
 import com.yoshione.fingen.dao.PayeesDAO;

@@ -1,7 +1,7 @@
 package com.yoshione.fingen;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 import android.util.Log;
 

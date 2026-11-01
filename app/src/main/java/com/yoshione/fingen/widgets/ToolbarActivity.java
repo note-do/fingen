@@ -8,14 +8,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 //import com.arellomobile.mvp.MvpDelegate;
-import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.yoshione.fingen.ActivityMain;
 import com.yoshione.fingen.BuildConfig;
 import com.yoshione.fingen.FGApplication;
@@ -34,7 +34,7 @@ import io.reactivex.disposables.Disposable;
  * Created by slv on 18.11.2015.
  *
  */
-public abstract class ToolbarActivity extends PinCompatActivity implements IUnsubscribeOnDestroy {
+public abstract class ToolbarActivity extends AppCompatActivity implements IUnsubscribeOnDestroy {
 //    private MvpDelegate<? extends ToolbarActivity> mMvpDelegate;
 
     protected final String TAG = this.getClass().getName();

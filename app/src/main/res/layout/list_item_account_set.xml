@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.constraint.ConstraintLayout android:id="@+id/container"
+<androidx.constraintlayout.widget.ConstraintLayout android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingEnd="16dp"
@@ -10,21 +10,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <eu.davidea.flipview.FlipView
+    <com.yoshione.fingen.widgets.FlipView
         android:id="@+id/radioButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:clickable="true"
-        android:inAnimation="@anim/grow_from_middle_x_axis"
-        android:outAnimation="@anim/grow_from_middle_x_axis"
-        app:checked="false"
-        app:enableInitialAnimation="false"
-        app:frontBackgroundColor="@android:color/transparent"
         app:frontImage="@drawable/ic_radio_button_unchecked"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:rearBackgroundColor="@android:color/transparent"
         app:rearImage="@drawable/ic_radio_button_checked" />
 
     <TextView
@@ -38,4 +32,4 @@
         tools:text="Parent"
         style="@style/StyleTextPrimary" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>

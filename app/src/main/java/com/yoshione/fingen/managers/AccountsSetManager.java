@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.preference.PreferenceManager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.preference.PreferenceManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
