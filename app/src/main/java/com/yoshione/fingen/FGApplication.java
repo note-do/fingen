@@ -102,7 +102,7 @@ public class FGApplication extends Application implements ISyncAnimMethods {
     }
 
     // One-time removal of the settings of the removed FNS receipts feature (login, password, credentials)
-    private void cleanLegacyFtsPrefs() {
+    void cleanLegacyFtsPrefs() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (prefs.getBoolean(FgConst.PREF_FTS_PREFS_CLEANED, false)) {
             return;
