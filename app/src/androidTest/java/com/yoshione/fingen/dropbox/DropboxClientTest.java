@@ -9,6 +9,7 @@ import com.dropbox.core.oauth.DbxCredential;
 import com.dropbox.core.v2.DbxClientV2;
 import com.yoshione.fingen.FgConst;
 import com.yoshione.fingen.SystemDialogsRule;
+import com.yoshione.fingen.utils.SecureStore;
 
 import org.junit.After;
 import org.junit.Before;
@@ -164,5 +165,66 @@ public class DropboxClientTest {
         assertFalse(prefs.contains(FgConst.PREF_DROPBOX_ACCOUNT));
         assertFalse(DropboxClient.isLinked(mContext));
         assertNull(DropboxClient.getClient(mContext));
+    }
+
+    @Test
+    public void plainCredential_migrated_encrypted_plainRemoved_linked() {
+        DropboxClient.getPrefs(mContext).edit()
+                .putString(DropboxClient.KEY_CREDENTIAL, validCredentialJson())
+                .commit();
+
+        DropboxClient.migrateCredential(mContext);
+
+        SharedPreferences prefs = DropboxClient.getPrefs(mContext);
+        assertFalse(prefs.contains(DropboxClient.KEY_CREDENTIAL));
+        String encrypted = prefs.getString(DropboxClient.KEY_CREDENTIAL_ENC, null);
+        assertNotNull(encrypted);
+        assertFalse(encrypted.contains("refresh"));
+        assertTrue(prefs.getBoolean(DropboxClient.KEY_CREDENTIAL_MIGRATED, false));
+        assertTrue(DropboxClient.isLinked(mContext));
+        assertEquals("refresh", DropboxClient.getCredential(mContext).getRefreshToken());
+
+        // second run changes nothing
+        DropboxClient.migrateCredential(mContext);
+        assertEquals(encrypted, prefs.getString(DropboxClient.KEY_CREDENTIAL_ENC, null));
+    }
+
+    @Test
+    public void saveCredential_storesEncryptedOnly() {
+        DropboxClient.saveCredential(mContext,
+                new DbxCredential("access", System.currentTimeMillis() + 3600_000L, "refresh", "app key"));
+
+        SharedPreferences prefs = DropboxClient.getPrefs(mContext);
+        assertFalse(prefs.contains(DropboxClient.KEY_CREDENTIAL));
+        assertTrue(prefs.contains(DropboxClient.KEY_CREDENTIAL_ENC));
+        assertTrue(DropboxClient.isLinked(mContext));
+        assertEquals("access", DropboxClient.getCredential(mContext).getAccessToken());
+    }
+
+    @Test
+    public void undecryptableCredential_notLinked_keyRemoved() {
+        DropboxClient.getPrefs(mContext).edit()
+                .putString(DropboxClient.KEY_CREDENTIAL_ENC, "v1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                .commit();
+
+        assertNull(DropboxClient.getCredential(mContext));
+        assertFalse(DropboxClient.isLinked(mContext));
+        assertNull(DropboxClient.getClient(mContext));
+        assertFalse(DropboxClient.getPrefs(mContext).contains(DropboxClient.KEY_CREDENTIAL_ENC));
+    }
+
+    @Test
+    public void unlink_removesBothCredentialKeys() {
+        DropboxClient.getPrefs(mContext).edit()
+                .putString(DropboxClient.KEY_CREDENTIAL, validCredentialJson())
+                .putString(DropboxClient.KEY_CREDENTIAL_ENC, SecureStore.encrypt(validCredentialJson()))
+                .commit();
+
+        DropboxClient.unlink(mContext);
+
+        SharedPreferences prefs = DropboxClient.getPrefs(mContext);
+        assertFalse(prefs.contains(DropboxClient.KEY_CREDENTIAL));
+        assertFalse(prefs.contains(DropboxClient.KEY_CREDENTIAL_ENC));
+        assertFalse(DropboxClient.isLinked(mContext));
     }
 }

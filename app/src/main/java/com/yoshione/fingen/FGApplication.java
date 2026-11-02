@@ -84,6 +84,7 @@ public class FGApplication extends Application implements ISyncAnimMethods {
         mContext = this;
 
         DropboxClient.migrateLegacyToken(this);
+        DropboxClient.migrateCredential(this);
         BackupPassword.migrate(this);
 
         cancelLegacyJobs();
