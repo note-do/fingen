@@ -9,6 +9,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.FgConst;
 import com.yoshione.fingen.SystemDialogsRule;
+import com.yoshione.fingen.interfaces.IOnUnzipComplete;
+import com.yoshione.fingen.utils.FileUtils;
 import com.yoshione.fingen.utils.SecureStore;
 
 import org.junit.After;
@@ -186,5 +188,67 @@ public class BackupPasswordTest {
     public void protectionOff_backupNotBlocked() {
         assertEquals("", BackupPassword.get(mContext));
         assertFalse(BackupPassword.isBackupBlocked(mContext));
+    }
+
+    @Test
+    public void backupWithPassword_isEncrypted_andOpensWithStoredPassword() throws Exception {
+        assertTrue(BackupPassword.set(mContext, "Secret-1"));
+        mDefaultPrefs.edit().putBoolean(FgConst.PREF_ENABLE_BACKUP_PASSWORD, true).commit();
+
+        File backup = DBHelper.getInstance(mContext).backupDB(false);
+        File outDir = new File(mContext.getCacheDir(), "backup_password_test");
+        try {
+            assertNotNull(backup);
+            assertTrue(outDir.mkdirs() || outDir.isDirectory());
+
+            final String[] state = new String[1];
+            FileUtils.unzipAndDecrypt(backup.getAbsolutePath(), outDir.getAbsolutePath(), "wrong", new IOnUnzipComplete() {
+                @Override
+                public void onComplete() {
+                    state[0] = "complete";
+                }
+
+                @Override
+                public void onError() {
+                    state[0] = "error";
+                }
+
+                @Override
+                public void onWrongPassword() {
+                    state[0] = "wrongPassword";
+                }
+            });
+            assertEquals("wrongPassword", state[0]);
+
+            FileUtils.unzipAndDecrypt(backup.getAbsolutePath(), outDir.getAbsolutePath(),
+                    BackupPassword.get(mContext), new IOnUnzipComplete() {
+                        @Override
+                        public void onComplete() {
+                            state[0] = "complete";
+                        }
+
+                        @Override
+                        public void onError() {
+                            state[0] = "error";
+                        }
+
+                        @Override
+                        public void onWrongPassword() {
+                            state[0] = "wrongPassword";
+                        }
+                    });
+            assertEquals("complete", state[0]);
+        } finally {
+            if (backup != null) {
+                backup.delete();
+            }
+            File[] files = outDir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    file.delete();
+                }
+            }
+            outDir.delete();
+        }
     }
 }
