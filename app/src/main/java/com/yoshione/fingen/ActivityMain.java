@@ -49,6 +49,7 @@ import com.yoshione.fingen.utils.WindowInsetsHelper;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -71,6 +72,7 @@ import com.yoshione.fingen.interfaces.ITransactionItemEventListener;
 import com.yoshione.fingen.managers.AccountsSetManager;
 import com.yoshione.fingen.managers.TransactionManager;
 import com.yoshione.fingen.model.AccountsSet;
+import com.yoshione.fingen.backup.BackupPassword;
 import com.yoshione.fingen.model.BaseModel;
 import com.yoshione.fingen.model.Events;
 import com.yoshione.fingen.model.Sender;
@@ -216,6 +218,9 @@ public class ActivityMain extends ToolbarActivity {
         }
 
         super.onCreate(null);
+
+        // The DB is opened while injecting, so the pre-restore copy is no longer needed
+        DBHelper.deleteRestoreBackup(this);
 
         mUpdateUIHandler = new UpdateUIHandler(this);
 
@@ -502,6 +507,7 @@ public class ActivityMain extends ToolbarActivity {
 
         checkPermissionsAndShowAlert();
         checkBackupFolder();
+        checkPinResetNotice();
 
         List<String> tabs = PrefUtils.getTabsOrder(mPreferences);
         boolean actual = true;
@@ -644,18 +650,6 @@ public class ActivityMain extends ToolbarActivity {
 
     private void handleBackPressed() {
         // Закрываем Navigation Drawer по нажатию системной кнопки "Назад" если он открыт
-                mBinding = ActivityMainBinding.bind(getContentRoot());
-        viewPager = mBinding.pager;
-        tabLayout = findViewById(R.id.tabLayout);
-        coordinatorLayout = mBinding.coordinatorLayout;
-        mAppBarLayout = findViewById(R.id.appbar);
-        mTextViewActiveSet = findViewById(R.id.textViewSubtitle);
-        mButtonTemplates = mBinding.buttonTemplates;
-        mButtonNewExpense = mBinding.buttonNewExpense;
-        mButtonNewIncome = mBinding.buttonNewIncome;
-        mButtonNewTransfer = mBinding.buttonNewTransfer;
-        mButtonsBar = mBinding.buttonsBar;
-        mButtonsBarContainer = mBinding.buttonsBarContainer;
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START))
         {
             mDrawerLayout.closeDrawer(GravityCompat.START);
@@ -708,11 +702,31 @@ public class ActivityMain extends ToolbarActivity {
     @NeedsPermission(Manifest.permission.RECEIVE_SMS)
     void getReceiveSmsPermission() {
         Log.d(TAG, "getReceiveSmsPermission");
+        requestPostNotificationsIfNeeded();
     }
 
     @OnShowRationale(Manifest.permission.RECEIVE_SMS)
     void showRationaleForReceiveSms(PermissionRequest request) {
         showRationaleDialog(R.string.msg_permission_recieve_sms_rationale, request);
+    }
+
+    // The second system dialog can't be shown together with the first one, so
+    // POST_NOTIFICATIONS is requested after the SMS request is answered (any answer)
+    @OnPermissionDenied(Manifest.permission.RECEIVE_SMS)
+    void onReceiveSmsDenied() {
+        requestPostNotificationsIfNeeded();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.RECEIVE_SMS)
+    void onReceiveSmsNeverAskAgain() {
+        requestPostNotificationsIfNeeded();
+    }
+
+    private void requestPostNotificationsIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, RequestCodes.REQUEST_CODE_POST_NOTIFICATIONS);
+        }
     }
 
     @Override
@@ -742,23 +756,73 @@ public class ActivityMain extends ToolbarActivity {
         sBackupFolderWarningChecked = true;
         final Context appContext = getApplicationContext();
         new Thread(() -> {
-            boolean problem = !BackupFolder.isAvailable(appContext)
-                    || mPreferences.getBoolean(FgConst.PREF_BACKUP_FOLDER_UNAVAILABLE, false);
-            if (problem) {
+            // "Do not remind" mutes the folder warning only. The flag PREF_BACKUP_FOLDER_UNAVAILABLE is also
+            // set by BackupWorker when the folder is missing, so a failed copy can't be told apart: it is muted too.
+            boolean folderProblem = !mPreferences.getBoolean(FgConst.PREF_BACKUP_FOLDER_REMINDER_OFF, false)
+                    && (!BackupFolder.isAvailable(appContext)
+                    || mPreferences.getBoolean(FgConst.PREF_BACKUP_FOLDER_UNAVAILABLE, false));
+            // the lost password stops all backups, so it is never muted
+            boolean passwordProblem = BackupPassword.hasWarning(appContext);
+            if (folderProblem || passwordProblem) {
                 runOnUiThread(() -> {
                     if (isFinishing()) {
                         return;
                     }
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.ent_backup_data)
-                            .setMessage(R.string.msg_backup_folder_warning)
-                            .setPositiveButton(R.string.ent_backup_data, (dialog, which) ->
-                                    startActivity(new Intent(this, ActivityBackup.class)))
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show();
+                    if (passwordProblem) {
+                        showBackupPasswordWarning();
+                    }
+                    if (folderProblem) {
+                        showBackupFolderWarning();
+                    }
                 });
             }
         }).start();
+    }
+
+    private void showBackupPasswordWarning() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.ent_backup_data)
+                .setMessage(R.string.msg_backup_password_warning)
+                .setPositiveButton(R.string.ent_backup_data, (dialog, which) ->
+                        startActivity(new Intent(this, ActivityBackup.class)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void showBackupFolderWarning() {
+        final CheckBox doNotRemind = new CheckBox(this);
+        doNotRemind.setText(R.string.msg_backup_folder_do_not_remind);
+        final int padding = (int) (24 * getResources().getDisplayMetrics().density);
+        final FrameLayout container = new FrameLayout(this);
+        container.setPadding(padding, padding / 2, padding, 0);
+        container.addView(doNotRemind);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.ent_backup_data)
+                .setMessage(R.string.msg_backup_folder_warning)
+                .setView(container)
+                .setPositiveButton(R.string.ent_backup_data, (dialog, which) ->
+                        startActivity(new Intent(this, ActivityBackup.class)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setOnDismissListener(dialog -> {
+                    if (doNotRemind.isChecked()) {
+                        mPreferences.edit().putBoolean(FgConst.PREF_BACKUP_FOLDER_REMINDER_OFF, true).apply();
+                    }
+                })
+                .show();
+    }
+
+    /**
+     * One-time notice: PIN of the old lock library was reset (see PinLockManager.init)
+     */
+    private void checkPinResetNotice() {
+        if (!mPreferences.getBoolean(FgConst.PREF_PIN_RESET_NOTICE_PENDING, false)) {
+            return;
+        }
+        mPreferences.edit().putBoolean(FgConst.PREF_PIN_RESET_NOTICE_PENDING, false).apply();
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.msg_pin_reset_notice)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     private void checkPermissionsAndShowAlert() {
@@ -777,10 +841,6 @@ public class ActivityMain extends ToolbarActivity {
             }
             if (smsMarkers.size() > 0 | senders.size() > 0) {
                 ActivityMainPermissionsDispatcher.getReceiveSmsPermissionWithPermissionCheck(this);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, RequestCodes.REQUEST_CODE_POST_NOTIFICATIONS);
-                }
             }
         }
     }

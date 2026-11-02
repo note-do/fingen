@@ -80,44 +80,43 @@ public class FileUtils {
         return outFile;
     }
 
+    /**
+     * Extracts only the "fingen.db" entry to outputFile.
+     * @throws IOException if the archive is damaged or has no "fingen.db" entry
+     */
     public static void unzip(String zipFile, String outputFile) throws IOException {
+        boolean found = false;
         try {
             ZipInputStream zin = new ZipInputStream(new FileInputStream(zipFile));
             try {
                 ZipEntry ze;
                 while ((ze = zin.getNextEntry()) != null) {
-
-                    if (ze.isDirectory()) {
-                        File unzipFile = new File(outputFile);
-                        if(!unzipFile.isDirectory()) {
-                            unzipFile.mkdirs();
-                        }
+                    if (ze.isDirectory() || !"fingen.db".equals(ze.getName())) {
+                        continue;
                     }
-                    else {
-                        FileOutputStream fout = new FileOutputStream(outputFile, false);
-                        BufferedOutputStream bufout = new BufferedOutputStream(fout);
-                        try {
-
-                            byte[] buffer = new byte[2048];
-                            int read;
-                            while ((read = zin.read(buffer)) != -1) {
-                                bufout.write(buffer, 0, read);
-                            }
+                    try (BufferedOutputStream bufout = new BufferedOutputStream(new FileOutputStream(outputFile, false))) {
+                        byte[] buffer = new byte[2048];
+                        int read;
+                        while ((read = zin.read(buffer)) != -1) {
+                            bufout.write(buffer, 0, read);
                         }
-                        finally {
-                            zin.closeEntry();
-                            bufout.close();
-                            fout.close();
-                        }
+                    } finally {
+                        zin.closeEntry();
                     }
+                    found = true;
                 }
             }
             finally {
                 zin.close();
             }
         }
-        catch (Exception e) {
-            Log.e(TAG, "Unzip exception", e);
+        catch (ZipException e) {
+            // ZipException means "wrong password" for the caller, so rethrow as a plain error
+            throw new IOException("Unzip exception", e);
+        }
+        if (!found) {
+            new File(outputFile).delete();
+            throw new IOException("No fingen.db in archive");
         }
     }
 

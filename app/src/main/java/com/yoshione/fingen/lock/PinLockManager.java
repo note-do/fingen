@@ -39,8 +39,13 @@ public final class PinLockManager {
 
     public static void init(Application application) {
         // PINs of the previous lock library are not migrated: drop the flag if no PIN is set here.
+        // The flag without a PIN hash can only come from the old library, so the user is told once
+        // (ActivityMain shows the notice and clears PREF_PIN_RESET_NOTICE_PENDING).
         if (!isPinSet(application) && getPrefs(application).getBoolean(PREF_PIN_ENABLED, false)) {
-            getPrefs(application).edit().putBoolean(PREF_PIN_ENABLED, false).apply();
+            getPrefs(application).edit()
+                    .putBoolean(PREF_PIN_ENABLED, false)
+                    .putBoolean(FgConst.PREF_PIN_RESET_NOTICE_PENDING, true)
+                    .apply();
         }
         application.registerActivityLifecycleCallbacks(new LockCallbacks());
     }

@@ -94,6 +94,15 @@ public class BackupWorker extends Worker {
     @Override
     public Result doWork() {
         Context context = getApplicationContext();
+        try {
+            return doBackup(context);
+        } finally {
+            // The chain must go on after any end of the run, including unchecked exceptions
+            scheduleNext(context);
+        }
+    }
+
+    private Result doBackup(Context context) {
         if (!BuildConfig.FLAVOR.equals("nd")) {
             DbxClientV2 dbxClient = DropboxClient.getClient(context);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -105,7 +114,7 @@ public class BackupWorker extends Worker {
             }
             if (folderAvailable || dbxClient != null) {
                 try {
-                    File zip = DBHelper.getInstance(context).backupDB(true, folderAvailable);
+                    File zip = DBHelper.getInstance(context).backupDB(true, folderAvailable && getRunAttemptCount() == 0);
                     if (dbxClient != null && zip != null) {
                         // Upload to Dropbox
                         try (InputStream inputStream = new FileInputStream(zip)) {
@@ -115,7 +124,8 @@ public class BackupWorker extends Worker {
                             prefs.edit().putLong(FgConst.PREF_SHOW_LAST_SUCCESFUL_BACKUP_TO_DROPBOX, new Date().getTime()).apply();
                         } catch (DbxException e) {
                             e.printStackTrace();
-                            if (getRunAttemptCount() < MAX_ATTEMPTS) {
+                            // getRunAttemptCount() starts at 0: MAX_ATTEMPTS runs in total
+                            if (getRunAttemptCount() < MAX_ATTEMPTS - 1) {
                                 return Result.retry();
                             }
                         }
@@ -126,7 +136,6 @@ public class BackupWorker extends Worker {
                 }
             }
         }
-        scheduleNext(context);
         return Result.success();
     }
 }

@@ -237,8 +237,14 @@ public class ActivityBackup extends ToolbarActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 String password = BackupPassword.get(ActivityBackup.this);
-                prefs.edit().putBoolean(FgConst.PREF_ENABLE_BACKUP_PASSWORD,
-                        isChecked && password != null && !password.isEmpty()).apply();
+                boolean hasPassword = password != null && !password.isEmpty();
+                if (isChecked && !hasPassword) {
+                    // protection can't be enabled without a password: keep the switch and the pref in sync
+                    compoundButton.setChecked(false);
+                    Toast.makeText(ActivityBackup.this, R.string.msg_backup_password_required, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                prefs.edit().putBoolean(FgConst.PREF_ENABLE_BACKUP_PASSWORD, isChecked && hasPassword).apply();
             }
         });
         String savedPassword = BackupPassword.get(this);
@@ -273,6 +279,10 @@ public class ActivityBackup extends ToolbarActivity {
         mPasswordDirty = false;
         String password = mEditTextPassword.getText().toString();
         if (BackupPassword.set(this, password)) {
+            if (password.isEmpty() && mSwitchCompatEnablePasswordProtection.isChecked()) {
+                // the password was cleared: protection can't stay on (the listener turns the pref off)
+                mSwitchCompatEnablePasswordProtection.setChecked(false);
+            }
             prefs.edit().putBoolean(FgConst.PREF_ENABLE_BACKUP_PASSWORD,
                     mSwitchCompatEnablePasswordProtection.isChecked() && !password.isEmpty()).apply();
             mEditTextPassword.setError(null);
@@ -371,9 +381,6 @@ public class ActivityBackup extends ToolbarActivity {
             @Override
             public void onAccountReceived(FullAccount account) {
                 //Print account's info
-                Log.d("User", account.getEmail());
-                Log.d("User", account.getName().getDisplayName());
-                Log.d("User", account.getAccountType().name());
                 mEditTextDropboxAccount.setText(account.getEmail());
                 dropboxPrefs.edit().putString(FgConst.PREF_DROPBOX_ACCOUNT, account.getEmail()).apply();
             }
@@ -508,9 +515,11 @@ public class ActivityBackup extends ToolbarActivity {
                                 @Override
                                 public void run() {
                                     File file = new File(activity.getCacheDir(), item.mMetadata.getName());
-                                    try {
-                                        OutputStream outputStream = new FileOutputStream(file);
-                                        DbxClientV2 dbxClient = DropboxClient.getClient(activity);
+                                    DbxClientV2 dbxClient = DropboxClient.getClient(activity);
+                                    if (dbxClient == null) {
+                                        return;
+                                    }
+                                    try (OutputStream outputStream = new FileOutputStream(file)) {
                                         dbxClient.files().download(item.mMetadata.getPathLower(), item.mMetadata.getRev())
                                                 .download(outputStream);
                                         activity.mHandler.sendMessage(activity.mHandler.obtainMessage(MSG_DOWNLOAD_FILE, file));

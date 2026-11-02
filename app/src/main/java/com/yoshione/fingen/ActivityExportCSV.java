@@ -1,6 +1,5 @@
 package com.yoshione.fingen;
 
-import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.databinding.ActivityExportCsvBinding;
 import android.app.Activity;
 import android.content.Intent;

@@ -1249,6 +1249,10 @@
     <string name="msg_backup_folder_selection_failed" formatted="false">Не удалось получить доступ к выбранной папке</string>
 
     <string name="msg_backup_folder_warning" formatted="false">Локальные резервные копии не создаются: папка не выбрана или доступ к ней потерян. Автокопия в Dropbox работает как обычно. Выберите папку в разделе «Резервное копирование».</string>
+    <string name="msg_backup_password_required" formatted="false">Сначала введите пароль резервной копии, затем включите защиту</string>
+    <string name="msg_backup_password_warning" formatted="false">Резервные копии не создаются: пароль резервной копии не удалось прочитать на этом устройстве. Введите пароль заново в разделе «Резервное копирование».</string>
+    <string name="msg_backup_folder_do_not_remind" formatted="false">Не напоминать</string>
+    <string name="msg_pin_reset_notice" formatted="false">PIN-защита сброшена после обновления приложения. Включите её заново в настройках.</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->

@@ -2099,4 +2099,8 @@
     <string name="pin_code_mismatch" formatted="false">PINs do not match</string>
     <string name="msg_backup_password_lost" formatted="false">Backup password cannot be read on this device. Enter the backup password again, backups are paused until then</string>
     <string name="msg_backup_password_not_saved" formatted="false">Backup password was not saved</string>
+    <string name="msg_backup_password_required" formatted="false">Enter a backup password first, then turn protection on</string>
+    <string name="msg_backup_password_warning" formatted="false">Backups are not being created: the backup password cannot be read on this device. Enter the password again in the Backup and restore screen.</string>
+    <string name="msg_backup_folder_do_not_remind" formatted="false">Do not remind me</string>
+    <string name="msg_pin_reset_notice" formatted="false">PIN protection was reset after the app update. Turn it on again in Settings.</string>
 </resources>

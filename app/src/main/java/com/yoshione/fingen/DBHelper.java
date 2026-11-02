@@ -987,16 +987,84 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         }
     }
 
+    private boolean isRestoredDbValid(File file) {
+        if (!file.exists()) {
+            return false;
+        }
+        SQLiteDatabase restored = null;
+        Cursor c = null;
+        try {
+            restored = SQLiteDatabase.openDatabase(file.getPath(), null, SQLiteDatabase.OPEN_READONLY);
+            c = restored.rawQuery("PRAGMA quick_check", null);
+            if (!c.moveToFirst() || !"ok".equalsIgnoreCase(c.getString(0))) {
+                return false;
+            }
+            c.close();
+            c = restored.rawQuery("PRAGMA user_version", null);
+            return c.moveToFirst() && c.getInt(0) <= DATABASE_VERSION;
+        } catch (Exception e) {
+            Log.e(TAG, "Restored DB check failed", e);
+            return false;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+            if (restored != null) {
+                restored.close();
+            }
+        }
+    }
+
+    /**
+     * Deletes fingen.db.bak left by restoreDB. Call only after the DB is opened successfully.
+     */
+    public static void deleteRestoreBackup(Context context) {
+        try {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            // Set only after a successful restore; a failed rollback leaves the old DB in fingen.db.bak
+            if (!preferences.getBoolean(FgConst.PREF_RESTORE_BAK_PENDING, false)) return;
+            File db = context.getDatabasePath(DATABASE_NAME);
+            File bak = new File(db.getParent() + "/fingen.db.bak");
+            if (bak.exists() && !bak.delete()) {
+                Log.w(TAG, "Can't delete " + bak.getPath());
+                return;
+            }
+            preferences.edit().putBoolean(FgConst.PREF_RESTORE_BAK_PENDING, false).apply();
+        } catch (Exception e) {
+            Log.w(TAG, "Can't delete restore backup", e);
+        }
+    }
+
     synchronized private void restoreDB(String filename, final AppCompatActivity activity) {
         final File file = new File(filename);
         final File db = new File(getDbPath());
         final IOnUnzipComplete completeListener = new IOnUnzipComplete() {
             @Override
             public void onComplete() {
-                if (db.delete()) {
-                    File restored = new File(db.getParent() + "/fingen.db.ex");
-                    restored.renameTo(db);
+                File restored = new File(db.getParent() + "/fingen.db.ex");
+                if (!isRestoredDbValid(restored)) {
+                    restored.delete();
+                    onError();
+                    return;
                 }
+                File bak = new File(db.getParent() + "/fingen.db.bak");
+                // Keep the current DB until the restored one is in place
+                if (!db.renameTo(bak)) {
+                    restored.delete();
+                    onError();
+                    return;
+                }
+                if (!restored.renameTo(db)) {
+                    if (bak.renameTo(db)) {
+                        restored.delete();
+                    } else {
+                        Log.e(TAG, "Restore failed and rollback failed, old DB is in " + bak.getPath());
+                    }
+                    onError();
+                    return;
+                }
+                // commit(), not apply(): the flag must be on disk before the process exits
+                PreferenceManager.getDefaultSharedPreferences(mContext).edit().putBoolean(FgConst.PREF_RESTORE_BAK_PENDING, true).commit();
                 Intent restartIntent = Intent.makeRestartActivityTask(new ComponentName(mContext, ActivityMain.class));
                 activity.startActivity(restartIntent);
                 Runtime.getRuntime().exit(0);

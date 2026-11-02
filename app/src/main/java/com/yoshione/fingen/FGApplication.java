@@ -86,6 +86,7 @@ public class FGApplication extends Application implements ISyncAnimMethods {
         DropboxClient.migrateLegacyToken(this);
         DropboxClient.migrateCredential(this);
         BackupPassword.migrate(this);
+        cleanLegacyFtsPrefs();
 
         cancelLegacyJobs();
 
@@ -98,6 +99,21 @@ public class FGApplication extends Application implements ISyncAnimMethods {
         registerActivityLifecycleCallbacks(new FgActivityLifecycleCallbacks());
 
         BackupWorker.schedule(this);
+    }
+
+    // One-time removal of the settings of the removed FNS receipts feature (login, password, credentials)
+    private void cleanLegacyFtsPrefs() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean(FgConst.PREF_FTS_PREFS_CLEANED, false)) {
+            return;
+        }
+        prefs.edit()
+                .remove(FgConst.PREF_FTS_LOGIN)
+                .remove(FgConst.PREF_FTS_PASS)
+                .remove(FgConst.PREF_FTS_CREDENTIALS)
+                .remove(FgConst.PREF_FTS_DO_NOT_SHOW_AGAIN)
+                .putBoolean(FgConst.PREF_FTS_PREFS_CLEANED, true)
+                .apply();
     }
 
     // One-time cleanup of jobs left by the removed android-job library

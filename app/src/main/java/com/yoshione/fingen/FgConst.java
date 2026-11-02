@@ -38,6 +38,10 @@ public class FgConst {
     public static final String PREF_ANDROID_JOB_MIGRATED = "android_job_migrated";
     public static final String PREF_BACKUP_FOLDER_URI = "backup_folder_uri";
     public static final String PREF_BACKUP_FOLDER_UNAVAILABLE = "backup_folder_unavailable";
+    public static final String PREF_BACKUP_FOLDER_REMINDER_OFF = "backup_folder_reminder_off";
+    public static final String PREF_FTS_PREFS_CLEANED = "fts_prefs_cleaned_v1";
+    public static final String PREF_PIN_RESET_NOTICE_PENDING = "pin_reset_notice_pending";
+    public static final String PREF_RESTORE_BAK_PENDING = "restore_bak_pending";
 //    public static final String PREF_SHOW_SHOW_ACCOUNTS_PANEL = "show_accounts_panel";
     public static final String PREF_START_TAB = "start_tab";
     public static final String PREF_SWITCH_TAB_ON_START = "switch_tab_on_start";

@@ -59,7 +59,6 @@ public class SecureStore {
             }
         } catch (Exception e) {
             Log.e(TAG, "Can't encrypt: " + e);
-            resetKey();
             return null;
         }
     }
