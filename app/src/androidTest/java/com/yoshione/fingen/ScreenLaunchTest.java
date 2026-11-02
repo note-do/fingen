@@ -14,6 +14,7 @@ import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.Category;
 import com.yoshione.fingen.model.Credit;
 import com.yoshione.fingen.model.Location;
+import com.yoshione.fingen.model.Template;
 import com.yoshione.fingen.utils.RequestCodes;
 
 import org.junit.After;
@@ -152,7 +153,7 @@ public class ScreenLaunchTest {
 
     @Test
     public void modelList() throws Exception {
-        check(ActivityModelList.class, modelIntent(new Category()));
+        check(ActivityModelList.class, modelIntent(new Template()));
     }
 
     @Test
