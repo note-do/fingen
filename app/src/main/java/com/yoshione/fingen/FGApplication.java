@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
+import com.yoshione.fingen.backup.BackupPassword;
 import com.yoshione.fingen.dropbox.DropboxClient;
 import com.yoshione.fingen.backup.BackupWorker;
 import com.yoshione.fingen.di.AppComponent;
@@ -83,6 +84,7 @@ public class FGApplication extends Application implements ISyncAnimMethods {
         mContext = this;
 
         DropboxClient.migrateLegacyToken(this);
+        BackupPassword.migrate(this);
 
         cancelLegacyJobs();
 

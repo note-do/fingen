@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import android.util.Log;
+import com.yoshione.fingen.backup.BackupPassword;
 import com.yoshione.fingen.dao.DatabaseUpgradeHelper;
 import com.yoshione.fingen.db.IUpdateRunningBalance;
 import com.yoshione.fingen.db.UpdateHelper;
@@ -908,6 +909,12 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
      * @return the cache file, which is used for upload to Dropbox
      */
     public File backupDB(boolean vacuum, boolean copyToFolder) throws IOException {
+        if (BackupPassword.isBackupBlocked(mContext)) {
+            // Protection is on but the password is lost: no backup (neither local nor Dropbox) until it is entered again
+            Log.w(TAG, "Backup skipped: backup password can't be read");
+            BackupPassword.markWarning(mContext);
+            return null;
+        }
         if (vacuum) {
             mDatabase.execSQL("VACUUM");
         }
@@ -918,9 +925,9 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
 
         File backup;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String password = preferences.getString("backup_password", "");
-        Boolean enableProtection = preferences.getBoolean("enable_backup_password", false);
-        if (enableProtection && !password.isEmpty()) {
+        String password = BackupPassword.get(mContext);
+        boolean enableProtection = BackupPassword.isProtectionEnabled(mContext);
+        if (enableProtection && password != null && !password.isEmpty()) {
             backup = FileUtils.zipAndEncrypt(getDbPath(), backupPath + backupFile, password);
         } else {
             backup = FileUtils.zip(new String[]{getDbPath()}, backupPath + backupFile);
@@ -1016,7 +1023,8 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
             }
         };
         if (file.exists()) {
-            final String password = PreferenceManager.getDefaultSharedPreferences(mContext).getString("backup_password", "");
+            String savedPassword = BackupPassword.get(mContext);
+            final String password = savedPassword == null ? "" : savedPassword;
             FileUtils.unzipAndDecrypt(file.toString(), db.getParent() + "/", password, completeListener);
         }
     }

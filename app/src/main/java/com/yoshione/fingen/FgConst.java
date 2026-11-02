@@ -44,6 +44,12 @@ public class FgConst {
     public static final String PREF_TAB_ORDER = "main_screen_tab_order";
     public static final String PREF_TRANSACTION_EDITOR_CONSTRUCTOR = "transaction_editor_constructor";
     public static final String PREF_DROPBOX_ACCOUNT = "dropbox_account";
+    public static final String PREF_BACKUP_PASSWORD = "backup_password"; // legacy plain text, only for migration
+    public static final String PREF_ENABLE_BACKUP_PASSWORD = "enable_backup_password";
+    // keys of the secure prefs file (SecureStore.PREFS_NAME)
+    public static final String SECURE_BACKUP_PASSWORD = "backup_password_enc";
+    public static final String SECURE_BACKUP_PASSWORD_MIGRATED = "secure_migrated_v1";
+    public static final String SECURE_BACKUP_PASSWORD_WARNING = "backup_password_warning";
     public static final String PREF_EXPAND_LISTS = "expand_lists";
     public static final String PREF_LAST_BUDGET_CURRENCY = "last_budget_currency";
     public static final String PREF_ACCOUNT_CLICK_ACTION = "account_click_action";

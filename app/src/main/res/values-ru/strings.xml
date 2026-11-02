@@ -2097,4 +2097,6 @@
     <string name="act_tune_editor" formatted="false">Настроить редактор</string>
     <string name="pin_code_wrong" formatted="false">Неверный PIN</string>
     <string name="pin_code_mismatch" formatted="false">PIN-коды не совпадают</string>
+    <string name="msg_backup_password_lost" formatted="false">Пароль резервной копии не удалось прочитать на этом устройстве. Введите пароль заново, до этого резервные копии не создаются</string>
+    <string name="msg_backup_password_not_saved" formatted="false">Пароль резервной копии не сохранён</string>
 </resources>

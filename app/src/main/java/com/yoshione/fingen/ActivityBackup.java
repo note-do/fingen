@@ -38,6 +38,7 @@ import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.users.FullAccount;
+import com.yoshione.fingen.backup.BackupPassword;
 import com.yoshione.fingen.dropbox.DropboxClient;
 import com.yoshione.fingen.dropbox.UploadTask;
 import com.yoshione.fingen.dropbox.UserAccountTask;
@@ -83,6 +84,9 @@ public class ActivityBackup extends ToolbarActivity {
     Button mButtonSelectBackupFolder;
     SwitchCompat mSwitchCompatEnablePasswordProtection;
     EditText mEditTextPassword;
+    private static final long PASSWORD_SAVE_DELAY_MS = 1000;
+    private boolean mPasswordDirty;
+    private final Runnable mSavePasswordRunnable = this::savePassword;
     EditText mEditTextDropboxAccount;
     TextInputLayout mTextInputLayoutDropboxAccount;
     TextView mTextViewLastBackupToDropbox;
@@ -228,15 +232,17 @@ public class ActivityBackup extends ToolbarActivity {
     }
 
     private void initPasswordProtection() {
-        mSwitchCompatEnablePasswordProtection.setChecked(prefs.getBoolean("enable_backup_password", false));
+        mSwitchCompatEnablePasswordProtection.setChecked(BackupPassword.isProtectionEnabled(this));
         mSwitchCompatEnablePasswordProtection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                String password = prefs.getString("backup_password", "");
-                prefs.edit().putBoolean("enable_backup_password", isChecked & !password.isEmpty()).apply();
+                String password = BackupPassword.get(ActivityBackup.this);
+                prefs.edit().putBoolean(FgConst.PREF_ENABLE_BACKUP_PASSWORD,
+                        isChecked && password != null && !password.isEmpty()).apply();
             }
         });
-        mEditTextPassword.setText(prefs.getString("backup_password", ""));
+        String savedPassword = BackupPassword.get(this);
+        mEditTextPassword.setText(savedPassword == null ? "" : savedPassword);
         mEditTextPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -245,17 +251,43 @@ public class ActivityBackup extends ToolbarActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String password = String.valueOf(charSequence);
-                prefs.edit().putString("backup_password", password).apply();
-                prefs.edit().putBoolean("enable_backup_password", mSwitchCompatEnablePasswordProtection.isChecked()
-                        & !password.isEmpty()).apply();
+
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-
+                // Encrypting on every key press is wasteful: save after a pause or on leaving the screen
+                mPasswordDirty = true;
+                mEditTextPassword.removeCallbacks(mSavePasswordRunnable);
+                mEditTextPassword.postDelayed(mSavePasswordRunnable, PASSWORD_SAVE_DELAY_MS);
             }
         });
+        showPasswordWarning();
+    }
+
+    private void savePassword() {
+        mEditTextPassword.removeCallbacks(mSavePasswordRunnable);
+        if (!mPasswordDirty) {
+            return;
+        }
+        mPasswordDirty = false;
+        String password = mEditTextPassword.getText().toString();
+        if (BackupPassword.set(this, password)) {
+            prefs.edit().putBoolean(FgConst.PREF_ENABLE_BACKUP_PASSWORD,
+                    mSwitchCompatEnablePasswordProtection.isChecked() && !password.isEmpty()).apply();
+            mEditTextPassword.setError(null);
+        } else {
+            // Keystore error: the password is not stored, so protection can't be enabled
+            prefs.edit().putBoolean(FgConst.PREF_ENABLE_BACKUP_PASSWORD, false).apply();
+            Toast.makeText(this, R.string.msg_backup_password_not_saved, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void showPasswordWarning() {
+        if (BackupPassword.hasWarning(this)) {
+            mEditTextPassword.setError(getString(R.string.msg_backup_password_lost));
+            Toast.makeText(this, R.string.msg_backup_password_lost, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void initDropbox() {
@@ -318,6 +350,12 @@ public class ActivityBackup extends ToolbarActivity {
     }
 
     @Override
+    protected void onPause() {
+        savePassword();
+        super.onPause();
+    }
+
+    @Override
     public void onResume() {
         saveCredential();
         initDropbox();
@@ -364,6 +402,12 @@ public class ActivityBackup extends ToolbarActivity {
     }
 
     private void backupDB() {
+        savePassword();
+        if (BackupPassword.isBackupBlocked(this)) {
+            BackupPassword.markWarning(this);
+            showPasswordWarning();
+            return;
+        }
         DbxClientV2 client = DropboxClient.getClient(this);
         boolean folderAvailable = BackupFolder.isAvailable(this);
         if (!folderAvailable) {

@@ -2097,4 +2097,6 @@
     <string name="act_tune_editor" formatted="false">Tune the editor</string>
     <string name="pin_code_wrong" formatted="false">Wrong PIN</string>
     <string name="pin_code_mismatch" formatted="false">PINs do not match</string>
+    <string name="msg_backup_password_lost" formatted="false">Backup password cannot be read on this device. Enter the backup password again, backups are paused until then</string>
+    <string name="msg_backup_password_not_saved" formatted="false">Backup password was not saved</string>
 </resources>
