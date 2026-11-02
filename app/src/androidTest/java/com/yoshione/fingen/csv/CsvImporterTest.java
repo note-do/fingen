@@ -18,7 +18,6 @@ import com.yoshione.fingen.utils.ImportParams;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -157,19 +156,16 @@ public class CsvImporterTest {
         assertEquals("row count after malformed custom import", before, allTransactionsCount());
     }
 
-    /**
-     * Defect: loadFingenCSV calls database.beginTransaction() without try/finally, so an exception
-     * inside the row loop skips endTransaction(). Actual failure: AssertionError "database must not stay
-     * in a transaction after a failed import". Fix belongs to CsvImporter, not to this test.
-     */
-    @Ignore("CsvImporter.loadFingenCSV leaves the DB transaction open after an exception in the row loop")
     @Test
-    public void malformedFile_fingen_leavesNoOpenDbTransaction() throws Exception {
+    public void malformedFile_leavesNoOpenDbTransaction() throws Exception {
         writeCsv("this is not a csv file", "no separators in this line", "still plain text");
 
         runFingen();
+        assertFalse("loadFingenCSV must end its transaction after a failed import",
+                DBHelper.getInstance(mContext).getWritableDatabase().inTransaction());
 
-        assertFalse("database must not stay in a transaction after a failed import",
+        runCustom();
+        assertFalse("loadCustomCSV must end its transaction after a failed import",
                 DBHelper.getInstance(mContext).getWritableDatabase().inTransaction());
     }
 

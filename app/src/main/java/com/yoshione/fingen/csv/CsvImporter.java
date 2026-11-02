@@ -370,6 +370,7 @@ public class CsvImporter {
         try {
             final SQLiteDatabase database = DBHelper.getInstance(mContext).getDatabase();
             database.beginTransaction();
+            try {
             csv.read(mFileName, new CSVReadProc() {
                 @Override
                 public void procRow(int i, String... values) {
@@ -599,7 +600,9 @@ public class CsvImporter {
                 }
             });
             database.setTransactionSuccessful();
-            database.endTransaction();
+            } finally {
+                database.endTransaction();
+            }
 
 //            database.beginTransaction();
             if (!transactionList.isEmpty()) {
@@ -644,9 +647,12 @@ public class CsvImporter {
 
             final SQLiteDatabase database = DBHelper.getInstance(mContext).getDatabase();
             database.beginTransaction();
-            csv.read(mFileName, customCsvImportProc);
-            database.setTransactionSuccessful();
-            database.endTransaction();
+            try {
+                csv.read(mFileName, customCsvImportProc);
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
+            }
             if (!transactionList.isEmpty()) {
                 TransactionsDAO.getInstance(mContext).bulkCreateModel(transactionList, null, false);
             }
@@ -693,9 +699,12 @@ public class CsvImporter {
 
             final SQLiteDatabase database = DBHelper.getInstance(mContext).getDatabase();
             database.beginTransaction();
-            csv.read(mFileName, fingenCsvImportProc);
-            database.setTransactionSuccessful();
-            database.endTransaction();
+            try {
+                csv.read(mFileName, fingenCsvImportProc);
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
+            }
             if (!transactionList.isEmpty()) {
                 TransactionsDAO.getInstance(mContext).bulkCreateModel(transactionList, null, false);
             }
