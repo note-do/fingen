@@ -236,6 +236,15 @@ public class ActivityBackup extends ToolbarActivity {
         mSwitchCompatEnablePasswordProtection.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked && !mEditTextPassword.getText().toString().isEmpty()) {
+                    // The password is saved with a delay: save it now so it is not lost for the check below
+                    mPasswordDirty = true;
+                    savePassword();
+                    if (!compoundButton.isChecked()) {
+                        // Keystore error: savePassword already turned the switch off
+                        return;
+                    }
+                }
                 String password = BackupPassword.get(ActivityBackup.this);
                 boolean hasPassword = password != null && !password.isEmpty();
                 if (isChecked && !hasPassword) {
@@ -289,6 +298,9 @@ public class ActivityBackup extends ToolbarActivity {
         } else {
             // Keystore error: the password is not stored, so protection can't be enabled
             prefs.edit().putBoolean(FgConst.PREF_ENABLE_BACKUP_PASSWORD, false).apply();
+            if (mSwitchCompatEnablePasswordProtection.isChecked()) {
+                mSwitchCompatEnablePasswordProtection.setChecked(false);
+            }
             Toast.makeText(this, R.string.msg_backup_password_not_saved, Toast.LENGTH_LONG).show();
         }
     }

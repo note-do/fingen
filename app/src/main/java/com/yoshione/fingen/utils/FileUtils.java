@@ -121,8 +121,16 @@ public class FileUtils {
     }
 
     public static void unzipAndDecrypt(String zipFile, String location, String password, IOnUnzipComplete onCompleteListener) {
+        AesZipFileDecrypter decrypter;
         try {
-            AesZipFileDecrypter decrypter = new AesZipFileDecrypter(new File(zipFile), new AESDecrypterBC());
+            decrypter = new AesZipFileDecrypter(new File(zipFile), new AESDecrypterBC());
+        } catch (Exception e) {
+            // Not a zip archive (no central directory) is not a wrong password
+            Log.e(TAG, "Can't open archive", e);
+            onCompleteListener.onError();
+            return;
+        }
+        try {
             ExtZipEntry entry = decrypter.getEntry("fingen.db");
             if (entry.isEncrypted()) {
                 decrypter.extractEntry(entry, new File(location + "/fingen.db.ex"), password);
@@ -137,6 +145,12 @@ public class FileUtils {
             Log.e(TAG, "Unzip exception", e);
             onCompleteListener.onError();
             return;
+        } finally {
+            try {
+                decrypter.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Can't close archive", e);
+            }
         }
         onCompleteListener.onComplete();
     }

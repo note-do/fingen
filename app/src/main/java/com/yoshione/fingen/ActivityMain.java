@@ -219,9 +219,6 @@ public class ActivityMain extends ToolbarActivity {
 
         super.onCreate(null);
 
-        // The DB is opened while injecting, so the pre-restore copy is no longer needed
-        DBHelper.deleteRestoreBackup(this);
-
         mUpdateUIHandler = new UpdateUIHandler(this);
 
         mPreferences.edit().putBoolean(FgConst.PREF_SWITCH_TAB_ON_START, true).apply();

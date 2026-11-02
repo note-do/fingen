@@ -604,6 +604,8 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         final DatabaseUpgradeHelper dbh = DatabaseUpgradeHelper.getInstance();
         dbh.setUpgrading(true);
         mDatabase = getWritableDatabase();
+        // Opened successfully: the pre-restore copy is no longer needed (stays if opening throws)
+        deleteRestoreBackup(mContext);
         dbh.setUpgrading(false);
         while (dbh.isUpgrading()) {
             SystemClock.sleep(10);
@@ -1001,7 +1003,8 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
             }
             c.close();
             c = restored.rawQuery("PRAGMA user_version", null);
-            return c.moveToFirst() && c.getInt(0) <= DATABASE_VERSION;
+            // 16 is the oldest version with migrations (fixtures 16/21/23/30/34)
+            return c.moveToFirst() && c.getInt(0) >= 16 && c.getInt(0) <= DATABASE_VERSION;
         } catch (Exception e) {
             Log.e(TAG, "Restored DB check failed", e);
             return false;

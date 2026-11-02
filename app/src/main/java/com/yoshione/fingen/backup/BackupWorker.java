@@ -94,12 +94,23 @@ public class BackupWorker extends Worker {
     @Override
     public Result doWork() {
         Context context = getApplicationContext();
+        Result result;
         try {
-            return doBackup(context);
-        } finally {
-            // The chain must go on after any end of the run, including unchecked exceptions
+            result = doBackup(context);
+        } catch (RuntimeException e) {
+            // Unexpected failure: no retry; success (not failure) so the appended next run is not cancelled
+            Log.e(TAG, "Backup failed", e);
+            result = Result.success();
+        }
+        // The next run is queued only on the final outcome: a retry re-runs this same work
+        if (!isRetry(result)) {
             scheduleNext(context);
         }
+        return result;
+    }
+
+    private static boolean isRetry(Result result) {
+        return result instanceof Result.Retry;
     }
 
     private Result doBackup(Context context) {

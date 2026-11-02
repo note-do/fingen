@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 
@@ -70,6 +71,16 @@ public class ActivityBackupPasswordToggleTest {
                 editor.putString(entry.getKey(), (String) value);
             } else if (value instanceof Boolean) {
                 editor.putBoolean(entry.getKey(), (Boolean) value);
+            } else if (value instanceof Integer) {
+                editor.putInt(entry.getKey(), (Integer) value);
+            } else if (value instanceof Long) {
+                editor.putLong(entry.getKey(), (Long) value);
+            } else if (value instanceof Float) {
+                editor.putFloat(entry.getKey(), (Float) value);
+            } else if (value instanceof Set) {
+                @SuppressWarnings("unchecked")
+                Set<String> set = (Set<String>) value;
+                editor.putStringSet(entry.getKey(), set);
             }
         }
         editor.commit();
