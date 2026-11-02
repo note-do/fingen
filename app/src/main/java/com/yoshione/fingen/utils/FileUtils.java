@@ -144,6 +144,16 @@ public class FileUtils {
             onCompleteListener.onError();
             return;
         }
+        if (entry == null) {
+            Log.e(TAG, "No fingen.db entry in archive");
+            try {
+                decrypter.close();
+            } catch (IOException ce) {
+                Log.w(TAG, "Can't close archive", ce);
+            }
+            onCompleteListener.onError();
+            return;
+        }
         try {
             if (entry.isEncrypted()) {
                 decrypter.extractEntry(entry, new File(location + "/fingen.db.ex"), password);

@@ -455,7 +455,7 @@ public class ActivityBackup extends ToolbarActivity {
                         BackupFolder.cleanCache(ActivityBackup.this, zip);
                     }
                 }).execute();
-            } else {
+            } else if (zip != null) {
                 BackupFolder.cleanCache(this, zip);
             }
         } catch (IOException e) {
@@ -526,7 +526,7 @@ public class ActivityBackup extends ToolbarActivity {
                             Thread thread = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    File file = new File(activity.getCacheDir(), item.mMetadata.getName());
+                                    File file = new File(activity.getCacheDir(), RESTORE_CACHE_PREFIX + item.mMetadata.getName());
                                     DbxClientV2 dbxClient = DropboxClient.getClient(activity);
                                     if (dbxClient == null) {
                                         return;

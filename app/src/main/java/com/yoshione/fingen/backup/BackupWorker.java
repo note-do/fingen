@@ -98,7 +98,7 @@ public class BackupWorker extends Worker {
         try {
             retry = doBackup(context);
         } catch (RuntimeException e) {
-            // Unexpected failure: no retry; success (not failure) so the appended next run is not cancelled
+            // Unexpected failure: no retry; the next run is still queued below, so the daily chain is not broken
             Log.e(TAG, "Backup failed", e);
             retry = false;
         }

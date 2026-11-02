@@ -1051,6 +1051,16 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
                     return;
                 }
                 File bak = new File(db.getParent() + "/fingen.db.bak");
+                // Close the connection and drop the singleton: no writes through the old connection,
+                // and the journal must not stay bound to the replaced file
+                close();
+                synchronized (DBHelper.class) {
+                    mInstance = null;
+                }
+                new File(db.getPath() + "-journal").delete();
+                // WAL is not used, the files are removed for safety (no-op if absent)
+                new File(db.getPath() + "-wal").delete();
+                new File(db.getPath() + "-shm").delete();
                 // Keep the current DB until the restored one is in place
                 if (!db.renameTo(bak)) {
                     restored.delete();
