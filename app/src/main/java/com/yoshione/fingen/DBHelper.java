@@ -989,7 +989,7 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
         }
     }
 
-    private boolean isRestoredDbValid(File file) {
+    boolean isRestoredDbValid(File file) {
         if (!file.exists()) {
             return false;
         }

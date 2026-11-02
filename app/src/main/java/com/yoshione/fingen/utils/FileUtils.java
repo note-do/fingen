@@ -130,8 +130,21 @@ public class FileUtils {
             onCompleteListener.onError();
             return;
         }
+        ExtZipEntry entry;
         try {
-            ExtZipEntry entry = decrypter.getEntry("fingen.db");
+            entry = decrypter.getEntry("fingen.db");
+        } catch (Exception e) {
+            // Damaged central directory is not a wrong password
+            Log.e(TAG, "Can't read archive entry", e);
+            try {
+                decrypter.close();
+            } catch (IOException ce) {
+                Log.w(TAG, "Can't close archive", ce);
+            }
+            onCompleteListener.onError();
+            return;
+        }
+        try {
             if (entry.isEncrypted()) {
                 decrypter.extractEntry(entry, new File(location + "/fingen.db.ex"), password);
             } else {

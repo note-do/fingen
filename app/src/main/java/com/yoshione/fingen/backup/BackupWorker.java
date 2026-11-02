@@ -94,26 +94,26 @@ public class BackupWorker extends Worker {
     @Override
     public Result doWork() {
         Context context = getApplicationContext();
-        Result result;
+        boolean retry;
         try {
-            result = doBackup(context);
+            retry = doBackup(context);
         } catch (RuntimeException e) {
             // Unexpected failure: no retry; success (not failure) so the appended next run is not cancelled
             Log.e(TAG, "Backup failed", e);
-            result = Result.success();
+            retry = false;
         }
         // The next run is queued only on the final outcome: a retry re-runs this same work
-        if (!isRetry(result)) {
-            scheduleNext(context);
+        if (retry) {
+            return Result.retry();
         }
-        return result;
+        scheduleNext(context);
+        return Result.success();
     }
 
-    private static boolean isRetry(Result result) {
-        return result instanceof Result.Retry;
-    }
-
-    private Result doBackup(Context context) {
+    /**
+     * @return true if the work must be retried
+     */
+    private boolean doBackup(Context context) {
         if (!BuildConfig.FLAVOR.equals("nd")) {
             DbxClientV2 dbxClient = DropboxClient.getClient(context);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -137,16 +137,19 @@ public class BackupWorker extends Worker {
                             e.printStackTrace();
                             // getRunAttemptCount() starts at 0: MAX_ATTEMPTS runs in total
                             if (getRunAttemptCount() < MAX_ATTEMPTS - 1) {
-                                return Result.retry();
+                                return true;
                             }
                         }
                     }
-                    BackupFolder.cleanCache(context, zip);
+                    // zip == null (e.g. backup password lost): keep the cache, it may hold the pre-migration copy
+                    if (zip != null) {
+                        BackupFolder.cleanCache(context, zip);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-        return Result.success();
+        return false;
     }
 }
