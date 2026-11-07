@@ -56,7 +56,6 @@ import static org.junit.Assert.assertTrue;
  * Snapshots (PNG + view geometry JSON) of screens that contain layouts flagged by lint MissingConstraints:
  * activity_backup, activity_edit_transaction, fragment_date_filter_settings, fragment_model_list,
  * fragment_tree_model_list, list_item_menu, list_item_summary.
- * list_item_transactions_split is not inflated by any code and has no screen.
  *
  * Tag: -Pandroid.testInstrumentationRunnerArguments.snapTag=before (default "default").
  * Output: /storage/emulated/0/Download/fingen_snapshots/<tag>/ (MediaStore, survives uninstall).
