@@ -183,14 +183,14 @@ public class CategoriesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor
                         "   ), 0)) AS Plan,\n" +
                         "   (\n" +
                         "   IFNULL((\n" +
-                        "       SELECT SUM(prod.Price*prod.Quantity)\n" +
+                        "       SELECT SUM(IFNULL(prod.Price*prod.Quantity, t.Amount))\n" +
                         "       FROM (\n" +
                         "           SELECT log_Transactions.*, ref_Accounts.Currency\n" +
                         "           FROM log_Transactions, ref_Accounts\n" +
                         "           WHERE SrcAccount = ref_Accounts._id AND log_Transactions.Deleted = 0 AND IsClosed = 0) as t\n" +
-                        "       INNER JOIN log_Products prod ON t._id = prod.TransactionID \n" +
+                        "       LEFT JOIN log_Products prod ON t._id = prod.TransactionID \n" +
                         "       WHERE\n" +
-                        "           (ref_Categories._id = CASE WHEN prod.CategoryID < 0 THEN t.Category ELSE prod.CategoryID END)\n" +
+                        "           (ref_Categories._id = CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END)\n" +
                         "           AND (Currency = ref_Currencies._id)\n" +
                         "           AND (DestAccount < 0)\n" +
                         "           AND (DateTime >= %s)\n" +
