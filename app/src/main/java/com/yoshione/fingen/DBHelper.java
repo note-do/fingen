@@ -1079,10 +1079,14 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
                 if (failed) {
                     editor.putBoolean(FgConst.PREF_RESTORE_FAILED, true);
+                    // A stale flag from an earlier restore must not delete the .bak that may hold the data
+                    editor.putBoolean(FgConst.PREF_RESTORE_BAK_PENDING, false);
                 } else {
                     editor.putBoolean(FgConst.PREF_RESTORE_BAK_PENDING, true);
                 }
-                editor.commit();
+                if (!editor.commit()) {
+                    Log.e(TAG, "Can't save restore flags to preferences");
+                }
                 Intent restartIntent = Intent.makeRestartActivityTask(new ComponentName(mContext, ActivityMain.class));
                 activity.startActivity(restartIntent);
                 Runtime.getRuntime().exit(0);
