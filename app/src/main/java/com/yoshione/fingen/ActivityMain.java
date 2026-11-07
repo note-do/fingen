@@ -505,6 +505,7 @@ public class ActivityMain extends ToolbarActivity {
         checkPermissionsAndShowAlert();
         checkBackupFolder();
         checkPinResetNotice();
+        checkRestoreFailed();
 
         List<String> tabs = PrefUtils.getTabsOrder(mPreferences);
         boolean actual = true;
@@ -820,6 +821,17 @@ public class ActivityMain extends ToolbarActivity {
                 .setMessage(R.string.msg_pin_reset_notice)
                 .setPositiveButton(android.R.string.ok, null)
                 .show();
+    }
+
+    /**
+     * Restore failed after the connection was closed: the app was restarted, show the error (see DBHelper.restoreDB)
+     */
+    private void checkRestoreFailed() {
+        if (!mPreferences.getBoolean(FgConst.PREF_RESTORE_FAILED, false)) {
+            return;
+        }
+        mPreferences.edit().putBoolean(FgConst.PREF_RESTORE_FAILED, false).commit();
+        Toast.makeText(this, "Error on restore DB", Toast.LENGTH_SHORT).show();
     }
 
     private void checkPermissionsAndShowAlert() {

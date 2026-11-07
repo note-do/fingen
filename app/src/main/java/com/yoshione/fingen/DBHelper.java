@@ -1062,22 +1062,27 @@ public class DBHelper extends SQLiteOpenHelper implements BaseColumns {
                 new File(db.getPath() + "-wal").delete();
                 new File(db.getPath() + "-shm").delete();
                 // Keep the current DB until the restored one is in place
+                boolean failed = false;
                 if (!db.renameTo(bak)) {
                     restored.delete();
-                    onError();
-                    return;
-                }
-                if (!restored.renameTo(db)) {
+                    failed = true;
+                } else if (!restored.renameTo(db)) {
                     if (bak.renameTo(db)) {
                         restored.delete();
                     } else {
                         Log.e(TAG, "Restore failed and rollback failed, old DB is in " + bak.getPath());
                     }
-                    onError();
-                    return;
+                    failed = true;
                 }
-                // commit(), not apply(): the flag must be on disk before the process exits
-                PreferenceManager.getDefaultSharedPreferences(mContext).edit().putBoolean(FgConst.PREF_RESTORE_BAK_PENDING, true).commit();
+                // The connection is closed: the process restarts in any case.
+                // commit(), not apply(): the flags must be on disk before the process exits
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+                if (failed) {
+                    editor.putBoolean(FgConst.PREF_RESTORE_FAILED, true);
+                } else {
+                    editor.putBoolean(FgConst.PREF_RESTORE_BAK_PENDING, true);
+                }
+                editor.commit();
                 Intent restartIntent = Intent.makeRestartActivityTask(new ComponentName(mContext, ActivityMain.class));
                 activity.startActivity(restartIntent);
                 Runtime.getRuntime().exit(0);
