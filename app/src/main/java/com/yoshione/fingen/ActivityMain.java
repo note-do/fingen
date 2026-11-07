@@ -1092,6 +1092,9 @@ public class ActivityMain extends ToolbarActivity {
         @Override
         public void handleMessage(Message msg) {
             final ActivityMain activity = mActivity.get();
+            if (activity == null) {
+                return;
+            }
             switch (msg.what) {
                 case MSG_UPDATE_LISTS:
                     activity.updateLists();

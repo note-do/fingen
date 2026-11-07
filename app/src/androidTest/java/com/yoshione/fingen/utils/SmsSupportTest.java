@@ -2,12 +2,16 @@ package com.yoshione.fingen.utils;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.appcompat.view.menu.ActionMenuItemView;
+import androidx.core.content.ContextCompat;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.GrantPermissionRule;
 import androidx.test.runner.AndroidJUnit4;
@@ -21,7 +25,9 @@ import com.yoshione.fingen.ActivitySmsList;
 import com.yoshione.fingen.DbSnapshot;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.ScreenTestUtils;
+import com.yoshione.fingen.dao.SendersDAO;
 import com.yoshione.fingen.dao.SmsDAO;
+import com.yoshione.fingen.model.Sender;
 import com.yoshione.fingen.model.Sms;
 
 import org.junit.After;
@@ -80,7 +86,10 @@ public class SmsSupportTest {
     public void noTelephony_noSmsRecords_noSmsDialog_incomingHidden() throws Exception {
         // DbSnapshot restores only rows added by the test, so existing rows are not deleted: skip instead
         assumeTrue("log_Incoming_SMS is not empty on this device", countSmsRecords() == 0);
+        assumeSmsPermissionNotGranted();
 
+        // A sender makes ActivityMain want RECEIVE_SMS (as on telephony devices): only SmsSupport stops the request
+        insertSender();
         SmsSupport.setOverrideForTesting(false);
         mActivity = ScreenTestUtils.launch(ActivityMain.class, null);
 
@@ -89,6 +98,24 @@ public class SmsSupportTest {
         Thread.sleep(COUNTERS_WAIT_MS);
 
         assertIncomingAbsent(mActivity);
+    }
+
+    /** Control for the test above: with telephony and the same sender the SMS permission dialog appears. */
+    @Test
+    public void telephony_withSender_smsDialogShown() throws Exception {
+        assumeSmsPermissionNotGranted();
+
+        insertSender();
+        SmsSupport.setOverrideForTesting(true);
+        // The system dialog covers ActivityMain (PAUSED), so RESUMED is not awaited here
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        Intent intent = new Intent();
+        intent.setClassName(instrumentation.getTargetContext(), ActivityMain.class.getName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mActivity = instrumentation.startActivitySync(intent);
+
+        waitForSmsPermissionDialog(TIMEOUT_MS);
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).pressBack();
     }
 
     @Test
@@ -126,6 +153,19 @@ public class SmsSupportTest {
         return smss.size();
     }
 
+    private void assumeSmsPermissionNotGranted() {
+        assumeTrue("RECEIVE_SMS is already granted on this device",
+                ContextCompat.checkSelfPermission(mContext, Manifest.permission.RECEIVE_SMS)
+                        != PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void insertSender() throws Exception {
+        Sender sender = new Sender();
+        sender.setName("SmsSupportTest " + System.nanoTime());
+        sender.setPhoneNo("SmsSupportTest");
+        SendersDAO.getInstance(mContext).createModel(sender);
+    }
+
     private void insertSmsRecord() throws Exception {
         Sms sms = new Sms();
         sms.setmDateTime(new Date());
@@ -148,6 +188,20 @@ public class SmsSupportTest {
             }
             Thread.sleep(500);
         }
+    }
+
+    private void waitForSmsPermissionDialog(long waitMs) throws Exception {
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+        long end = System.currentTimeMillis() + waitMs;
+        while (System.currentTimeMillis() < end) {
+            for (String pkg : PERMISSION_CONTROLLER_PACKAGES) {
+                if (device.findObject(By.pkg(pkg).textContains("SMS")) != null) {
+                    return;
+                }
+            }
+            Thread.sleep(500);
+        }
+        fail("SMS permission dialog is not shown with telephony and a sender");
     }
 
     private void waitForIncomingPresent(final Activity activity) throws Exception {
