@@ -328,7 +328,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
             }
             case R.id.action_select_color: {
                 final IAbstractModel model = dao.getModelById(info.id);
-                ColorPickerDialog.Builder colorDialogBuilder = new ColorPickerDialog.Builder(Objects.requireNonNull(getActivity()));
+                ColorPickerDialog.Builder colorDialogBuilder = new ColorPickerDialog.Builder(requireActivity());
                 colorDialogBuilder.getColorPickerView().setInitialColor(model.getColor());
                 colorDialogBuilder
                         .setTitle(getActivity().getResources().getString(R.string.ttl_select_color))

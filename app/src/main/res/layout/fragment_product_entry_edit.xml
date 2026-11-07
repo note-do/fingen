@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toStartOf="@id/imageButtonDeleteCategory"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:hint="@string/ent_product">
 
         <AutoCompleteTextView

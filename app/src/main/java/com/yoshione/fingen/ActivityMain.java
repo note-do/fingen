@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import com.google.android.material.appbar.AppBarLayout;
@@ -36,6 +37,7 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.BadgeUtils;
+import com.google.android.material.badge.ExperimentalBadgeUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -300,6 +302,7 @@ public class ActivityMain extends ToolbarActivity {
         });
     }
 
+    @OptIn(markerClass = ExperimentalBadgeUtils.class)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);

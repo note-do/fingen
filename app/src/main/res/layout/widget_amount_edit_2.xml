@@ -64,7 +64,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toStartOf="@+id/imageButtonCalc"
-            app:layout_constraintStart_toEndOf="@+id/textViewDecimalSeparator">
+            app:layout_constraintStart_toEndOf="@+id/textViewDecimalSeparator"
+            app:layout_constraintTop_toTopOf="parent">
 
             <EditText
                 android:id="@+id/edittext_amount_cents"

@@ -2099,4 +2099,8 @@
     <!-- 28. EditorConstructor -->
     <!-- Actions -->
     <string name="act_tune_editor" formatted="false">Настроить редактор</string>
+    <string name="pin_code_wrong" formatted="false">Няправільны PIN</string>
+    <string name="pin_code_mismatch" formatted="false">PIN-коды не супадаюць</string>
+    <string name="msg_backup_password_lost" formatted="false">Пароль рэзервовай копіі немагчыма прачытаць на гэтай прыладзе. Увядзіце пароль рэзервовай копіі зноў, да гэтага часу рэзервовае капіраванне прыпынена</string>
+    <string name="msg_backup_password_not_saved" formatted="false">Пароль рэзервовай копіі не захаваны</string>
 </resources>
