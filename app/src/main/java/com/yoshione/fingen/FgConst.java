@@ -35,12 +35,26 @@ public class FgConst {
     public static final String PREF_FORCE_UPDATE_TRANSACTIONS = "force_update_transaction";
     public static final String PREF_SHOW_CLOSED_ACCOUNTS = "show_closed_accounts";
     public static final String PREF_SHOW_LAST_SUCCESFUL_BACKUP_TO_DROPBOX = "last_succesful_backup_to_dropbox";
+    public static final String PREF_ANDROID_JOB_MIGRATED = "android_job_migrated";
+    public static final String PREF_BACKUP_FOLDER_URI = "backup_folder_uri";
+    public static final String PREF_BACKUP_FOLDER_UNAVAILABLE = "backup_folder_unavailable";
+    public static final String PREF_BACKUP_FOLDER_REMINDER_OFF = "backup_folder_reminder_off";
+    public static final String PREF_FTS_PREFS_CLEANED = "fts_prefs_cleaned_v1";
+    public static final String PREF_PIN_RESET_NOTICE_PENDING = "pin_reset_notice_pending";
+    public static final String PREF_RESTORE_BAK_PENDING = "restore_bak_pending";
+    public static final String PREF_RESTORE_FAILED = "restore_failed";
 //    public static final String PREF_SHOW_SHOW_ACCOUNTS_PANEL = "show_accounts_panel";
     public static final String PREF_START_TAB = "start_tab";
     public static final String PREF_SWITCH_TAB_ON_START = "switch_tab_on_start";
     public static final String PREF_TAB_ORDER = "main_screen_tab_order";
     public static final String PREF_TRANSACTION_EDITOR_CONSTRUCTOR = "transaction_editor_constructor";
     public static final String PREF_DROPBOX_ACCOUNT = "dropbox_account";
+    public static final String PREF_BACKUP_PASSWORD = "backup_password"; // legacy plain text, only for migration
+    public static final String PREF_ENABLE_BACKUP_PASSWORD = "enable_backup_password";
+    // keys of the secure prefs file (SecureStore.PREFS_NAME)
+    public static final String SECURE_BACKUP_PASSWORD = "backup_password_enc";
+    public static final String SECURE_BACKUP_PASSWORD_MIGRATED = "secure_migrated_v1";
+    public static final String SECURE_BACKUP_PASSWORD_WARNING = "backup_password_warning";
     public static final String PREF_EXPAND_LISTS = "expand_lists";
     public static final String PREF_LAST_BUDGET_CURRENCY = "last_budget_currency";
     public static final String PREF_ACCOUNT_CLICK_ACTION = "account_click_action";

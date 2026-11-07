@@ -1,9 +1,9 @@
 package com.yoshione.fingen.adapter;
 
 import android.graphics.drawable.Drawable;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.MotionEventCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,9 +19,8 @@ import com.yoshione.fingen.adapter.helper.OnStartDragListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import eu.davidea.flipview.FlipView;
+import com.yoshione.fingen.databinding.ListItemTreeModel2Binding;
+import com.yoshione.fingen.widgets.FlipView;
 
 /**
  * Created by Leonid on 23.11.2016.
@@ -111,20 +110,20 @@ public class AdapterTabOrder extends RecyclerView.Adapter implements ItemTouchHe
     }
 
     static class ViewHolderTabOrder extends RecyclerView.ViewHolder {
-        @BindView(R.id.drag_handle)
         FlipView dragHandle;
-        @BindView(R.id.textViewModelName)
         TextView textViewModelName;
-        @BindView(R.id.expandableIndicator)
         ImageView expandableIndicator;
-        @BindView(R.id.container)
         ConstraintLayout container;
-        @BindView(R.id.color_tag)
         ImageView colorTag;
 
         ViewHolderTabOrder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemTreeModel2Binding binding = ListItemTreeModel2Binding.bind(view);
+            dragHandle = binding.dragHandle;
+            textViewModelName = binding.textViewModelName;
+            expandableIndicator = binding.expandableIndicator;
+            container = binding.container;
+            colorTag = binding.colorTag;
         }
     }
 

@@ -1,3 +1,7 @@
+# Keep behaviour of the previous proguard-android.txt (AGP 9 uses the optimize variant).
+# Remove this line to enable R8 optimizations and check release builds.
+-dontoptimize
+
 # Add project specific ProGuard rules here.
 # By default, the flags in this file are appended to flags specified
 # in C:\Users\Leonid\AppData\Local\Android\sdk/tools/proguard/proguard-android.txt
@@ -21,31 +25,6 @@
 #-ignorewarnings
 #-dontshrink
 
-#Butterknife
--keepattributes EnclosingMethod
-# Retain generated class which implement ViewBinder.
--keep public class * implements butterknife.internal.ViewBinder { public <init>(); }
-# Prevent obfuscation of types which use ButterKnife annotations since the simple name
-# is used to reflectively look up the generated ViewBinder.
--keep class butterknife.*
--keepclasseswithmembernames class * { @butterknife.* <methods>; }
--keepclasseswithmembernames class * { @butterknife.* <fields>; }
--dontwarn butterknife.internal.*
--keep class **$$ViewBinder { *; }
-
-#Billing
--keep class com.android.vending.billing.**
--assumenosideeffects class org.solovyev.android.checkout.Billing {
-    public static void debug(...);
-    public static void warning(...);
-    public static void error(...);
-}
--assumenosideeffects class org.solovyev.android.checkout.Check {
-    static *;
-}
--keep class com.android.vending.billing.**
--keepattributes *Annotation*
--keep public class com.android.vending.licensing.ILicensingService
 
 #MP Android chart
 -keep class com.github.mikephil.charting.** { *; }
@@ -71,11 +50,6 @@
 }
 -keep enum org.greenrobot.eventbus.ThreadMode { *; }
 
-#Crashlytics
--keepattributes SourceFile,LineNumberTable
--keep class com.crashlytics.** { *; }
--dontwarn com.crashlytics.**
-
 #Dropbox OkHttp and Servlet optional dependencies
 -dontwarn okio.**
 -dontwarn okhttp3.**
@@ -93,18 +67,4 @@
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
 
-#evernote.android.job
--dontwarn com.evernote.android.job.gcm.**
--dontwarn com.evernote.android.job.GcmAvailableHelper
--keep public class com.evernote.android.job.v21.PlatformJobService
--keep public class com.evernote.android.job.v14.PlatformAlarmService
--keep public class com.evernote.android.job.v14.PlatformAlarmReceiver
--keep public class com.evernote.android.job.JobBootReceiver
--keep public class com.evernote.android.job.JobRescheduleService
--keep public class com.evernote.android.job.gcm.PlatformGcmService
-
--keep class android.support.v7.widget.SearchView { *; }
-
--dontwarn com.sothree.**
--keep class com.sothree.**
--keep interface com.sothree.**
+-keep class androidx.appcompat.widget.SearchView { *; }

@@ -3,13 +3,12 @@ package com.yoshione.fingen.utils;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.Rect;
 
 import com.github.mikephil.charting.utils.FSize;
+import com.github.mikephil.charting.utils.MPPointF;
+import com.github.mikephil.charting.utils.Utils;
 import com.yoshione.fingen.FGApplication;
-
-import static com.github.mikephil.charting.utils.Utils.getSizeOfRotatedRectangleByDegrees;
 
 public class ChartUtils {
 
@@ -19,7 +18,7 @@ public class ChartUtils {
 
     public static void drawXAxisValue(Canvas c, String text, float x, float y,
                                       Paint paint,
-                                      PointF anchor, float angleDegrees,
+                                      MPPointF anchor, float angleDegrees,
                                       int color) {
 
         float drawOffsetX = 0.f;
@@ -58,7 +57,7 @@ public class ChartUtils {
 
             // Move the "outer" rect relative to the anchor, assuming its centered
             if (anchor.x != 0.5f || anchor.y != 0.5f) {
-                final FSize rotatedSize = getSizeOfRotatedRectangleByDegrees(
+                final FSize rotatedSize = Utils.INSTANCE.getSizeOfRotatedRectangleByDegrees(
                         mDrawTextRectBuffer.width(),
                         lineHeight,
                         angleDegrees);

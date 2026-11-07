@@ -1,17 +1,18 @@
 package com.yoshione.fingen.adapter;
 
 import android.annotation.SuppressLint;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.l4digital.fastscroll.FastScroller;
+import com.yoshione.fingen.widgets.FgFastScrollRecyclerView;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.adapter.viewholders.TransactionViewHolder;
 import com.yoshione.fingen.adapter.viewholders.TransactionViewHolderParams;
+import com.yoshione.fingen.databinding.HeaderItemBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.ILoadMoreFinish;
 import com.yoshione.fingen.interfaces.IOnLoadMore;
@@ -26,16 +27,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import ca.barrenechea.widget.recyclerview.decoration.StickyHeaderAdapter;
+import com.yoshione.fingen.widgets.StickyHeaderDecoration;
 
 /**
  * Created by slv on 10.09.2015.
  * a
  */
-public class AdapterTransactions extends RecyclerView.Adapter implements FastScroller.SectionIndexer,
-        StickyHeaderAdapter<AdapterTransactions.HeaderViewHolder>, ITransactionClickListener {
+public class AdapterTransactions extends RecyclerView.Adapter implements FgFastScrollRecyclerView.SectionIndexer,
+        StickyHeaderDecoration.StickyHeaderAdapter<AdapterTransactions.HeaderViewHolder>, ITransactionClickListener {
 //    private static final String TAG = "AdapterTransactions";
 
     private int lastYear;
@@ -336,12 +335,12 @@ public class AdapterTransactions extends RecyclerView.Adapter implements FastScr
     class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         public Transaction transaction;
-        @BindView(R.id.text)
         TextView text;
 
         HeaderViewHolder(View v) {
             super(v);
-            ButterKnife.bind(this, v);
+            HeaderItemBinding binding = HeaderItemBinding.bind(v);
+            text = binding.text;
         }
 
         void bindHeader(String s) {

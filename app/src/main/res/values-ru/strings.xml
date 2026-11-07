@@ -278,10 +278,6 @@
     <string name="ttl_email_body" formatted="false">Напишите свой вопрос</string>
 
     <!-- 1. General -->
-    <!-- Titles -->
-    <string name="ttl_billing_error" formatted="false">При соединении с сервером произошла ошибка (код %s)</string>
-
-    <!-- 1. General -->
     <!-- Messages -->
     <string name="msg_set_date" formatted="false">Укажите дату</string>
 
@@ -1232,10 +1228,27 @@
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
     <string name="ttl_last_backup_to_dropbox" formatted="false">Последнее сохранение в Dropbox:</string>
+    <string name="msg_dropbox_upload_failed" formatted="false">Не удалось загрузить в Dropbox: %s</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_auto_backup_info" formatted="false">Резервные копии создаются автоматически и сохраняются на карте памяти в папке Fingen/\Backup</string>
+    <string name="ttl_auto_backup_info" formatted="false">Резервные копии создаются автоматически и сохраняются в выбранной папке</string>
+
+    <string name="ttl_backup_folder" formatted="false">Папка резервных копий: %s</string>
+
+    <string name="ttl_backup_folder_not_selected" formatted="false">Папка резервных копий не выбрана</string>
+
+    <string name="act_select_backup_folder" formatted="false">Выбрать папку</string>
+
+    <string name="act_restore_other_file" formatted="false">Другой файл…</string>
+
+    <string name="msg_backup_saved" formatted="false">Резервная копия сохранена в выбранную папку</string>
+
+    <string name="msg_backup_folder_unavailable" formatted="false">Папка резервных копий недоступна. Выберите папку заново.</string>
+
+    <string name="msg_backup_folder_selection_failed" formatted="false">Не удалось получить доступ к выбранной папке</string>
+
+    <string name="msg_backup_folder_warning" formatted="false">Локальные резервные копии не создаются: папка не выбрана или доступ к ней потерян. Автокопия в Dropbox работает как обычно. Выберите папку в разделе «Резервное копирование».</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
@@ -1243,15 +1256,7 @@
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_rationale" formatted="false">Для работы системы резервного копирования необходимо разрешение. Нажмите Далее и разрешите доступ к файлам.</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
     <string name="msg_permission_rw_external_storage_denied" formatted="false">Операция не выполнена, так как разрешение не было получено.</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_never_askagain" formatted="false">Операция не выполнена, так как разрешение не было получено.</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
@@ -1319,11 +1324,9 @@
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_select_csv_file" formatted="false">Выберите файл CSV</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_select_export_dir" formatted="false">Выберите файл или каталог</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
@@ -1805,18 +1808,6 @@
     <!-- Titles -->
     <string name="ttl_no_chart_data" formatted="false">Нет данных</string>
 
-    <!-- 23. In-app purchases -->
-    <!-- Entities -->
-    <string name="ent_pro_features" formatted="false">Функции PRO</string>
-
-    <!-- 23. In-app purchases -->
-    <!-- Messages -->
-    <string name="msg_inapp_purchases_not_avaliable" formatted="false">Функции PRO не доступны. Возможно на устройстве нет учетной записи Google.</string>
-
-    <!-- 23. In-app purchases -->
-    <!-- Messages -->
-    <string name="msg_thanks_for_purchase_reports" formatted="false">Спасибо за покупку! Для построения графических отчетов перейдите на вкладку "Транзакции", потяните вверх нижнюю панель и нажмите на кнопку построения графиков. Отчеты строятся по отображенным в списке транзакциям, с учетом всех фильтров.</string>
-
     <!-- 24. Senders -->
     <!-- Entities -->
     <string name="ent_sender" formatted="false">Отправитель смс</string>
@@ -1900,10 +1891,6 @@
     <!-- 25. Sync -->
     <!-- Titles -->
     <string name="ttl_sync_iap_summary" formatted="false">Позволяет вести учет на разных устройствах</string>
-
-    <!-- 25. Sync -->
-    <!-- Titles -->
-    <string name="ttl_purchased" formatted="false">Приобретено</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->
@@ -2108,4 +2095,12 @@
     <!-- 28. EditorConstructor -->
     <!-- Actions -->
     <string name="act_tune_editor" formatted="false">Настроить редактор</string>
+    <string name="pin_code_wrong" formatted="false">Неверный PIN</string>
+    <string name="pin_code_mismatch" formatted="false">PIN-коды не совпадают</string>
+    <string name="msg_backup_password_lost" formatted="false">Пароль резервной копии не удалось прочитать на этом устройстве. Введите пароль заново, до этого резервные копии не создаются</string>
+    <string name="msg_backup_password_not_saved" formatted="false">Пароль резервной копии не сохранён</string>
+    <string name="msg_backup_password_required" formatted="false">Сначала введите пароль резервной копии, затем включите защиту</string>
+    <string name="msg_backup_password_warning" formatted="false">Резервные копии не создаются: пароль резервной копии не удалось прочитать на этом устройстве. Введите пароль заново в разделе «Резервное копирование».</string>
+    <string name="msg_backup_folder_do_not_remind" formatted="false">Не напоминать</string>
+    <string name="msg_pin_reset_notice" formatted="false">PIN-защита сброшена после обновления приложения. Включите её заново в настройках.</string>
 </resources>

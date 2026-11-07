@@ -1,9 +1,9 @@
 package com.yoshione.fingen.utils;
 
-import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.formatter.YAxisValueFormatter;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.text.DecimalFormat;
@@ -15,7 +15,7 @@ import java.util.Locale;
  *
  */
 
-public class FgLargeValuesFormatter implements ValueFormatter, YAxisValueFormatter {
+public class FgLargeValuesFormatter implements IValueFormatter, IAxisValueFormatter {
 
         private static final String[] SUFFIX = new String[]{
                 "", "k", "m", "b", "t"
@@ -30,15 +30,20 @@ public class FgLargeValuesFormatter implements ValueFormatter, YAxisValueFormatt
             mFormat = new DecimalFormat("###E0", otherSymbols);
         }
 
-        // ValueFormatter
+        // IValueFormatter
         @Override
-        public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+        public String getFormattedValue(float value, Entry<?> entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
             return makePretty(value);
         }
 
-        // YAxisValueFormatter
         @Override
-        public String getFormattedValue(float value, YAxis yAxis) {
+        public String getStackedFormattedValue(float value, int stackIndex, Entry<?> entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+            return makePretty(value);
+        }
+
+        // IAxisValueFormatter
+        @Override
+        public String getFormattedValue(float value, AxisBase axis) {
             return makePretty(value);
         }
 

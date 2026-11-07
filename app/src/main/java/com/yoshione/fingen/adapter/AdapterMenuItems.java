@@ -1,6 +1,6 @@
 package com.yoshione.fingen.adapter;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,12 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.yoshione.fingen.R;
+import com.yoshione.fingen.databinding.ListItemMenuBinding;
 import com.yoshione.fingen.model.MenuItem;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by slv on 21.01.2016.
@@ -63,18 +61,18 @@ public class AdapterMenuItems extends RecyclerView.Adapter {
     }
 
     class MenuItemViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.imageViewIcon)
         ImageView imageViewIcon;
-        @BindView(R.id.textViewTitle)
         TextView textViewTitle;
-        @BindView(R.id.spaceBottom)
         FrameLayout mSpaceBottom;
-        @BindView(R.id.spaceBottomFinal)
         FrameLayout mSpaceBottomFinal;
 
         MenuItemViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ListItemMenuBinding binding = ListItemMenuBinding.bind(itemView);
+            imageViewIcon = binding.imageViewIcon;
+            textViewTitle = binding.textViewTitle;
+            mSpaceBottom = binding.spaceBottom;
+            mSpaceBottomFinal = binding.spaceBottomFinal;
         }
     }
 

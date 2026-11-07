@@ -1,7 +1,7 @@
 package com.yoshione.fingen.utils;
 
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.text.DecimalFormat;
@@ -13,7 +13,7 @@ import java.text.NumberFormat;
  *
  */
 
-public class NormalValuesFormatter implements ValueFormatter {
+public class NormalValuesFormatter implements IValueFormatter {
 
         private NumberFormat mFormat;
 
@@ -28,9 +28,14 @@ public class NormalValuesFormatter implements ValueFormatter {
             ((DecimalFormat) mFormat).setDecimalFormatSymbols(dfs);
         }
 
-        // ValueFormatter
+        // IValueFormatter
         @Override
-        public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+        public String getFormattedValue(float value, Entry<?> entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+            return mFormat.format(value);
+        }
+
+        @Override
+        public String getStackedFormattedValue(float value, int stackIndex, Entry<?> entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
             return mFormat.format(value);
         }
 

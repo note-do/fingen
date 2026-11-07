@@ -1,5 +1,7 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
+import com.yoshione.fingen.databinding.ActivityEditTransactionBinding;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -13,21 +15,21 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -52,7 +54,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.yoshione.fingen.adapter.AdapterProducts;
 import com.yoshione.fingen.adapter.NestedItemFullNameAdapter;
 import com.yoshione.fingen.dao.AccountsDAO;
@@ -66,10 +67,6 @@ import com.yoshione.fingen.dao.SmsDAO;
 import com.yoshione.fingen.dao.SmsMarkersDAO;
 import com.yoshione.fingen.dao.TemplatesDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
-import com.yoshione.fingen.fts.ActivityFtsLogin;
-import com.yoshione.fingen.fts.ActivityScanQR;
-import com.yoshione.fingen.fts.FtsHelper;
-import com.yoshione.fingen.fts.IDownloadProductsListener;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.managers.AccountManager;
 import com.yoshione.fingen.managers.PayeeManager;
@@ -121,19 +118,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import io.fabric.sdk.android.Fabric;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
-import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
+import com.yoshione.fingen.utils.HelpSequence;
 
 import static com.yoshione.fingen.utils.RequestCodes.REQUEST_CODE_SELECT_MODEL;
 import static com.yoshione.fingen.utils.RequestCodes.REQUEST_CODE_SELECT_MODEL_FOR_PRODUCT;
@@ -153,143 +144,70 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     private static final int ERR_EXRATE_ZERO = 1;
     private static final int ERR_EXRATE_ONE = 2;
     private static final int ERR_EMPTY_SRC_ACCOUNT = 3;
-    private static final String SHOWCASE_ID = "Edit transaction showcase";
     //</editor-fold>
 
     //<editor-fold desc="Bind views" defaultstate="collapsed">
-    @BindView(R.id.te_lay_DateTime)
+    private ActivityEditTransactionBinding mBinding;
     LinearLayout teLayDateTime;
-    @BindView(R.id.editTextTemplateName)
     EditText editTextTemplateName;
-    @BindView(R.id.layoutCategory)
     RelativeLayout layoutCategory;
-    @BindView(R.id.layoutSms)
     RelativeLayout layoutSms;
-    @BindView(R.id.layoutProject)
     RelativeLayout layoutProject;
-    @BindView(R.id.layoutLocation)
     RelativeLayout layoutLocation;
-    @BindView(R.id.textViewSrcAmount)
     EditText textViewSrcAmount;
-    @BindView(R.id.textViewDepartment)
     EditText edDepartment;
-    @BindView(R.id.imageButtonDeleteDepartment)
     ImageButton imageButtonDeleteDepartment;
-    @BindView(R.id.layoutDepartment)
     RelativeLayout layoutDepartment;
-    @BindView(R.id.textViewSimpleDebt)
     EditText mTextViewSimpleDebt;
-    @BindView(R.id.imageButtonDeleteDebt)
     ImageButton mImageButtonDeleteDebt;
-    @BindView(R.id.layoutSimpleDebt)
     RelativeLayout layoutSimpleDebt;
-    @BindView(R.id.buttonMore)
     Button mButtonMore;
-    @BindView(R.id.textInputLayoutTemplateName)
     TextInputLayout mTextInputLayoutTemplateName;
-    @BindView(R.id.textInputLayoutSrcAmount)
     TextInputLayout mTextInputLayoutSrcAmount;
-    @BindView(R.id.textInputLayoutExchangeRate)
     TextInputLayout mTextInputLayoutExchangeRate;
-    @BindView(R.id.te_pager_payee)
     MyViewPager viewPager;
-    @BindView(R.id.textInputLayoutAccount)
     TextInputLayout textInputLayoutAccount;
-    @BindView(R.id.textViewAccount)
     EditText textViewAccount;
-    @BindView(R.id.textViewCategory)
     EditText edCategory;
-    @BindView(R.id.textViewProject)
     EditText edProject;
-    @BindView(R.id.textViewLocation)
     EditText edLocation;
-    @BindView(R.id.editTextDate)
     EditText edDate;
-    @BindView(R.id.te_ed_Time)
     EditText edTime;
-    @BindView(R.id.edit_text_exchange_rate)
     EditText edExchangeRate;
-    @BindView(R.id.editTextComment)
     EditText edComment;
-    @BindView(R.id.te_tv_sms)
     SmsEditText edSms;
-    @BindView(R.id.amount_editor)
     AmountEditor amountEditor;
-    @BindView(R.id.dest_amount_editor)
     AmountEditor destAmountEditor;
-    @BindView(R.id.imageButtonDeleteLocation)
     ImageButton imageButtonDeleteLocation;
-    @BindView(R.id.imageButtonDeleteCategory)
     ImageButton imageButtonDeleteCategory;
-    @BindView(R.id.imageButtonDeleteProject)
     ImageButton imageButtonDeleteProject;
-    @BindView(R.id.imageButtonAddMarker)
     ImageButton imageButtonAddMarker;
-    @BindView(R.id.tabLayoutType)
     TabLayout tabLayoutType;
-    @BindView(R.id.textViewFN)
-    EditText mTextViewFN;
-    @BindView(R.id.textViewFD)
-    EditText mTextViewFD;
-    @BindView(R.id.textViewFP)
-    EditText mTextViewFP;
-    @BindView(R.id.imageButtonDownloadReceipt)
-    ImageButton mImageButtonDownloadReceipt;
-    @BindView(R.id.imageButtonScanQR)
-    ImageButton mImageButtonScanQR;
-    @BindView(R.id.layoutFTS)
-    ConstraintLayout mLayoutFTS;
-    @BindView(R.id.textViewCaptonProductList)
     TextView mTextViewCaptonProductList;
-    @BindView(R.id.expandableIndicator)
     ImageView mExpandableIndicator;
-    @BindView(R.id.recyclerViewProductList)
     RecyclerView mRecyclerViewProductList;
-    @BindView(R.id.layoutProductList)
     ConstraintLayout mLayoutProductList;
-    @BindView(R.id.imageViewLoadingProducts)
     ImageView mImageViewLoadingProducts;
-    @BindView(R.id.textViewLoadingProducts)
     TextView mTextViewLoadingProducts;
-    @BindView(R.id.layoutLoadingProducts)
     ConstraintLayout mLayoutLoadingProducts;
-    @BindView(R.id.imageButtonInvertExRate)
     ImageButton mImageButtonInvertExRate;
-    @BindView(R.id.layoutExchangeRate)
     RelativeLayout mLayoutExchangeRate;
-    @BindView(R.id.fabBGLayout)
     View mFabBGLayout;
-    @BindView(R.id.fabSelectAll)
     FloatingActionButton mFabSelectAll;
-    @BindView(R.id.fabSelectAllLayout)
     LinearLayout mFabSelectAllLayout;
-    @BindView(R.id.fabUnselectAll)
     FloatingActionButton mFabUnselectAll;
-    @BindView(R.id.fabUnselectAllLayout)
     LinearLayout mFabUnselectAllLayout;
-    @BindView(R.id.fabSetCategory)
     FloatingActionButton mFabSetCategory;
-    @BindView(R.id.fabSetCategoryLayout)
     LinearLayout mFabSetCategoryLayout;
-    @BindView(R.id.fabSetProject)
     FloatingActionButton mFabSetProject;
-    @BindView(R.id.fabSetProjectLayout)
     LinearLayout mFabSetProjectLayout;
-    @BindView(R.id.fabDeleteSelected)
     FloatingActionButton mFabDeleteSelected;
-    @BindView(R.id.fabDeleteSelectedLayout)
     LinearLayout mFabDeleteSelectedLayout;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton mFabMenuButtonRoot;
-    @BindView(R.id.fabMenuButtonRootLayout)
     LinearLayout mFabMenuButtonRootLayout;
-    @BindView(R.id.layoutPayeeOrDestAcc)
     LinearLayout mLayoutPayeeOrDestAcc;
-    @BindView(R.id.layoutAmounts)
     LinearLayout mLayoutAmounts;
-    @BindView(R.id.layoutRoot)
     LinearLayout mLayoutRoot;
-    @BindView(R.id.layoutComment)
     TextInputLayout mLayoutComment;
     //</editor-fold>
 
@@ -322,9 +240,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     private LocationListener locationListener;
     private SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener;
 
-    @Inject
-    FtsHelper mFtsHelper;
-
     @Override
     protected int getLayoutResourceId() {
         return R.layout.activity_edit_transaction;
@@ -336,13 +251,76 @@ public class ActivityEditTransaction extends ToolbarActivity implements
 
         FGApplication.getAppComponent().inject(this);
 
-        if (!BuildConfig.DEBUG) {
-            if (!Fabric.isInitialized()) {
-                Fabric.with(this, new Crashlytics());
-            }
-        }
-
-        ButterKnife.bind(this);
+        mBinding = ActivityEditTransactionBinding.bind(getContentRoot());
+        teLayDateTime = findViewById(R.id.te_lay_DateTime);
+        editTextTemplateName = mBinding.editTextTemplateName;
+        layoutCategory = mBinding.layoutCategory;
+        layoutSms = mBinding.layoutSms;
+        layoutProject = mBinding.layoutProject;
+        layoutLocation = mBinding.layoutLocation;
+        textViewSrcAmount = mBinding.textViewSrcAmount;
+        edDepartment = mBinding.textViewDepartment;
+        imageButtonDeleteDepartment = mBinding.imageButtonDeleteDepartment;
+        layoutDepartment = mBinding.layoutDepartment;
+        mTextViewSimpleDebt = mBinding.textViewSimpleDebt;
+        mImageButtonDeleteDebt = mBinding.imageButtonDeleteDebt;
+        layoutSimpleDebt = mBinding.layoutSimpleDebt;
+        mButtonMore = mBinding.buttonMore;
+        mTextInputLayoutTemplateName = mBinding.textInputLayoutTemplateName;
+        mTextInputLayoutSrcAmount = mBinding.textInputLayoutSrcAmount;
+        mTextInputLayoutExchangeRate = mBinding.textInputLayoutExchangeRate;
+        viewPager = findViewById(R.id.te_pager_payee);
+        textInputLayoutAccount = mBinding.textInputLayoutAccount;
+        textViewAccount = mBinding.textViewAccount;
+        edCategory = mBinding.textViewCategory;
+        edProject = mBinding.textViewProject;
+        edLocation = mBinding.textViewLocation;
+        edDate = mBinding.editTextDate;
+        edTime = findViewById(R.id.te_ed_Time);
+        edExchangeRate = findViewById(R.id.edit_text_exchange_rate);
+        edComment = mBinding.editTextComment;
+        edSms = findViewById(R.id.te_tv_sms);
+        amountEditor = findViewById(R.id.amount_editor);
+        destAmountEditor = findViewById(R.id.dest_amount_editor);
+        imageButtonDeleteLocation = mBinding.imageButtonDeleteLocation;
+        imageButtonDeleteCategory = mBinding.imageButtonDeleteCategory;
+        imageButtonDeleteProject = mBinding.imageButtonDeleteProject;
+        imageButtonAddMarker = mBinding.imageButtonAddMarker;
+        tabLayoutType = mBinding.tabLayoutType;
+        mTextViewCaptonProductList = findViewById(R.id.textViewCaptonProductList);
+        mExpandableIndicator = findViewById(R.id.expandableIndicator);
+        mRecyclerViewProductList = findViewById(R.id.recyclerViewProductList);
+        mLayoutProductList = findViewById(R.id.layoutProductList);
+        mImageViewLoadingProducts = findViewById(R.id.imageViewLoadingProducts);
+        mTextViewLoadingProducts = findViewById(R.id.textViewLoadingProducts);
+        mLayoutLoadingProducts = findViewById(R.id.layoutLoadingProducts);
+        mImageButtonInvertExRate = mBinding.imageButtonInvertExRate;
+        mLayoutExchangeRate = mBinding.layoutExchangeRate;
+        mFabBGLayout = mBinding.fabBGLayout;
+        mFabSelectAll = mBinding.fabSelectAll;
+        mFabSelectAllLayout = mBinding.fabSelectAllLayout;
+        mFabUnselectAll = mBinding.fabUnselectAll;
+        mFabUnselectAllLayout = mBinding.fabUnselectAllLayout;
+        mFabSetCategory = mBinding.fabSetCategory;
+        mFabSetCategoryLayout = mBinding.fabSetCategoryLayout;
+        mFabSetProject = mBinding.fabSetProject;
+        mFabSetProjectLayout = mBinding.fabSetProjectLayout;
+        mFabDeleteSelected = mBinding.fabDeleteSelected;
+        mFabDeleteSelectedLayout = mBinding.fabDeleteSelectedLayout;
+        mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+        mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
+        mLayoutPayeeOrDestAcc = mBinding.layoutPayeeOrDestAcc;
+        mLayoutAmounts = mBinding.layoutAmounts;
+        mLayoutRoot = mBinding.layoutRoot;
+        mLayoutComment = mBinding.layoutComment;
+        mBinding.buttonSaveTransaction.setOnClickListener(new DebouncingOnClickListener(v -> onSaveClick()));
+        mBinding.buttonMore.setOnClickListener(new DebouncingOnClickListener(v -> onClick()));
+        mBinding.imageButtonDeleteLocation.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.imageButtonDeleteCategory.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.imageButtonDeleteDebt.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.imageButtonDeleteProject.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.imageButtonDeleteDepartment.setOnClickListener(new DebouncingOnClickListener(v -> onTrashButtonClick(v)));
+        mBinding.editTextDate.setOnClickListener(new DebouncingOnClickListener(v -> onDateClick(v)));
 
         mTrEditItems = PrefUtils.getTrEditorLayout(mPreferences, this);
         recreateViews();
@@ -433,13 +411,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
             startActivityForResult(intent, REQUEST_CODE_SELECT_MODEL);
         }
 
-        if (getIntent().getBooleanExtra("scan_qr", false)) {
-
-            getIntent().removeExtra("scan_qr");
-            Intent intent = new Intent(ActivityEditTransaction.this, ActivityScanQR.class);
-            intent.putExtra("transaction", transaction);
-            startActivityForResult(intent, RequestCodes.REQUEST_CODE_SCAN_QR);
-        }
     }
 
     @Override
@@ -455,7 +426,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         mLayoutRoot.removeView(layoutCategory);
         mLayoutRoot.removeView(mLayoutAmounts);
         mLayoutRoot.removeView(layoutSms);
-        mLayoutRoot.removeView(mLayoutFTS);
         mLayoutRoot.removeView(mLayoutProductList);
         mLayoutRoot.removeView(layoutProject);
         mLayoutRoot.removeView(layoutSimpleDebt);
@@ -493,9 +463,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
                     break;
                 case FgConst.TEI_SMS :
                     mLayoutRoot.addView(layoutSms);
-                    break;
-                case FgConst.TEI_FTS :
-                    mLayoutRoot.addView(mLayoutFTS);
                     break;
                 case FgConst.TEI_PRODUCT_LIST :
                     mLayoutRoot.addView(mLayoutProductList);
@@ -540,7 +507,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
 
         initCategory();
 
-        initFTS();
 
         initProductList();
 
@@ -694,7 +660,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         }
     }
 
-    @OnClick(R.id.buttonSaveTransaction)
     public void onSaveClick() {
 
         switch (viewPager.getCurrentItem()) {
@@ -879,7 +844,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         builder.show();
     }
 
-    @OnClick(R.id.buttonMore)
     public void onClick() {
         mIsBtnMorePressed = !mIsBtnMorePressed;
         updateControlsState();
@@ -933,14 +897,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
                     | (!item.isHideUnderMore() || mIsBtnMorePressed)
                     | getIntent().getBooleanExtra("load_products", false))
                      & item.isVisible() ? View.VISIBLE : View.GONE);
-        }
-
-        boolean scanQR = mPreferences.getBoolean(FgConst.PREF_ENABLE_SCAN_QR, true);
-
-        item = PrefUtils.getTrEditItemByID(mTrEditItems, FgConst.TEI_FTS);
-        if (item != null) {
-            mLayoutFTS.setVisibility(
-                    (transaction.getFN() > 0 | transaction.getFD() > 0 | transaction.getFP() > 0 | (!item.isHideUnderMore() || mIsBtnMorePressed)) & scanQR & item.isVisible() ? View.VISIBLE : View.GONE);
         }
 
         if (transaction.getTransactionType() == Transaction.TRANSACTION_TYPE_TRANSFER) {
@@ -1618,148 +1574,11 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         });
     }
 
-    private void initFTS() {
-
-        mTextViewFN.setText(String.valueOf(transaction.getFN()));
-        mTextViewFD.setText(String.valueOf(transaction.getFD()));
-        mTextViewFP.setText(String.valueOf(transaction.getFP()));
-
-        mTextViewFN.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                try {
-                    transaction.setFN(Long.valueOf(charSequence.toString()));
-                } catch (NumberFormatException e) {
-                    transaction.setFN(0);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
-
-        mTextViewFD.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                try {
-                    transaction.setFD(Long.valueOf(charSequence.toString()));
-                } catch (NumberFormatException e) {
-                    transaction.setFD(0);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
-
-        mTextViewFP.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                try {
-                    transaction.setFP(Long.valueOf(charSequence.toString()));
-                } catch (NumberFormatException e) {
-                    transaction.setFP(0);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });
-
-        mImageButtonScanQR.setOnClickListener(view -> {
-            Intent intent = new Intent(ActivityEditTransaction.this, ActivityScanQR.class);
-            intent.putExtra("transaction", transaction);
-            startActivityForResult(intent, RequestCodes.REQUEST_CODE_SCAN_QR);
-        });
-
-        mImageButtonDownloadReceipt.setOnClickListener(view -> {
-            getIntent().putExtra("load_products", true);
-            initProductList();
-        });
-    }
-
     AdapterProducts mAdapterProducts;
     boolean mProductListExpanded = true;
 
-    private void loadProducts() {
-        if (mFtsHelper.isFtsCredentialsAvailiable(this)) {
-            final RotateAnimation spinAnim = new RotateAnimation(360, 0f,
-                    Animation.RELATIVE_TO_SELF, 0.5f,
-                    Animation.RELATIVE_TO_SELF, 0.5f);
-
-            spinAnim.setInterpolator(new LinearInterpolator());
-            spinAnim.setDuration(2000);
-            spinAnim.setRepeatCount(Animation.INFINITE);
-            mLayoutLoadingProducts.setVisibility(View.VISIBLE);
-            mImageViewLoadingProducts.setVisibility(View.VISIBLE);
-            mImageViewLoadingProducts.startAnimation(spinAnim);
-            mTextViewLoadingProducts.setText(getString(R.string.ttl_loading_products));
-            updateControlsState();
-            IDownloadProductsListener downloadProductsListener = new IDownloadProductsListener() {
-                @Override
-                public void onDownload(List<ProductEntry> productEntries, String payeeName) {
-                    spinAnim.cancel();
-                    spinAnim.reset();
-                    mLayoutLoadingProducts.setVisibility(View.GONE);
-                    transaction.getProductEntries().clear();
-                    transaction.getProductEntries().addAll(productEntries);
-                    getIntent().removeExtra("load_products");
-                    fillProductList();
-                    if ((viewPager.getCurrentItem() == 0) && mPayeeName != null && mPayeeName.isEmpty()) {
-                        setPayeeName(payeeName);
-                    }
-                    isErrorLoadingProducts = false;
-                }
-
-                @Override
-                public void onAccepted() {
-                    initProductList();
-                }
-
-                @Override
-                public void onFailure(String errorMessage, boolean tryAgain) {
-                    isErrorLoadingProducts = true;
-                    getIntent().removeExtra("load_products");
-                    spinAnim.cancel();
-                    spinAnim.reset();
-                    mImageViewLoadingProducts.setVisibility(View.GONE);
-                    mTextViewLoadingProducts.setText(errorMessage);
-                    updateControlsState();
-                }
-            };
-            unsubscribeOnDestroy(mFtsHelper.downloadProductEntryList(transaction, downloadProductsListener));
-        } else {
-            mLayoutLoadingProducts.setVisibility(View.GONE);
-            fillProductList();
-            if (!mPreferences.getBoolean(FgConst.PREF_FTS_DO_NOT_SHOW_AGAIN, false)) {
-                startActivityForResult(
-                        new Intent(ActivityEditTransaction.this, ActivityFtsLogin.class),
-                        RequestCodes.REQUEST_CODE_ENTER_FTS_LOGIN);
-            }
-        }
-    }
-
     private void initProductList() {
-        if (getIntent().getBooleanExtra("load_products", false)) {
-            loadProducts();
-        } else {
-            fillProductList();
-        }
+        fillProductList();
 
         mRecyclerViewProductList.setVisibility(mProductListExpanded ? View.VISIBLE : View.GONE);
 
@@ -1973,8 +1792,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         ActivityEditTransactionPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    @OnClick({R.id.imageButtonDeleteLocation, R.id.imageButtonDeleteCategory, R.id.imageButtonDeleteDebt,
-            R.id.imageButtonDeleteProject, R.id.imageButtonDeleteDepartment})
     void onTrashButtonClick(View v) {
         switch (v.getId()) {
             case R.id.imageButtonDeleteLocation:
@@ -2185,7 +2002,6 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     }
 
     //<editor-fold desc="Date & Time pickers" defaultstate="collapsed">
-//    @OnClick(R.id.editTextDate)
     public void onDateClick(View view) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(transaction.getDateTime());
@@ -2221,16 +2037,9 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     public boolean showHelp() {
         super.showHelp();
 
-        MaterialShowcaseView.resetSingleUse(this, SHOWCASE_ID);
 
-        ShowcaseConfig config = new ShowcaseConfig();
-        config.setDelay(500); // half second between each showcase view
+        HelpSequence sequence = new HelpSequence(this);
 
-        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(this, SHOWCASE_ID);
-
-        sequence.setConfig(config);
-
-        String gotIt = getResources().getString(R.string.act_next);
         //+Вводный экран
         //+дата/время Нажмите, чтобы изменить дату или время транзакции
         //Счет Выберите из списка счет
@@ -2241,23 +2050,11 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         //Курс
         //Комментарий
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(new View(this)).setDismissText(gotIt)
-                .setContentText(getString(R.string.hlp_tr_editor_intro))
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .build());
+        sequence.add(findViewById(android.R.id.content), R.string.hlp_tr_editor_intro);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(edDate).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_tr_editor_date)
-                .build());
+        sequence.add(edDate, R.string.hlp_tr_editor_date);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(edTime).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_tr_editor_time)
-                .build());
+        sequence.add(edTime, R.string.hlp_tr_editor_time);
 
         String accountHint = "";
         switch (transaction.getTransactionType()) {
@@ -2269,11 +2066,7 @@ public class ActivityEditTransaction extends ToolbarActivity implements
                 accountHint = getString(R.string.hlp_tr_editor_account_outcome_or_transfer);
                 break;
         }
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(textViewAccount).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(accountHint)
-                .build());
+        sequence.add(textViewAccount, accountHint);
 
         String payeeHint = "";
         switch (transaction.getTransactionType()) {
@@ -2287,49 +2080,25 @@ public class ActivityEditTransaction extends ToolbarActivity implements
                 payeeHint = getString(R.string.hlp_tr_editor_dest_account);
                 break;
         }
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(viewPager).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(payeeHint)
-                .build());
+        sequence.add(viewPager, payeeHint);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(edCategory).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(getString(R.string.hlp_tr_editor_category))
-                .build());
+        sequence.add(edCategory, getString(R.string.hlp_tr_editor_category));
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(amountEditor).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(getString(R.string.hlp_tr_editor_amount))
-                .build());
+        sequence.add(amountEditor, getString(R.string.hlp_tr_editor_amount));
 
         switch (transaction.getTransactionType()) {
             case Transaction.TRANSACTION_TYPE_INCOME:
             case Transaction.TRANSACTION_TYPE_EXPENSE:
-                sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                        .setTarget(amountEditor.btnAmountSign).setDismissText(gotIt).withRectangleShape()
-                        .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                        .setContentText(getString(R.string.hlp_tr_editor_amount_sign))
-                        .build());
+                sequence.add(amountEditor.btnAmountSign, getString(R.string.hlp_tr_editor_amount_sign));
                 break;
         }
 
         //Если мы в режиме перевода между счетами с разными валютами, показываем хинт для суммы в валюте
         //счета назначения и курса
         if (destAmountEditor.getVisibility() == View.VISIBLE) {
-            sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                    .setTarget(destAmountEditor).setDismissText(gotIt).withRectangleShape()
-                    .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                    .setContentText(getString(R.string.hlp_tr_editor_amount_dest_account))
-                    .build());
+            sequence.add(destAmountEditor, getString(R.string.hlp_tr_editor_amount_dest_account));
 
-            sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                    .setTarget(edExchangeRate).setDismissText(gotIt).withRectangleShape()
-                    .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                    .setContentText(getString(R.string.hlp_tr_editor_exchange_rate))
-                    .build());
+            sequence.add(edExchangeRate, getString(R.string.hlp_tr_editor_exchange_rate));
         }
 
         sequence.start();

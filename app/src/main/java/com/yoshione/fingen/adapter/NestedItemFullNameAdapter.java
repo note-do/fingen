@@ -1,7 +1,7 @@
 package com.yoshione.fingen.adapter;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 

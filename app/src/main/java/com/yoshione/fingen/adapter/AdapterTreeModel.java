@@ -4,10 +4,10 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MotionEventCompat;
+import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,6 +23,7 @@ import com.yoshione.fingen.adapter.helper.ItemTouchHelperAdapter;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
 import com.yoshione.fingen.dao.AbstractDAO;
 import com.yoshione.fingen.dao.BaseDAO;
+import com.yoshione.fingen.databinding.ListItemTreeModel2Binding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IAdapterEventsListener;
 import com.yoshione.fingen.interfaces.IOrderable;
@@ -36,9 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import eu.davidea.flipview.FlipView;
+import com.yoshione.fingen.widgets.FlipView;
 
 /**
  * Created by slv on 25.12.2015.
@@ -338,18 +337,18 @@ public class AdapterTreeModel extends RecyclerView.Adapter implements ItemTouchH
     }
 
     static class ViewHolderTreeModel extends RecyclerView.ViewHolder {
-        @BindView(R.id.drag_handle)
         FlipView dragHandle;
-        @BindView(R.id.textViewModelName)
         TextView textViewModelName;
-        @BindView(R.id.expandableIndicator)
         ImageView expandableIndicator;
-        @BindView(R.id.color_tag)
         ImageView colorTag;
 
         ViewHolderTreeModel(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemTreeModel2Binding binding = ListItemTreeModel2Binding.bind(view);
+            dragHandle = binding.dragHandle;
+            textViewModelName = binding.textViewModelName;
+            expandableIndicator = binding.expandableIndicator;
+            colorTag = binding.colorTag;
         }
     }
 

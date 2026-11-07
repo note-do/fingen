@@ -4,11 +4,12 @@
 
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityModelListBinding;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.SearchView;
+import androidx.fragment.app.FragmentManager;
+import androidx.core.view.MenuItemCompat;
+import androidx.appcompat.widget.SearchView;
 import android.view.Menu;
 import android.widget.LinearLayout;
 
@@ -18,8 +19,6 @@ import com.yoshione.fingen.model.Template;
 import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 
 /**
@@ -28,14 +27,15 @@ import butterknife.ButterKnife;
  */
 public class ActivityModelList extends ToolbarActivity implements SearchView.OnQueryTextListener {
 
-    @BindView(R.id.container)
+    private ActivityModelListBinding mBinding;
     LinearLayout container;
     private FragmentModelList fragmentModelList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityModelListBinding.bind(getContentRoot());
+        container = mBinding.container;
         if (getIntent().getAction() != null && getIntent().getAction().equals(FgConst.ACT_SHOW_TEMPLATES)) {
             getIntent().putExtra("showHomeButton", false);
             getIntent().putExtra("model", new Template());

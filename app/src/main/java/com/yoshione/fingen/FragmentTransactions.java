@@ -9,13 +9,14 @@ import android.content.res.Resources;
 import android.graphics.drawable.Animatable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SwitchCompat;
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SwitchCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -37,13 +38,13 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.yoshione.fingen.adapter.AdapterFilters;
 import com.yoshione.fingen.adapter.AdapterTransactions;
 import com.yoshione.fingen.classes.ListSumsByCabbage;
 import com.yoshione.fingen.dao.AccountsDAO;
 import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.databinding.FragmentTransactionsBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
 import com.yoshione.fingen.filters.AmountFilter;
@@ -51,7 +52,6 @@ import com.yoshione.fingen.filters.DateRangeFilter;
 import com.yoshione.fingen.filters.FilterListHelper;
 import com.yoshione.fingen.filters.FilterUtils;
 import com.yoshione.fingen.filters.NestedModelFilter;
-import com.yoshione.fingen.iab.BillingService;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.ILoadMoreFinish;
 import com.yoshione.fingen.interfaces.IOnLoadMore;
@@ -67,6 +67,7 @@ import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.model.StringIntItem;
 import com.yoshione.fingen.model.Template;
 import com.yoshione.fingen.model.Transaction;
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import com.yoshione.fingen.utils.FabMenuController;
 import com.yoshione.fingen.utils.Lg;
 import com.yoshione.fingen.utils.PrefUtils;
@@ -86,12 +87,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import ca.barrenechea.widget.recyclerview.decoration.StickyHeaderDecoration;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import com.yoshione.fingen.widgets.StickyHeaderDecoration;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static android.app.Activity.RESULT_OK;
 import static com.yoshione.fingen.utils.RequestCodes.REQUEST_CODE_SELECT_MODEL;
@@ -108,64 +106,35 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     private static final int CONTEXT_MENU_TRANSACTIONS = 0;
 
     //<editor-fold desc="Bind views" defaultstate="collapsed">
-    @BindView(R.id.layoutSummaryTable)
     TableLayout layoutSumTable;
-    @BindView(R.id.switch_all_filters)
     SwitchCompat switchAllFilters;
-    @BindView(R.id.recycler_view_filters)
     ContextMenuRecyclerView recyclerViewFilters;
-    @BindView(R.id.fabGoTop)
     FloatingActionButton mFabGoTop;
-    @BindView(R.id.fabSelectAll)
     FloatingActionButton mFabSelectAll;
-    @BindView(R.id.fabUnselectAll)
     FloatingActionButton mFabUnselectAll;
-    @BindView(R.id.fabEditSelected)
     FloatingActionButton mFabEditSelected;
-    @BindView(R.id.fabExportSelected)
     FloatingActionButton mFabExportSelected;
-    @BindView(R.id.fabDeleteSelected)
     FloatingActionButton mFabDeleteSelected;
-    @BindView(R.id.sliding_layout_transactions)
-    SlidingUpPanelLayout mSlidingLayoutTransactions;
-    @BindView(R.id.editTextSearch)
+    BottomSheetBehavior<LinearLayout> mBottomSheetBehavior;
     EditText mEditTextSearch;
-    @BindView(R.id.imageButtonClearSearchString)
     ImageButton mImageButtonClearSearchString;
-    @BindView(R.id.cardViewSearch)
     ConstraintLayout mCardViewSearch;
-    @BindView(R.id.dragView)
     LinearLayout mDragView;
-    @BindView(R.id.textViewSelectedCount)
     TextView mTextViewSelectedCount;
-    @BindView(R.id.imageViewPullMe)
     ImageView mImageViewPullMe;
-    @BindView(R.id.sliding_panel_header)
     View mSlidingPanelHeader;
-    @BindView(R.id.buttonSearch)
     Button mButtonSearch;
-    @BindView(R.id.buttonReports)
     Button mButtonReports;
-    @BindView(R.id.buttonAddFilter)
     Button mButtonAddFilter;
-    @BindView(R.id.buttonClearfilters)
     Button mButtonClearFilters;
-    @BindView(R.id.fabSelectAllLayout)
     LinearLayout mFabSelectAllLayout;
-    @BindView(R.id.fabUnselectAllLayout)
     LinearLayout mFabUnselectAllLayout;
-    @BindView(R.id.fabEditSelectedLayout)
     LinearLayout mFabEditSelectedLayout;
-    @BindView(R.id.fabExportSelectedLayout)
     LinearLayout mFabExportSelectedLayout;
-    @BindView(R.id.fabDeleteSelectedLayout)
     LinearLayout mFabDeleteSelectedLayout;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton mFabMenuButtonRoot;
-    @BindView(R.id.fabMenuButtonRootLayout)
     LinearLayout mFabMenuButtonRootLayout;
-    Unbinder unbinder;
-    @BindView(R.id.fabBGLayout)
+    private FragmentTransactionsBinding mBinding;
     View mFabBGLayout;
     //</editor-fold>
 
@@ -179,8 +148,6 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     private final int visibleThreshold = 10;
     public volatile boolean endOfList = false;
 
-    @Inject
-    BillingService mBillingService;
     @Inject
     SharedPreferences mPreferences;
     @Inject
@@ -206,12 +173,45 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
                              Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
+        if (view != null) {
+            mBinding = FragmentTransactionsBinding.bind(view);
+            layoutSumTable = view.findViewById(R.id.layoutSummaryTable);
+            switchAllFilters = mBinding.switchAllFilters;
+            recyclerViewFilters = mBinding.recyclerViewFilters;
+            mFabGoTop = mBinding.fabGoTop;
+            mFabSelectAll = mBinding.fabSelectAll;
+            mFabUnselectAll = mBinding.fabUnselectAll;
+            mFabEditSelected = mBinding.fabEditSelected;
+            mFabExportSelected = mBinding.fabExportSelected;
+            mFabDeleteSelected = mBinding.fabDeleteSelected;
+            mBottomSheetBehavior = BottomSheetBehavior.from(mBinding.dragView);
+            mEditTextSearch = mBinding.editTextSearch;
+            mImageButtonClearSearchString = mBinding.imageButtonClearSearchString;
+            mCardViewSearch = mBinding.cardViewSearch;
+            mDragView = mBinding.dragView;
+            mTextViewSelectedCount = mBinding.textViewSelectedCount;
+            mImageViewPullMe = mBinding.imageViewPullMe;
+            mSlidingPanelHeader = mBinding.slidingPanelHeader.getRoot();
+            mButtonSearch = mBinding.buttonSearch;
+            mButtonReports = mBinding.buttonReports;
+            mButtonAddFilter = mBinding.buttonAddFilter;
+            mButtonClearFilters = mBinding.buttonClearfilters;
+            mFabSelectAllLayout = mBinding.fabSelectAllLayout;
+            mFabUnselectAllLayout = mBinding.fabUnselectAllLayout;
+            mFabEditSelectedLayout = mBinding.fabEditSelectedLayout;
+            mFabExportSelectedLayout = mBinding.fabExportSelectedLayout;
+            mFabDeleteSelectedLayout = mBinding.fabDeleteSelectedLayout;
+            mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+            mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
+            mFabBGLayout = mBinding.fabBGLayout;
+        }
+
         FGApplication.getAppComponent().inject(this);
 
         if (getActivity() != null) {
             Intent intent = getActivity().getIntent();
             if (intent.getBooleanExtra(FgConst.LOCK_SLIDINGUP_PANEL, false) & !BuildConfig.DEBUG) {
-                mSlidingLayoutTransactions.setEnabled(false);
+                mBottomSheetBehavior.setDraggable(false);
             }
         }
 
@@ -263,23 +263,18 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             onFilterChange(true);
         }
 
-        mSlidingLayoutTransactions.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+        mBottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onPanelSlide(View panel, float slideOffset) {
-                float alpha = Math.max(0, Math.abs(1 - slideOffset * 25));
-                mImageViewPullMe.setAlpha(alpha);
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    onSelectionChange(adapterT.getSelectedCount());
+                }
             }
 
             @Override
-            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-                if (previousState != newState && newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-                    onSelectionChange(adapterT.getSelectedCount());
-                }
-//                if (previousState == SlidingUpPanelLayout.PanelState.HIDDEN & newState == SlidingUpPanelLayout.PanelState.COLLAPSED) {
-//                    animatePullMe();
-//                } else if (previousState == SlidingUpPanelLayout.PanelState.COLLAPSED & newState == SlidingUpPanelLayout.PanelState.HIDDEN) {
-//                    animatePullMeReverse();
-//                }
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                float alpha = Math.max(0, Math.abs(1 - slideOffset * 25));
+                mImageViewPullMe.setAlpha(alpha);
             }
         });
 
@@ -311,7 +306,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         });
 
         layoutSumTable.getViewTreeObserver().addOnGlobalLayoutListener(
-                new SumsTableOnGlobalLayoutListener(getActivity(), layoutSumTable, mSlidingLayoutTransactions));
+                new SumsTableOnGlobalLayoutListener(getActivity(), layoutSumTable, mBottomSheetBehavior, mBinding.relativeLayout));
 
         if (getActivity() instanceof ActivityMain) {
             ((ActivityMain) getActivity()).mAppBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
@@ -326,9 +321,6 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             });
         }
 
-        if (view != null) {
-            unbinder = ButterKnife.bind(this, view);
-        }
         return view;
     }
 
@@ -586,23 +578,12 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             builderSingle.show();
         });
         mButtonClearFilters.setOnClickListener(v -> adapterF.clearData());
-        mButtonReports.setOnClickListener(v -> ((ToolbarActivity) Objects.requireNonNull(getActivity())).unsubscribeOnDestroy(
-                mBillingService.getReportsIapInfo()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                skuDetailsWrapper -> {
-                                    Intent intent;
-                                    if (skuDetailsWrapper.isPurchased()) {
-                                        intent = new Intent(getActivity(), ActivityReports.class);
-                                        intent.putParcelableArrayListExtra("filter_list", adapterF.getFilterList());
-                                        mSlidingLayoutTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                                        startActivity(intent);
-                                    } else {
-                                        intent = new Intent(getActivity(), ActivityPro.class);
-                                        startActivityForResult(intent, RequestCodes.REQUEST_CODE_OPEN_PRO);
-                                    }
-                                })));
+        mButtonReports.setOnClickListener(new DebouncingOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ActivityReports.class);
+            intent.putParcelableArrayListExtra("filter_list", adapterF.getFilterList());
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            startActivity(intent);
+        }));
     }
 
     @Override
@@ -635,7 +616,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
 //                            new Handler().postDelayed(new Runnable() {
 //                                @Override
 //                                public void run() {
-//                                    mSlidingLayoutTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+//                                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 //                                    mSlidingLayoutTransactions.setAnchorPoint(0.5f);
 //                                }
 //                            }, 2000);
@@ -921,7 +902,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
 
     private void showSearchView() {
         mCardViewSearch.setVisibility(View.VISIBLE);
-        mSlidingLayoutTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         mEditTextSearch.requestFocus();
         if (getActivity() != null) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -952,7 +933,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     @Override
     public void loadData(long itemID) {
 //        Debug.startMethodTracing("TransactionsLoadData");
-        stickyHeaderDecoration.clearHeaderCache();
+        stickyHeaderDecoration.invalidateHeaders();
         setAccountSetFilter();
 
         if (recyclerView == null) return;
@@ -1046,7 +1027,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     private class FabMenuSelectionItemClickListener implements View.OnClickListener {

@@ -5,34 +5,32 @@ package com.yoshione.fingen;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
+import androidx.appcompat.app.AlertDialog;
 import android.view.Gravity;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
-import com.evernote.android.job.JobManager;
-import com.github.omadahealth.lollipin.lib.managers.LockManager;
-import com.yoshione.fingen.backup.BackupJob;
-import com.yoshione.fingen.backup.BackupJobCreator;
-import com.yoshione.fingen.backup.BackupTestJobCreator;
+import com.yoshione.fingen.backup.BackupPassword;
+import com.yoshione.fingen.dropbox.DropboxClient;
+import com.yoshione.fingen.backup.BackupWorker;
 import com.yoshione.fingen.di.AppComponent;
 import com.yoshione.fingen.di.DaggerAppComponent;
 import com.yoshione.fingen.di.modules.ContextModule;
-import com.yoshione.fingen.fts.FtsApi;
 import com.yoshione.fingen.interfaces.ISyncAnimMethods;
-import com.yoshione.fingen.receivers.CustomIntentReceiver;
-import com.yoshione.fingen.widgets.CustomPinActivity;
+import com.yoshione.fingen.lock.PinLockManager;
 
 import java.lang.ref.WeakReference;
 
@@ -53,7 +51,6 @@ public class FGApplication extends Application implements ISyncAnimMethods {
     // View held by Popup
     public LinearLayout mLinearLayout;
     ImageView mImageView;
-    CustomIntentReceiver mCustomIntentReceiver;
 
     public AlertDialog getDialog() {
         return mDialog;
@@ -86,28 +83,54 @@ public class FGApplication extends Application implements ISyncAnimMethods {
 
         mContext = this;
 
-        JobManager.create(this).addJobCreator(new BackupJobCreator());
-        JobManager.create(this).addJobCreator(new BackupTestJobCreator());
+        DropboxClient.migrateLegacyToken(this);
+        DropboxClient.migrateCredential(this);
+        BackupPassword.migrate(this);
+        cleanLegacyFtsPrefs();
+
+        cancelLegacyJobs();
 
         mUpdateUIHandler = new UpdateUIHandler(this);
 
         mAppPaused = true;
 
-        LockManager<CustomPinActivity> lockManager = LockManager.getInstance();
-        lockManager.enableAppLock(this, CustomPinActivity.class);
-        lockManager.getAppLock().setOnlyBackgroundTimeout(true);
-        lockManager.getAppLock().setLogoId(R.drawable.ic_main);
-        long timeout = Integer.valueOf(
-                PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(
-                        FgConst.PREF_PIN_LOCK_TIMEOUT, "10"))*1000;
-        lockManager.getAppLock().setTimeout(timeout);
-        lockManager.getAppLock().setOnlyBackgroundTimeout(true);
+        PinLockManager.init(this);
 
         registerActivityLifecycleCallbacks(new FgActivityLifecycleCallbacks());
 
-        mCustomIntentReceiver = new CustomIntentReceiver();
+        BackupWorker.schedule(this);
+    }
 
-        BackupJob.schedule();
+    // One-time removal of the settings of the removed FNS receipts feature (login, password, credentials)
+    void cleanLegacyFtsPrefs() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean(FgConst.PREF_FTS_PREFS_CLEANED, false)) {
+            return;
+        }
+        prefs.edit()
+                .remove(FgConst.PREF_FTS_LOGIN)
+                .remove(FgConst.PREF_FTS_PASS)
+                .remove(FgConst.PREF_FTS_CREDENTIALS)
+                .remove(FgConst.PREF_FTS_DO_NOT_SHOW_AGAIN)
+                .putBoolean(FgConst.PREF_FTS_PREFS_CLEANED, true)
+                .apply();
+    }
+
+    // One-time cleanup of jobs left by the removed android-job library
+    private void cancelLegacyJobs() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean(FgConst.PREF_ANDROID_JOB_MIGRATED, false)) {
+            return;
+        }
+        JobScheduler scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (scheduler != null) {
+            for (JobInfo job : scheduler.getAllPendingJobs()) {
+                if (job.getService().getClassName().startsWith("com.evernote.android.job")) {
+                    scheduler.cancel(job.getId());
+                }
+            }
+        }
+        prefs.edit().putBoolean(FgConst.PREF_ANDROID_JOB_MIGRATED, true).apply();
     }
 
     public static AppComponent getAppComponent() {
@@ -124,12 +147,28 @@ public class FGApplication extends Application implements ISyncAnimMethods {
         super.onTerminate();
     }
 
+    // targetSdk 36 ignores screenOrientation on sw >= 600dp, so portrait is locked
+    // here for phones only; tablets and foldables rotate freely
+    private static void lockPortraitOnPhones(Activity activity) {
+        if (activity instanceof ActivityEditTransaction
+                || activity instanceof ActivityEditLocation2
+                || activity instanceof ActivityShortcut
+                || !activity.getClass().getName().startsWith("com.yoshione.fingen")) {
+            return;
+        }
+        if (activity.getResources().getConfiguration().smallestScreenWidthDp < 600) {
+            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+    }
+
     private final class FgActivityLifecycleCallbacks implements ActivityLifecycleCallbacks {
 
         int numOfRunning = 0;
 
         @Override
         public void onActivityCreated(Activity arg0, Bundle arg1) {
+            lockPortraitOnPhones(arg0);
+
             switch (Integer.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("theme", "0"))) {
                 case ActivityMain.THEME_LIGHT:
                     arg0.setTheme(R.style.AppThemeLight);
@@ -171,14 +210,6 @@ public class FGApplication extends Application implements ISyncAnimMethods {
                     mAppPaused = true;
                 }
             }, 100L);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                try {
-                    unregisterReceiver(mCustomIntentReceiver);
-                } catch (Exception e) {
-                    Log.d(TAG, "Can't unregister receiver");
-                }
-            }
         }
 
         @Override
@@ -191,13 +222,6 @@ public class FGApplication extends Application implements ISyncAnimMethods {
             mAppPaused = false;
             // Now, one activity is running
             numOfRunning++;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                IntentFilter intentFilter = new IntentFilter();
-                intentFilter.addAction("com.yoshione.fingen.intent.action.CREATE_TRANSACTION");
-                intentFilter.addAction("com.yoshione.fingen.intent.action.CREATE_SMS");
-                registerReceiver(mCustomIntentReceiver, intentFilter);
-            }
         }
 
         @Override

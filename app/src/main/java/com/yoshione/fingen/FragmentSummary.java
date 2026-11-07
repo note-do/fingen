@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -20,7 +20,6 @@ import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
 import com.yoshione.fingen.filters.DateRangeFilter;
 import com.yoshione.fingen.filters.FilterListHelper;
-import com.yoshione.fingen.iab.BillingService;
 import com.yoshione.fingen.managers.AccountsSetManager;
 import com.yoshione.fingen.model.AccountsSet;
 import com.yoshione.fingen.model.SummaryItem;
@@ -43,8 +42,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 /**
@@ -63,8 +62,6 @@ public class FragmentSummary extends BaseListFragment {
 
     private AdapterSummary adapter;
 
-    @Inject
-    BillingService mBillingService;
     @Inject
     TransactionsDAO mTransactionsDAO;
     @Inject
@@ -102,20 +99,6 @@ public class FragmentSummary extends BaseListFragment {
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater menuInflater = Objects.requireNonNull(getActivity()).getMenuInflater();
         menuInflater.inflate(R.menu.context_menu_summary, menu);
-        final MenuItem item = menu.findItem(R.id.action_show_report);
-        ((ToolbarActivity) getActivity()).unsubscribeOnDestroy(
-                mBillingService.getReportsIapInfo()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                skuDetailsWrapper -> {
-                                    if (skuDetailsWrapper.isPurchased()) {
-                                        item.setVisible(true);
-                                    } else {
-                                        item.setVisible(false);
-                                    }
-                                },
-                                throwable -> item.setVisible(false)));
     }
 
     @Override

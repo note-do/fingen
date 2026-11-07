@@ -1,21 +1,23 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityReportsBinding;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.TabLayout;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.activity.OnBackPressedCallback;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MenuItemCompat;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.preference.PreferenceManager;
+import androidx.appcompat.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
@@ -41,8 +43,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class ActivityReports extends ToolbarActivity {
 
@@ -51,25 +51,16 @@ public class ActivityReports extends ToolbarActivity {
     private static final int FRAGMENT_TIME_CHART = 2;
     private static final int FRAGMENTS_COUNT = 3;
 
-    @BindView(R.id.textInputLayoutData)
+    private ActivityReportsBinding mBinding;
     TextInputLayout mTextInputLayoutData;
-    @BindView(R.id.textInputLayoutDateRange)
     TextInputLayout mTextInputLayoutDateRange;
-    @BindView(R.id.pager)
     ViewPager viewPager;
-    @BindView(R.id.tabLayout)
     TabLayout tabLayout;
-    @BindView(R.id.toolbar)
     Toolbar toolbar;
-    @BindView(R.id.textViewDateRange)
     TextView mTextViewDateRange;
-    @BindView(R.id.editTextCabbage)
     EditText mEditTextCabbage;
-    @BindView(R.id.editTextData)
     EditText mEditTextData;
-    @BindView(R.id.editTextShow)
     EditText mEditTextShow;
-    @BindView(R.id.editTextDateRange)
     EditText mEditTextDateRange;
     ReportBuilder mReportBuilder;
     private int mCurrentFragment;
@@ -92,7 +83,29 @@ public class ActivityReports extends ToolbarActivity {
     @SuppressWarnings("unchecked")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityReportsBinding.bind(getContentRoot());
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (mReportBuilder.getParentID() >= 0 & viewPager.getCurrentItem() != FRAGMENT_TIME_CHART) {
+                    mReportBuilder.levelUp(ActivityReports.this);
+                    updateCharts();
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
+        mTextInputLayoutData = mBinding.textInputLayoutData;
+        mTextInputLayoutDateRange = mBinding.textInputLayoutDateRange;
+        viewPager = mBinding.pager;
+        tabLayout = findViewById(R.id.tabLayout);
+        toolbar = findViewById(R.id.toolbar);
+        mTextViewDateRange = mBinding.textViewDateRange;
+        mEditTextCabbage = mBinding.editTextCabbage;
+        mEditTextData = mBinding.editTextData;
+        mEditTextShow = mBinding.editTextShow;
+        mEditTextDateRange = mBinding.editTextDateRange;
 
         mCurrentFragment = 0;
 
@@ -320,16 +333,6 @@ public class ActivityReports extends ToolbarActivity {
         FragmentTimeBarChart fragmentTimeBarChart = (FragmentTimeBarChart) getFragment(FragmentTimeBarChart.class);
         if (fragmentTimeBarChart != null) {
             fragmentTimeBarChart.updateChart();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mReportBuilder.getParentID() >= 0 & viewPager.getCurrentItem() != FRAGMENT_TIME_CHART) {
-            mReportBuilder.levelUp(this);
-            updateCharts();
-        } else {
-            super.onBackPressed();
         }
     }
 

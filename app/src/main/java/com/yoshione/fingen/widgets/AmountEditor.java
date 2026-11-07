@@ -4,14 +4,16 @@
 
 package com.yoshione.fingen.widgets;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
+import androidx.core.content.ContextCompat;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.design.widget.TextInputLayout;
+import com.google.android.material.textfield.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -29,6 +31,7 @@ import com.yoshione.fingen.FgConst;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.calc.CalculatorBuilder;
 import com.yoshione.fingen.dao.CabbagesDAO;
+import com.yoshione.fingen.databinding.WidgetAmountEditBinding;
 import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.model.Events;
 import com.yoshione.fingen.receivers.CalcReciever;
@@ -47,10 +50,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
 /**
  * Created by Leonid on 14.11.2015.
  *
@@ -61,17 +60,11 @@ public class AmountEditor extends LinearLayout {
 
     public OnAmountChangeListener mOnAmountChangeListener;
     public OnCabbageChangeListener mOnCabbageChangeListener;
-    @BindView(R.id.imagebutton_amount_sign)
     public ImageButton btnAmountSign;
-    @BindView(R.id.edittext_amount)
     EditText edAmount;
-    @BindView(R.id.imageButtonCalc)
     ImageButton btnCalc;
-    @BindView(R.id.editTextCabbage)
     EditText spinnerCabbage;
-    @BindView(R.id.textInputLayoutCabbage)
     TextInputLayout mTextInputLayoutCabbage;
-    @BindView(R.id.textInputLayoutAmount)
     TextInputLayout mTextInputLayoutAmount;
     private boolean mAllowChangeCabbage = true;
     private int type;
@@ -161,7 +154,7 @@ public class AmountEditor extends LinearLayout {
 
                     arrayAdapterCabbages.addAll(cabbages);
 
-                    android.support.v7.app.AlertDialog.Builder builderSingle = new android.support.v7.app.AlertDialog.Builder(activity);
+                    androidx.appcompat.app.AlertDialog.Builder builderSingle = new androidx.appcompat.app.AlertDialog.Builder(activity);
                     builderSingle.setSingleChoiceItems(arrayAdapterCabbages, index,
                             new DialogInterface.OnClickListener() {
                                 @Override
@@ -170,7 +163,7 @@ public class AmountEditor extends LinearLayout {
                                         @Override
                                         public void run() {
                                             dialog.cancel();
-                                            ListView lw = ((android.support.v7.app.AlertDialog) dialog).getListView();
+                                            ListView lw = ((androidx.appcompat.app.AlertDialog) dialog).getListView();
                                             Cabbage cabbage = (Cabbage) lw.getAdapter().getItem(which);
                                             setCabbage(cabbage);
                                         }
@@ -246,7 +239,14 @@ public class AmountEditor extends LinearLayout {
     private void init(final Context context) {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.widget_amount_edit, null);
         this.addView(view);
-        ButterKnife.bind(this);
+        WidgetAmountEditBinding binding = WidgetAmountEditBinding.bind(view);
+        btnAmountSign = binding.imagebuttonAmountSign;
+        edAmount = binding.edittextAmount;
+        btnCalc = binding.imageButtonCalc;
+        spinnerCabbage = binding.editTextCabbage;
+        mTextInputLayoutCabbage = binding.textInputLayoutCabbage;
+        mTextInputLayoutAmount = binding.textInputLayoutAmount;
+        binding.imageButtonCalc.setOnClickListener(new DebouncingOnClickListener(v -> onCalculatorClick()));
         scale = 2;
 
         mAmountColorizer = new AmountColorizer(context);
@@ -352,10 +352,9 @@ public class AmountEditor extends LinearLayout {
         mTextInputLayoutAmount.setHint(hint);
     }
 
-    @OnClick(R.id.imageButtonCalc)
     void onCalculatorClick() {
         CalcReciever receiver = new CalcReciever(this, activity);
-        activity.registerReceiver(receiver, new IntentFilter(FgConst.ACT_CALC_DONE));
+        ContextCompat.registerReceiver(activity, receiver, new IntentFilter(FgConst.ACT_CALC_DONE), ContextCompat.RECEIVER_NOT_EXPORTED);
         new CalculatorBuilder()
                 .withTitle("calc")
                 .withValue(getAmount().toString())

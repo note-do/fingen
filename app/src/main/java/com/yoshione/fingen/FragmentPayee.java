@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
+import androidx.annotation.NonNull;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -18,12 +18,10 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.yoshione.fingen.adapter.NestedItemFullNameAdapter;
+import com.yoshione.fingen.databinding.FrgTePayeeBinding;
 import com.yoshione.fingen.model.AutocompleteItem;
 
 import java.util.Objects;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by Leonid on 27.09.2015.
@@ -31,11 +29,8 @@ import butterknife.ButterKnife;
  */
 public class FragmentPayee extends Fragment {
 
-    @BindView(R.id.editTextPayee)
     AutoCompleteTextView edPayee;
-    @BindView(R.id.textInputLayoutPayee)
     TextInputLayout mTextInputLayoutPayee;
-    @BindView(R.id.imageButtonDeletePayee)
     ImageButton mImageButtonDeletePayee;
 
     private FragmentPayeeListener mCallback;
@@ -78,7 +73,10 @@ public class FragmentPayee extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.frg_te_payee, container, false);
-        ButterKnife.bind(this, view);
+        FrgTePayeeBinding binding = FrgTePayeeBinding.bind(view);
+        edPayee = binding.editTextPayee;
+        mTextInputLayoutPayee = binding.textInputLayoutPayee;
+        mImageButtonDeletePayee = binding.imageButtonDeletePayee;
 
         return view;
     }

@@ -2,7 +2,7 @@ package com.yoshione.fingen.adapter;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.yoshione.fingen.ActivityTransactions;
 import com.yoshione.fingen.FgConst;
 import com.yoshione.fingen.R;
+import com.yoshione.fingen.databinding.ListItemSummaryBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.DateRangeFilter;
 import com.yoshione.fingen.managers.SumsManager;
@@ -22,9 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by slv on 07.11.2016.
@@ -97,15 +95,15 @@ public class AdapterSummary extends RecyclerView.Adapter {
 
     class SummaryViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.textView)
         TextView mTextView;
-        @BindView(R.id.layoutSummaryTable)
         TableLayout mLayoutSummaryTable;
 
         SummaryViewHolder(View v) {
             super(v);
 
-            ButterKnife.bind(this, v);
+            ListItemSummaryBinding binding = ListItemSummaryBinding.bind(v);
+            mTextView = binding.textView;
+            mLayoutSummaryTable = binding.layoutSummaryTable;
 
         }
     }

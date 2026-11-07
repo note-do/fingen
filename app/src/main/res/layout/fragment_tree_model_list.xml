@@ -1,10 +1,9 @@
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:activity=".ActivityList">
 
     <com.yoshione.fingen.widgets.ContextMenuRecyclerView
@@ -35,7 +34,7 @@
             android:layout_height="wrap_content"
             android:text="@string/ent_item" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabAddModel"
             style="@style/FabMenuButtonChild"
             app:srcCompat="@drawable/ic_category_white" />
@@ -54,7 +53,7 @@
             android:layout_height="wrap_content"
             android:text="@string/ent_nested_item" />
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabAddNestedModel"
             style="@style/FabMenuButtonChild"
             app:srcCompat="@drawable/ic_categories_white" />
@@ -67,7 +66,7 @@
         style="@style/FabMenuRootButtonLayout">
 
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabMenuButtonRoot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -77,4 +76,4 @@
             app:srcCompat="@drawable/ic_add_white" />
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,7 +1,7 @@
 package com.yoshione.fingen;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
+import androidx.test.InstrumentationRegistry;
 
 import android.util.Log;
 
@@ -20,7 +20,9 @@ import com.yoshione.fingen.model.Transaction;
 import com.yoshione.fingen.utils.CabbageFormatter;
 import com.yoshione.fingen.utils.SmsParser;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -42,6 +44,9 @@ import static org.junit.Assert.assertThat;
  * 1
  */
 public class SmsParserTest {
+
+    @Rule
+    public final TestRule systemDialogs = new SystemDialogsRule();
     private static final String TAG = "SmsParserTest";
 
     private List<SmsTest> smsTests;
@@ -53,7 +58,7 @@ public class SmsParserTest {
     }
 
     @Test
-    public void smsParser_CorrectParseSms() {ac
+    public void smsParser_CorrectParseSms() {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         loadCSV();

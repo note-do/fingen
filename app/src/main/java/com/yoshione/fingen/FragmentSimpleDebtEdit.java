@@ -7,12 +7,12 @@ package com.yoshione.fingen;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.SimpleDebtsDAO;
+import com.yoshione.fingen.databinding.FragmentSimpledebtEditBinding;
 import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.model.SimpleDebt;
 import com.yoshione.fingen.model.Transaction;
@@ -29,22 +30,15 @@ import com.yoshione.fingen.widgets.AmountEditor;
 
 import java.math.BigDecimal;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 /**
  * Created by slv on 04.12.2015.
  *
  */
 public class FragmentSimpleDebtEdit extends DialogFragment {
 
-    @BindView(R.id.edit_text_name)
     EditText editTextName;
-    Unbinder unbinder;
-    @BindView(R.id.checkBoxClosed)
+    private FragmentSimpledebtEditBinding mBinding;
     CheckBox mCheckBoxClosed;
-    @BindView(R.id.amountEditorStartAmount)
     AmountEditor amountEditorStartAmount;
     private SimpleDebt mSimpleDebt;
 
@@ -67,7 +61,10 @@ public class FragmentSimpleDebtEdit extends DialogFragment {
         String title = getArguments().getString("title");
         mSimpleDebt = getArguments().getParcelable("simpleDebt");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_simpledebt_edit, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentSimpledebtEditBinding.bind(view);
+        editTextName = mBinding.editTextName;
+        mCheckBoxClosed = mBinding.checkBoxClosed;
+        amountEditorStartAmount = mBinding.amountEditorStartAmount;
 
         if (mSimpleDebt != null) {
             editTextName.setText(mSimpleDebt.getName());
@@ -161,6 +158,6 @@ public class FragmentSimpleDebtEdit extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 }

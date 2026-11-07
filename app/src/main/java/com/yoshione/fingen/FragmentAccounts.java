@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Animatable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -24,7 +24,6 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.yoshione.fingen.adapter.AdapterAccounts;
 import com.yoshione.fingen.adapter.AdapterAccountsSets;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
@@ -33,10 +32,10 @@ import com.yoshione.fingen.dao.AccountsDAO;
 import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.CreditsDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.databinding.FragmentAccountsBinding;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
 import com.yoshione.fingen.filters.FilterListHelper;
-import com.yoshione.fingen.iab.BillingService;
 import com.yoshione.fingen.interfaces.IUpdateCallback;
 import com.yoshione.fingen.managers.AccountManager;
 import com.yoshione.fingen.managers.AccountsSetManager;
@@ -51,6 +50,7 @@ import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.utils.ScreenUtils;
 import com.yoshione.fingen.widgets.AmountEditor;
 import com.yoshione.fingen.widgets.ContextMenuRecyclerView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yoshione.fingen.widgets.FgLinearLayoutManager;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
@@ -64,11 +64,10 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
 import dagger.Lazy;
-import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Leonid on 16.08.2015.
@@ -80,21 +79,13 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     private static final int CONTEXT_MENU_ACCOUNTS = 0;
     private static final int CONTEXT_MENU_SETS = 1;
     public AdapterAccounts adapter;
-    @BindView(R.id.layoutSummaryTable)
     TableLayout mLayoutSumTable;
-    @BindView(R.id.sliding_layout_accounts)
-    SlidingUpPanelLayout mSlidingUpPanelLayout;
-    @BindView(R.id.recycler_view_accounts_sets)
+    BottomSheetBehavior<LinearLayout> mBottomSheetBehavior;
     ContextMenuRecyclerView mRecyclerViewAccountsSets;
-    @BindView(R.id.buttonAddAccountSet)
     Button mButtonAddAccountSet;
-    @BindView(R.id.buttonAddAccount)
     Button mButtonAddAccount;
-    @BindView(R.id.imageViewPullMe)
     ImageView mImageViewPullMe;
-    @BindView(R.id.textview_pull_to_create_account)
     TextView mTextViewPullToCreateAccount;
-    @BindView(R.id.layout_pull_me)
     LinearLayout mLayoutPullMe;
     AdapterAccountsSets mAdapterAccountsSets;
     private AccountEventListener mAccountEventListener;
@@ -102,8 +93,6 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     private int contextMenuTarget = -1;
     private String mAllAccountsSetCaption;
 
-    @Inject
-    Lazy<BillingService> mBillingService;
     @Inject
     Lazy<SharedPreferences> mPreferences;
     @Inject
@@ -142,6 +131,16 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = super.onCreateView(inflater, container, savedInstanceState);
 
+        FragmentAccountsBinding binding = FragmentAccountsBinding.bind(view);
+        mLayoutSumTable = view.findViewById(R.id.layoutSummaryTable);
+        mBottomSheetBehavior = BottomSheetBehavior.from(binding.dragViewAccounts);
+        mRecyclerViewAccountsSets = binding.recyclerViewAccountsSets;
+        mButtonAddAccountSet = binding.buttonAddAccountSet;
+        mButtonAddAccount = binding.buttonAddAccount;
+        mImageViewPullMe = binding.imageViewPullMe;
+        mTextViewPullToCreateAccount = binding.textviewPullToCreateAccount;
+        mLayoutPullMe = binding.layoutPullMe;
+
         FGApplication.getAppComponent().inject(this);
 
         mAllAccountsSetCaption = getString(R.string.ent_all_accounts);
@@ -173,7 +172,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
         mItemTouchHelper.attachToRecyclerView(recyclerView);
 
         mLayoutSumTable.getViewTreeObserver().addOnGlobalLayoutListener(
-                    new SumsTableOnGlobalLayoutListener(getActivity(), mLayoutSumTable, mSlidingUpPanelLayout));
+                    new SumsTableOnGlobalLayoutListener(getActivity(), mLayoutSumTable, mBottomSheetBehavior, binding.relativeLayoutAccounts));
 
         if (getActivity() instanceof ActivityMain) {
             ((ActivityMain) getActivity()).mAppBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
@@ -252,7 +251,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
         registerForContextMenu(mRecyclerViewAccountsSets);
         loadAccountsSets();
         if (mAccountsDAO.get().getModelCount() == 0) {
-            mSlidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
         }
     }
 
@@ -270,23 +269,6 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
                     contextMenuTarget = CONTEXT_MENU_SETS;
                     menuInflater.inflate(R.menu.context_menu_accounts_sets, menu);
                     break;
-            }
-            final MenuItem item = menu.findItem(R.id.action_show_report);
-            if (item != null) {
-                item.setVisible(false);
-                ((ToolbarActivity) getActivity()).unsubscribeOnDestroy(
-                        mBillingService.get().getReportsIapInfo()
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(
-                                        skuDetailsWrapper -> {
-                                            if (skuDetailsWrapper.isPurchased()) {
-                                                item.setVisible(true);
-                                            } else {
-                                                item.setVisible(false);
-                                            }
-                                        },
-                                        throwable -> item.setVisible(false)));
             }
         }
     }

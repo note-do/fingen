@@ -9,13 +9,12 @@ import android.util.AttributeSet;
 import android.view.ContextMenu;
 import android.view.View;
 
-import com.l4digital.fastscroll.FastScrollRecyclerView;
 
 /**
  * Created by slv on 25.11.2015.
  *
  */
-public class ContextMenuRecyclerView extends FastScrollRecyclerView {
+public class ContextMenuRecyclerView extends FgFastScrollRecyclerView {
 
     private RecyclerContextMenuInfo mContextMenuInfo;
 

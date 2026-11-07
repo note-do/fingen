@@ -1,11 +1,12 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityBudgetBinding;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 import android.util.Log;
 
 import com.yoshione.fingen.interfaces.IAbstractModel;
@@ -22,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by slv on 07.03.2016.
@@ -35,7 +34,7 @@ public class ActivityBudget extends ToolbarActivity {
     private static final int YEAR_ZERO = 2000;
     private static final int POS_ZERO = Integer.MAX_VALUE / 2;
 
-    @BindView(R.id.viewPager)
+    private ActivityBudgetBinding mBinding;
     ViewPager viewPager;
     private List<FragmentBudget> fragments;
 
@@ -44,7 +43,8 @@ public class ActivityBudget extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityBudgetBinding.bind(getContentRoot());
+        viewPager = mBinding.viewPager;
 
         fragments = new ArrayList<>();
 

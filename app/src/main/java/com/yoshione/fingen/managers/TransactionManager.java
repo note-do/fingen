@@ -7,7 +7,7 @@ package com.yoshione.fingen.managers;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.preference.PreferenceManager;
+import androidx.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.yoshione.fingen.ActivityEditTransaction;

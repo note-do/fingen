@@ -1,18 +1,16 @@
 package com.yoshione.fingen;
 
-import android.Manifest;
+import com.yoshione.fingen.databinding.ActivityExportCsvBinding;
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AlertDialog;
+import com.google.android.material.textfield.TextInputLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +20,6 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.github.angads25.filepicker.model.DialogConfigs;
 import com.yoshione.fingen.csv.CsvImporter;
 import com.yoshione.fingen.dao.TransactionsDAO;
 import com.yoshione.fingen.interfaces.IProgressEventsListener;
@@ -31,40 +28,24 @@ import com.yoshione.fingen.utils.FileUtils;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
-
-@RuntimePermissions
 public class ActivityExportCSV extends ToolbarActivity implements IProgressEventsListener {
 
+    private static final int REQUEST_CREATE_CSV = 1;
     private final static int HANDLER_OPERATION_HIDE = 0;
     private final static int HANDLER_OPERATION_SHOW = 1;
     private final static int HANDLER_OPERATION_UPDATE = 2;
     private final static int HANDLER_OPERATION_TOAST = 3;
     private static final ProgressBar[] numberProgressBarArr = new ProgressBar[]{null};
     private static final Activity[] activityArr = new Activity[]{null};
-    @BindView(R.id.progressbar)
+    private ActivityExportCsvBinding mBinding;
     ProgressBar progressbar;
     UpdateProgressHandler handler;
-    @BindView(R.id.editTextDirectory)
-    EditText mEditTextDirectory;
-    @BindView(R.id.editTextFileName)
     EditText mEditTextFileName;
-    @BindView(R.id.textInputLayoutDir)
-    TextInputLayout mTextInputLayoutDir;
-    @BindView(R.id.textInputLayoutFileName)
     TextInputLayout mTextInputLayoutFileName;
-    @BindView(R.id.checkBoxExportProducts)
     CheckBox mCheckBoxExportProducts;
     private int mCurrentProgress;
 
@@ -81,7 +62,11 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityExportCsvBinding.bind(getContentRoot());
+        progressbar = mBinding.progressbar;
+        mEditTextFileName = mBinding.editTextFileName;
+        mTextInputLayoutFileName = mBinding.textInputLayoutFileName;
+        mCheckBoxExportProducts = mBinding.checkBoxExportProducts;
 
         progressbar.setProgress(0);
         numberProgressBarArr[0] = progressbar;
@@ -91,8 +76,6 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
 
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ActivityExportCSV.this);
 
-        mEditTextDirectory.setText(preferences.getString("export_dir", ""));
-        mEditTextFileName.setText(preferences.getString("export_file", ""));
         mCheckBoxExportProducts.setChecked(preferences.getBoolean("export_products", false));
         mCheckBoxExportProducts.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -114,50 +97,15 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_export:
-                ActivityExportCSVPermissionsDispatcher.exportCSVWithPermissionCheck(ActivityExportCSV.this);
+                selectExportFile();
                 return true;
             default:
                 return false;
         }
     }
 
-    @OnClick(R.id.editTextDirectory)
-    void OnSelectFileClick() {
-        ActivityExportCSVPermissionsDispatcher.SelectFileWithPermissionCheck(ActivityExportCSV.this);
-    }
-
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void SelectFile() {
-        FileUtils.SelectFileFromStorage(ActivityExportCSV.this, DialogConfigs.FILE_AND_DIR_SELECT, new FileUtils.IOnSelectFile() {
-            @Override
-            public void OnSelectFile(String path) {
-                String dir;
-                String fn;
-                File file = new File(path);
-                if (file.isDirectory()) {
-                    dir = path;
-                    fn = "";
-                } else {
-                    dir = file.getParent();
-                    fn = file.getName();
-                }
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ActivityExportCSV.this);
-                preferences.edit().putString("export_dir", dir).putString("export_file", fn).apply();
-                mEditTextDirectory.setText(dir);
-                mEditTextFileName.setText(fn);
-            }
-        });
-    }
-
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    void exportCSV() {
-        String dir = mEditTextDirectory.getText().toString();
-        String fn = mEditTextFileName.getText().toString();
-
-        if (dir.isEmpty()) {
-            mTextInputLayoutDir.setError(getString(R.string.err_set_dir));
-            return;
-        }
+    void selectExportFile() {
+        String fn = mEditTextFileName.getText().toString().trim();
 
         if (fn.isEmpty()) {
             mTextInputLayoutFileName.setError(getString(R.string.err_set_file_name));
@@ -168,12 +116,55 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
             fn = fn + ".csv";
         }
 
-        String path = dir + "/" + fn;
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/csv");
+        intent.putExtra(Intent.EXTRA_TITLE, fn);
+        startActivityForResult(intent, REQUEST_CREATE_CSV);
+    }
 
-        final CsvImporter csvImporter = new CsvImporter(this, path, 0, true);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CREATE_CSV && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            exportCSV(data.getData());
+        }
+    }
 
-        csvImporter.setmCsvImportProgressChangeListener(this);
+    void exportCSV(final Uri uri) {
+        final File tmp;
+        try {
+            tmp = File.createTempFile("csv_export", ".csv", getCacheDir());
+        } catch (IOException e) {
+            Log.e("csv", "temp file failed: " + e.getMessage());
+            Toast.makeText(this, getString(R.string.msg_export_complete_error_1), Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        final CsvImporter csvImporter = new CsvImporter(this, tmp.getPath(), 0, true);
+
+        // Completion is reported only after the temp file is copied to the chosen document
+        final int[] resultCode = new int[]{IProgressEventsListener.CODE_OK};
+        csvImporter.setmCsvImportProgressChangeListener(new IProgressEventsListener() {
+            @Override
+            public void onProgressChange(int progress) {
+                ActivityExportCSV.this.onProgressChange(progress);
+            }
+
+            @Override
+            public void onOperationComplete(int code) {
+                if (code != IProgressEventsListener.CODE_OK) {
+                    resultCode[0] = code;
+                }
+            }
+
+            @Override
+            public void onOperationComplete(int code, int[] stats) {
+                onOperationComplete(code);
+            }
+        });
+
+        final boolean exportProducts = mCheckBoxExportProducts.isChecked();
         handler.sendMessage(handler.obtainMessage(HANDLER_OPERATION_SHOW, 0, 0));
         Thread t = new Thread(new Runnable() {
             @Override
@@ -187,55 +178,21 @@ public class ActivityExportCSV extends ToolbarActivity implements IProgressEvent
                 } catch (Exception e) {
                     transactions = new ArrayList<>();
                 }
-                csvImporter.saveCSV(transactions, mCheckBoxExportProducts.isChecked());
+                try {
+                    csvImporter.saveCSV(transactions, exportProducts);
+                    if (resultCode[0] == IProgressEventsListener.CODE_OK) {
+                        FileUtils.copyFileToUri(ActivityExportCSV.this, tmp, uri);
+                    }
+                } catch (IOException | SecurityException e) {
+                    Log.e("csv", "copy failed: " + e.getMessage());
+                    resultCode[0] = IProgressEventsListener.CODE_ERROR;
+                } finally {
+                    tmp.delete();
+                }
+                ActivityExportCSV.this.onOperationComplete(resultCode[0]);
             }
         });
         t.start();
-    }
-
-    @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    void showRationaleForWrite_external_storage(PermissionRequest request) {
-        // NOTE: Show a rationale to explain why the permission is needed, e.g. with a dialog.
-        // Call proceed() or cancel() on the provided PermissionRequest to continue or abort
-        showRationaleDialog(R.string.msg_permission_write_external_storage_rationale, request);
-    }
-
-    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    void onWrite_external_storageDenied() {
-        // NOTE: Deal with a denied permission, e.g. by showing specific UI
-        // or disabling certain functionality
-        Toast.makeText(this, R.string.msg_permission_write_external_storage_denied, Toast.LENGTH_SHORT).show();
-    }
-
-    @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    void onWrite_external_storageNeverAskAgain() {
-        Toast.makeText(this, R.string.msg_permission_write_external_storage_never_askagain, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // NOTE: delegate the permission handling to generated method
-        ActivityExportCSVPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
-    }
-
-    private void showRationaleDialog(@StringRes int messageResId, final PermissionRequest request) {
-        new AlertDialog.Builder(this)
-                .setPositiveButton(R.string.act_next, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        request.proceed();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        request.cancel();
-                    }
-                })
-                .setCancelable(false)
-                .setMessage(messageResId)
-                .show();
     }
 
     @Override

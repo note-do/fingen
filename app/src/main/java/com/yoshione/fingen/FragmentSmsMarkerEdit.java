@@ -9,10 +9,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.yoshione.fingen.dao.SmsMarkersDAO;
+import com.yoshione.fingen.databinding.FragmentSmsmarkerEditBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.managers.SmsMarkerManager;
 import com.yoshione.fingen.model.SmsMarker;
@@ -29,10 +30,6 @@ import com.yoshione.fingen.utils.SmsParser;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 import static android.app.Activity.RESULT_OK;
 
 /**
@@ -40,23 +37,17 @@ import static android.app.Activity.RESULT_OK;
  * a
  */
 public class FragmentSmsMarkerEdit extends DialogFragment {
-    @BindView(R.id.editTextObject)
     EditText editTextObject;
-    @BindView(R.id.editTextValue)
     EditText editTextValue;
-    @BindView(R.id.textViewObject)
     EditText textViewObject;
-    @BindView(R.id.editTextType)
     EditText editTextType;
-    @BindView(R.id.textInputLayoutEditTextObject)
     TextInputLayout mTextInputLayoutEditTextObject;
-    @BindView(R.id.textInputLayoutTextViewObject)
     TextInputLayout mTextInputLayoutTextViewObject;
 
     private IDialogDismissListener dialogDismissListener;
     IAbstractModel mObject;
 
-    Unbinder unbinder;
+    private FragmentSmsmarkerEditBinding mBinding;
 
     public void setDialogDismissListener(IDialogDismissListener dialogDismissListener) {
         this.dialogDismissListener = dialogDismissListener;
@@ -81,7 +72,13 @@ public class FragmentSmsMarkerEdit extends DialogFragment {
         String title = getArguments().getString("title");
         SmsMarker smsMarker = getArguments().getParcelable("smsMarker");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_smsmarker_edit, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentSmsmarkerEditBinding.bind(view);
+        editTextObject = mBinding.editTextObject;
+        editTextValue = mBinding.editTextValue;
+        textViewObject = mBinding.textViewObject;
+        editTextType = mBinding.editTextType;
+        mTextInputLayoutEditTextObject = mBinding.textInputLayoutEditTextObject;
+        mTextInputLayoutTextViewObject = mBinding.textInputLayoutTextViewObject;
 
         if (smsMarker != null) {
             editTextType.setText(SmsMarkerManager.getMarkerTypeName(smsMarker.getType(), getActivity()));
@@ -260,7 +257,7 @@ public class FragmentSmsMarkerEdit extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     private class OnOkListener implements View.OnClickListener {

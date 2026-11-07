@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.sothree.slidinguppanel.SlidingUpPanelLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sliding_layout_transactions"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:umanoDragView="@+id/dragView"
-    app:umanoScrollableView="@+id/recycler_view_filters"
-    style="@style/StyleSlidingUpPanel">
+    android:layout_height="match_parent">
 
+    <!-- Bottom padding equals the bottom sheet peek height (updated in SumsTableOnGlobalLayoutListener) -->
     <RelativeLayout
         android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingBottom="48dp">
 
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cardViewSearch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,7 +25,7 @@
             android:padding="0dp"
             android:visibility="gone">
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -44,7 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="0dp"
                     android:inputType="textNoSuggestions" />
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <ImageButton
                 android:id="@+id/imageButtonClearSearchString"
@@ -53,7 +52,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="ContentDescription" />
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.yoshione.fingen.widgets.ContextMenuRecyclerView
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -71,7 +70,7 @@
             android:layout_marginStart="0dp"
             tools:listitem="@layout/list_item_transactions_2"/>
 
-        <android.support.design.widget.FloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabGoTop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -115,7 +114,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/act_select_all" />
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabSelectAll"
                 style="@style/FabMenuButtonChild"
                 app:srcCompat="@drawable/ic_select_all_white" />
@@ -131,7 +130,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/act_unselect_all" />
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabUnselectAll"
                 style="@style/FabMenuButtonChild"
                 app:srcCompat="@drawable/ic_unselect_all_white" />
@@ -147,7 +146,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/act_edit_selected" />
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabEditSelected"
                 style="@style/FabMenuButtonChild"
                 app:srcCompat="@drawable/ic_edit_white" />
@@ -163,7 +162,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/ent_export_selected" />
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabExportSelected"
                 style="@style/FabMenuButtonChild"
                 app:srcCompat="@drawable/ic_export_white" />
@@ -179,7 +178,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/act_delete_selected" />
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabDeleteSelected"
                 style="@style/FabMenuButtonChild"
                 app:srcCompat="@drawable/ic_trash_white" />
@@ -192,7 +191,7 @@
             android:visibility="visible"
             style="@style/FabMenuRootButtonLayout">
 
-            <android.support.design.widget.FloatingActionButton
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabMenuButtonRoot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -205,13 +204,25 @@
     </RelativeLayout>
 
     <!-- SLIDING LAYOUT -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/dragView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="?listItemBackground"
+        android:elevation="8dp"
         android:orientation="vertical"
         android:clickable="true"
-        android:focusable="false">
+        android:focusable="false"
+        app:behavior_fitToContents="false"
+        app:behavior_halfExpandedRatio="0.5"
+        app:behavior_hideable="false"
+        app:behavior_peekHeight="48dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <include
             android:id="@+id/sliding_panel_header"
@@ -252,7 +263,7 @@
             android:paddingRight="4dp"
             android:visibility="gone">
 
-            <android.support.v7.widget.SwitchCompat
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switch_all_filters"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -288,4 +299,6 @@
             android:visibility="gone"/>
     </LinearLayout>
 
-</com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</FrameLayout>

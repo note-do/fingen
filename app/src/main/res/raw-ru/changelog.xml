@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="2.7" changeDate=">2026.11.01">
+        <changelogtext>Dropbox: переход на новое приложение; после обновления нужно войти в Dropbox заново</changelogtext>
+        <changelogtext>Исправлено: ошибки бэкапа в Dropbox показывались как успешные</changelogtext>
+        <changelogtext>Отчёты теперь бесплатны для всех</changelogtext>
+    </changelogversion>
     <changelogversion versionName="2.6.4" changeDate=">2019.01.14">
         <changelogtext>Восстановлена работоспособность загрузки чеков</changelogtext>
     </changelogversion>

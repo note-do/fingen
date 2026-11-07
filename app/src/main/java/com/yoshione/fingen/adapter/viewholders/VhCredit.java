@@ -6,6 +6,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.yoshione.fingen.databinding.ListItemCreditBinding;
 import com.yoshione.fingen.managers.AccountManager;
 import com.yoshione.fingen.managers.DebtsManager;
 import com.yoshione.fingen.model.Account;
@@ -19,29 +20,18 @@ import com.yoshione.fingen.utils.CabbageFormatter;
 import java.math.BigDecimal;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 /**
  * Created by slv on 03.03.2016.
  *
  */
 public class VhCredit extends VhModelBase {
-    @BindView(R.id.imageViewAccountIcon)
     ImageView imageViewIcon;
-    @BindView(R.id.textViewAccountName)
     TextView mTextViewName;
-    @BindView(R.id.textViewAccountType)
     TextView mTextViewType;
-    @BindView(R.id.textViewAccountCurBalance)
     TextView mTextViewCurBalance;
-    @BindView(R.id.textViewIncome)
     TextView mTextViewIncome;
-    @BindView(R.id.textViewOutcome)
     TextView mTextViewExpense;
-    @BindView(R.id.spaceBottom)
     FrameLayout mSpaceBottom;
-    @BindView(R.id.spaceBottomFinal)
     FrameLayout mSpaceBottomFinal;
 
     private final Context mContext;
@@ -49,7 +39,15 @@ public class VhCredit extends VhModelBase {
 
     public VhCredit(View itemView, IOnItemClickListener onItemClickListener, Context mContext) {
         super(itemView, onItemClickListener, mContext);
-        ButterKnife.bind(this, itemView);
+        ListItemCreditBinding binding = ListItemCreditBinding.bind(itemView);
+        imageViewIcon = binding.imageViewAccountIcon;
+        mTextViewName = binding.textViewAccountName;
+        mTextViewType = binding.textViewAccountType;
+        mTextViewCurBalance = binding.textViewAccountCurBalance;
+        mTextViewIncome = binding.textViewIncome;
+        mTextViewExpense = binding.textViewOutcome;
+        mSpaceBottom = binding.spaceBottom;
+        mSpaceBottomFinal = binding.spaceBottomFinal;
         this.mContext = mContext;
         mAmountColorizer = new AmountColorizer(mContext);
     }

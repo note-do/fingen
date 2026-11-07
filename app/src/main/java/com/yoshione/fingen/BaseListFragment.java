@@ -1,11 +1,11 @@
 package com.yoshione.fingen;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.widget.LinearLayoutManager;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,10 +15,6 @@ import com.yoshione.fingen.widgets.ContextMenuRecyclerView;
 import com.yoshione.fingen.widgets.FgLinearLayoutManager;
 
 import java.util.Objects;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
 
 /**
  * Created by slv on 08.11.2016.
@@ -30,10 +26,8 @@ public class BaseListFragment extends Fragment {
     public static final String FORCE_UPDATE_PARAM = "forceUpdateParam";
     public static final String LAYOUT_NAME_PARAM = "layoutID";
 
-    @BindView(R.id.recycler_view)
     ContextMenuRecyclerView recyclerView;
 
-    private Unbinder unbinder;
     private boolean isUpdating = false;
     private String mForceUpdateParam;
 
@@ -56,7 +50,7 @@ public class BaseListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Lg.log("%s onCreateView", getClass().getName());
         View view = inflater.inflate(Objects.requireNonNull(getArguments()).getInt(LAYOUT_NAME_PARAM), container, false);
-        unbinder = ButterKnife.bind(this, view);
+        recyclerView = view.findViewById(R.id.recycler_view);
         FgLinearLayoutManager layoutManager = new FgLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
         return view;
@@ -66,7 +60,6 @@ public class BaseListFragment extends Fragment {
     public void onDestroyView() {
         Lg.log("%s onDestroyView", getClass().getName());
         super.onDestroyView();
-        unbinder.unbind();
     }
 
     @Override

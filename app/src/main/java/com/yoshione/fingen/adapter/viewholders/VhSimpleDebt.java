@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.databinding.ListItemSimpleDeptBinding;
 import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.model.SimpleDebt;
 import com.yoshione.fingen.utils.AmountColorizer;
@@ -22,41 +23,38 @@ import com.yoshione.fingen.utils.CabbageFormatter;
 import java.math.BigDecimal;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 /**
  * Created by slv on 03.03.2016.
  * VhSimpleDebt
  */
 public class VhSimpleDebt extends VhModelBase {
     private final Context mContext;
-    @BindView(R.id.imageViewIcon)
     ImageView mImageViewIcon;
-    @BindView(R.id.textViewName)
     TextView mTextViewName;
-    @BindView(R.id.textViewOweMe)
     TextView mTextViewOweMe;
-    @BindView(R.id.textViewOweMeTitle)
     TextView mTextViewOweMeTitle;
-    @BindView(R.id.textViewIOwe)
     TextView mTextViewIOwe;
-    @BindView(R.id.textViewIOweTitle)
     TextView mTextViewIOweTitle;
-    @BindView(R.id.textViewAccountTotal)
     TextView mTextViewAccountTotal;
-    @BindView(R.id.textViewTotalTitle)
     TextView mTextViewTotalTitle;
-    @BindView(R.id.spaceBottom)
     FrameLayout mSpaceBottom;
-    @BindView(R.id.spaceBottomFinal)
     FrameLayout mSpaceBottomFinal;
     private TransactionsDAO mTransactionsDAO;
     private AmountColorizer mAmountColorizer;
 
     public VhSimpleDebt(View itemView, IOnItemClickListener onItemClickListener, Context context) {
         super(itemView, onItemClickListener, context);
-        ButterKnife.bind(this, itemView);
+        ListItemSimpleDeptBinding binding = ListItemSimpleDeptBinding.bind(itemView);
+        mImageViewIcon = binding.imageViewIcon;
+        mTextViewName = binding.textViewName;
+        mTextViewOweMe = binding.textViewOweMe;
+        mTextViewOweMeTitle = binding.textViewOweMeTitle;
+        mTextViewIOwe = binding.textViewIOwe;
+        mTextViewIOweTitle = binding.textViewIOweTitle;
+        mTextViewAccountTotal = binding.textViewAccountTotal;
+        mTextViewTotalTitle = binding.textViewTotalTitle;
+        mSpaceBottom = binding.spaceBottom;
+        mSpaceBottomFinal = binding.spaceBottomFinal;
         mContext = context;
         mTransactionsDAO = TransactionsDAO.getInstance(context);
         mAmountColorizer = new AmountColorizer(context);

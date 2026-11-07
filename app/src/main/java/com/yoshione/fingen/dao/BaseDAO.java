@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.SystemClock;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
 
@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import io.requery.android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase;
 
 import static com.yoshione.fingen.DBHelper.C_ID;
 import static com.yoshione.fingen.DBHelper.C_SYNC_DELETED;
@@ -401,16 +401,29 @@ public class BaseDAO implements AbstractDAO {
     }
 
     public synchronized long createItem(ContentValues cv, long id, boolean updateDependencies) throws Exception {
+        boolean inTransaction = mDatabase.inTransaction();
+        if (!inTransaction) {
+            mDatabase.beginTransaction();
+        }
+        try {
+            long result = insertOrUpdateItem(cv, id, updateDependencies);
+            if (!inTransaction) {
+                mDatabase.setTransactionSuccessful();
+            }
+            return result;
+        } finally {
+            if (!inTransaction) {
+                mDatabase.endTransaction();
+            }
+        }
+    }
+
+    private long insertOrUpdateItem(ContentValues cv, long id, boolean updateDependencies) throws Exception {
         //Нужно для совместимости. Поле знак удалено из java, но осталось в БД
         if (mTableName.equals(DBHelper.T_REF_CATEGORIES)) {
             cv.put(DBHelper.C_REF_CATEGORIES_SIGN, 1);
         }
         long result;
-
-        boolean inTransaction = mDatabase.inTransaction();
-        if (!inTransaction) {
-            mDatabase.beginTransaction();
-        }
 
         //<editor-fold desc="Отменяем изменения в кэше балансов, сделанные предыдущей версией транзакции, если она уже была в БД">
 
@@ -444,7 +457,6 @@ public class BaseDAO implements AbstractDAO {
         } else {
             int rowsAffected = mDatabase.update(mTableName, cv, C_ID + " = " + id, null);
             if (rowsAffected == 0) {
-                mDatabase.endTransaction();
                 throw new Exception();
             }
             result = id;
@@ -485,11 +497,6 @@ public class BaseDAO implements AbstractDAO {
                     break;
             }
             //</editor-fold>
-        }
-
-        if (!inTransaction) {
-            mDatabase.setTransactionSuccessful();
-            mDatabase.endTransaction();
         }
 
         return result;

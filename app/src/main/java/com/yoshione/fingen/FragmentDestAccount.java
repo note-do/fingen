@@ -2,16 +2,14 @@ package com.yoshione.fingen;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.yoshione.fingen.databinding.FrgTeDestAccountBinding;
 
 /**
  * Created by Leonid on 27.09.2015.
@@ -19,9 +17,7 @@ import butterknife.ButterKnife;
  */
 public class FragmentDestAccount extends Fragment {
 
-    @BindView(R.id.textViewDestAccount)
     EditText textViewDestAccount;
-    @BindView(R.id.imageButtonInvertTransferDirection)
     ImageButton imageButtonInvertTransferDirection;
 
     FragmentDestAccountListener mCallback;
@@ -40,7 +36,9 @@ public class FragmentDestAccount extends Fragment {
 
     public View onCreateView(@NonNull final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frg_te_dest_account, container, false);
-        ButterKnife.bind(this, view);
+        FrgTeDestAccountBinding binding = FrgTeDestAccountBinding.bind(view);
+        textViewDestAccount = binding.textViewDestAccount;
+        imageButtonInvertTransferDirection = binding.imageButtonInvertTransferDirection;
 
         ActivityEditTransaction activityEditTransaction = (ActivityEditTransaction) getActivity();
 

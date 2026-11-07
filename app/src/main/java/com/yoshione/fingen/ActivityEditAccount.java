@@ -1,13 +1,15 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
+import com.yoshione.fingen.databinding.ActivityEditAccountBinding;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatCheckBox;
+import com.google.android.material.textfield.TextInputLayout;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatCheckBox;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -31,12 +33,7 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseSequence;
-import uk.co.deanwild.materialshowcaseview.MaterialShowcaseView;
-import uk.co.deanwild.materialshowcaseview.ShowcaseConfig;
+import com.yoshione.fingen.utils.HelpSequence;
 
 public class ActivityEditAccount extends ToolbarActivity {
 
@@ -46,35 +43,22 @@ public class ActivityEditAccount extends ToolbarActivity {
     private static final int ERR_NOT_UNIQUE_ACCOUNT_NAME = 3;
 
     //<editor-fold desc="View bindings">
-    @BindView(R.id.editTextName)
+    private ActivityEditAccountBinding mBinding;
     EditText editTextName;
-    @BindView(R.id.editTextType)
     EditText editTextType;
-    @BindView(R.id.editTextCabbage)
     EditText editTextCabbage;
-    @BindView(R.id.editTextEmitent)
     EditText editTextEmitent;
-    @BindView(R.id.editTextLast4Digits)
     EditText editTextLast4Digits;
-    @BindView(R.id.editTextComment)
     EditText editTextComment;
-    @BindView(R.id.amountEditorStartBalance)
     AmountEditor amountEditorStartBalance;
-    @BindView(R.id.checkboxAccountClosed)
     AppCompatCheckBox checkboxAccountClosed;
-    @BindView(R.id.amountEditorCreditLimit)
     AmountEditor amountEditorCreditLimit;
-    @BindView(R.id.textInputLayoutEmitent)
     TextInputLayout mTextInputLayoutEmitent;
-    @BindView(R.id.textInputLayoutLast4Digits)
     TextInputLayout mTextInputLayoutLast4Digits;
-    @BindView(R.id.textInputLayoutName)
     TextInputLayout mTextInputLayoutName;
-    @BindView(R.id.textInputLayoutCabbage)
     TextInputLayout mTextInputLayoutCabbage;
     //</editor-fold>
 
-    private static final String SHOWCASE_ID = "Edit account showcase";
 
     Account account;
 
@@ -98,7 +82,21 @@ public class ActivityEditAccount extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityEditAccountBinding.bind(getContentRoot());
+        editTextName = mBinding.editTextName;
+        editTextType = mBinding.editTextType;
+        editTextCabbage = mBinding.editTextCabbage;
+        editTextEmitent = mBinding.editTextEmitent;
+        editTextLast4Digits = mBinding.editTextLast4Digits;
+        editTextComment = mBinding.editTextComment;
+        amountEditorStartBalance = mBinding.amountEditorStartBalance;
+        checkboxAccountClosed = mBinding.checkboxAccountClosed;
+        amountEditorCreditLimit = mBinding.amountEditorCreditLimit;
+        mTextInputLayoutEmitent = mBinding.textInputLayoutEmitent;
+        mTextInputLayoutLast4Digits = mBinding.textInputLayoutLast4Digits;
+        mTextInputLayoutName = mBinding.textInputLayoutName;
+        mTextInputLayoutCabbage = mBinding.textInputLayoutCabbage;
+        mBinding.buttonSaveAccount.setOnClickListener(new DebouncingOnClickListener(v -> onSaveClick()));
         account = getIntent().getParcelableExtra("account");
     }
 
@@ -362,7 +360,6 @@ public class ActivityEditAccount extends ToolbarActivity {
         return 0;
     }
 
-    @OnClick(R.id.buttonSaveAccount)
     public void onSaveClick() {
         switch (validateAccount()) {
             case ERR_EMPTY_ACCOUNT_NAME:
@@ -393,17 +390,9 @@ public class ActivityEditAccount extends ToolbarActivity {
     public boolean showHelp() {
         super.showHelp();
 
-        MaterialShowcaseView.resetSingleUse(this, SHOWCASE_ID);
 
-        ShowcaseConfig config = new ShowcaseConfig();
-        config.setDelay(500); // half second between each showcase view
-        config.setMaskColor(ContextCompat.getColor(this, R.color.ColorPrimary));
+        HelpSequence sequence = new HelpSequence(this);
 
-        MaterialShowcaseSequence sequence = new MaterialShowcaseSequence(this, SHOWCASE_ID);
-
-        sequence.setConfig(config);
-
-        String gotIt = getResources().getString(R.string.act_next);
 
         /*
         hlp_account_editor_intro
@@ -416,57 +405,25 @@ public class ActivityEditAccount extends ToolbarActivity {
         hlp_account_editor_closed
         */
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(new View(this)).setDismissText(gotIt)
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(getString(R.string.hlp_account_editor_intro))
-                .build());
+        sequence.add(findViewById(android.R.id.content), getString(R.string.hlp_account_editor_intro));
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(editTextName).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_name)
-                .build());
+        sequence.add(editTextName, R.string.hlp_account_editor_name);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(editTextType).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_type)
-                .build());
+        sequence.add(editTextType, R.string.hlp_account_editor_type);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(editTextCabbage).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_currency)
-                .build());
+        sequence.add(editTextCabbage, R.string.hlp_account_editor_currency);
 
         if (editTextEmitent.getVisibility() == View.VISIBLE) {
-            sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                    .setTarget(editTextEmitent).setDismissText(gotIt).withRectangleShape()
-                    .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                    .setContentText(R.string.hlp_account_editor_emitent)
-                    .build());
+            sequence.add(editTextEmitent, R.string.hlp_account_editor_emitent);
         }
 
         if (editTextLast4Digits.getVisibility() == View.VISIBLE) {
-            sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                    .setTarget(editTextLast4Digits).setDismissText(gotIt).withRectangleShape()
-                    .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                    .setContentText(R.string.hlp_account_editor_last4digits)
-                    .build());
+            sequence.add(editTextLast4Digits, R.string.hlp_account_editor_last4digits);
         }
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(amountEditorStartBalance).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_start_balance)
-                .build());
+        sequence.add(amountEditorStartBalance, R.string.hlp_account_editor_start_balance);
 
-        sequence.addSequenceItem(new MaterialShowcaseView.Builder(this)
-                .setTarget(checkboxAccountClosed).setDismissText(gotIt).withRectangleShape()
-                .setMaskColour(ContextCompat.getColor(this, R.color.ColorPrimaryTransparent))
-                .setContentText(R.string.hlp_account_editor_closed)
-                .build());
+        sequence.add(checkboxAccountClosed, R.string.hlp_account_editor_closed);
 
         sequence.start();
 

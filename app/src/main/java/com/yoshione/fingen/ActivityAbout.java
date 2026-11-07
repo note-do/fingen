@@ -1,13 +1,14 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityAboutBinding;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -17,7 +18,6 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 
 import java.lang.ref.WeakReference;
 
-import butterknife.BindView;
 import de.psdev.licensesdialog.LicensesDialog;
 
 public class ActivityAbout extends ToolbarActivity {
@@ -25,23 +25,25 @@ public class ActivityAbout extends ToolbarActivity {
     private static final int MSG_REBUILD_START = 0;
     private static final int MSG_REBUILD_ERROR = 1;
     private static final int MSG_REBUILD_SUCCESS = 2;
-    @BindView(R.id.textViewVersion)
+    private ActivityAboutBinding mBinding;
     TextView mTextViewVersion;
-    @BindView(R.id.textViewLicense)
     TextView mTextViewLicense;
-    @BindView(R.id.buttonLicenses)
     TextView mButtonLicenses;
-    @BindView(R.id.buttonChangeLog)
     TextView mButtonChangeLog;
-    @BindView(R.id.textViewSQLiteVersion)
     TextView mTextViewSQLiteVersion;
-    @BindView(R.id.buttonRebuildDB)
     Button mButtonRebuildDB;
     private UpdateUIHandler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mBinding = ActivityAboutBinding.bind(getContentRoot());
+        mTextViewVersion = mBinding.textViewVersion;
+        mTextViewLicense = mBinding.textViewLicense;
+        mButtonLicenses = mBinding.buttonLicenses;
+        mButtonChangeLog = mBinding.buttonChangeLog;
+        mTextViewSQLiteVersion = mBinding.textViewSQLiteVersion;
+        mButtonRebuildDB = mBinding.buttonRebuildDB;
 
         mHandler = new UpdateUIHandler(this);
         PackageInfo pInfo;
@@ -61,7 +63,7 @@ public class ActivityAbout extends ToolbarActivity {
                 new LicensesDialog.Builder(ActivityAbout.this)
                         .setNotices(R.raw.license)
                         .build()
-                        .showAppCompat();
+                        .show();
             }
         });
 

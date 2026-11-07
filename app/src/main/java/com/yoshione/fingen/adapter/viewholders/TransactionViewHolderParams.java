@@ -3,7 +3,7 @@ package com.yoshione.fingen.adapter.viewholders;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.util.LongSparseArray;
 import android.view.ContextThemeWrapper;
 

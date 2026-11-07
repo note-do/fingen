@@ -1,20 +1,12 @@
 package com.yoshione.fingen.utils;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 
-import com.github.angads25.filepicker.controller.DialogSelectionListener;
-import com.github.angads25.filepicker.model.DialogConfigs;
-import com.github.angads25.filepicker.model.DialogProperties;
-import com.github.angads25.filepicker.view.FilePickerDialog;
 import android.util.Log;
 
-import com.yoshione.fingen.R;
 import com.yoshione.fingen.interfaces.IOnUnzipComplete;
 import com.yoshione.fingen.utils.winzipaes.AesZipFileDecrypter;
 import com.yoshione.fingen.utils.winzipaes.AesZipFileEncrypter;
@@ -28,8 +20,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
@@ -47,50 +39,6 @@ import java.util.zip.ZipOutputStream;
 public class FileUtils {
     private static final String TAG = "FileUtils";
     private static final int BUFFER_SIZE = 1024;
-    private static final String FG_Ext_Storage_Folder = "Fingen";
-    private static final String FG_Backup_Folder = "Backup";
-
-    private static boolean isExtStorageEnabled() {
-        return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-    }
-
-    private static boolean checkFolder(String pathToFolder) {
-        boolean success;
-
-        if (isExtStorageEnabled()) {
-            File folder = new File(pathToFolder);
-
-            success = folder.exists() || folder.mkdir();
-        } else {
-            success = false;
-        }
-
-        return success;
-    }
-
-    private static String getExtFingenFolder() {
-        String path = Environment.getExternalStorageDirectory().toString() + "/" + FG_Ext_Storage_Folder + "/";
-
-        if (checkFolder(path)) {
-            return path;
-        } else {
-            return "";
-        }
-    }
-
-    public static String getExtFingenBackupFolder() {
-        String path = getExtFingenFolder();
-        if (!path.isEmpty()) {
-            path = path + FG_Backup_Folder + "/";
-            if (checkFolder(path)) {
-                return path;
-            } else {
-                return "";
-            }
-        } else {
-            return "";
-        }
-    }
 
     public static File zip(String[] files, String zipFile) throws IOException {
         BufferedInputStream origin;
@@ -132,51 +80,81 @@ public class FileUtils {
         return outFile;
     }
 
+    /**
+     * Extracts only the "fingen.db" entry to outputFile.
+     * @throws IOException if the archive is damaged or has no "fingen.db" entry
+     */
     public static void unzip(String zipFile, String outputFile) throws IOException {
+        boolean found = false;
         try {
             ZipInputStream zin = new ZipInputStream(new FileInputStream(zipFile));
             try {
                 ZipEntry ze;
                 while ((ze = zin.getNextEntry()) != null) {
-
-                    if (ze.isDirectory()) {
-                        File unzipFile = new File(outputFile);
-                        if(!unzipFile.isDirectory()) {
-                            unzipFile.mkdirs();
-                        }
+                    if (ze.isDirectory() || !"fingen.db".equals(ze.getName())) {
+                        continue;
                     }
-                    else {
-                        FileOutputStream fout = new FileOutputStream(outputFile, false);
-                        BufferedOutputStream bufout = new BufferedOutputStream(fout);
-                        try {
-
-                            byte[] buffer = new byte[2048];
-                            int read;
-                            while ((read = zin.read(buffer)) != -1) {
-                                bufout.write(buffer, 0, read);
-                            }
+                    try (BufferedOutputStream bufout = new BufferedOutputStream(new FileOutputStream(outputFile, false))) {
+                        byte[] buffer = new byte[2048];
+                        int read;
+                        while ((read = zin.read(buffer)) != -1) {
+                            bufout.write(buffer, 0, read);
                         }
-                        finally {
-                            zin.closeEntry();
-                            bufout.close();
-                            fout.close();
-                        }
+                    } finally {
+                        zin.closeEntry();
                     }
+                    found = true;
                 }
             }
             finally {
                 zin.close();
             }
         }
-        catch (Exception e) {
-            Log.e(TAG, "Unzip exception", e);
+        catch (ZipException e) {
+            // ZipException means "wrong password" for the caller, so rethrow as a plain error
+            throw new IOException("Unzip exception", e);
+        }
+        if (!found) {
+            new File(outputFile).delete();
+            throw new IOException("No fingen.db in archive");
         }
     }
 
     public static void unzipAndDecrypt(String zipFile, String location, String password, IOnUnzipComplete onCompleteListener) {
+        AesZipFileDecrypter decrypter;
         try {
-            AesZipFileDecrypter decrypter = new AesZipFileDecrypter(new File(zipFile), new AESDecrypterBC());
-            ExtZipEntry entry = decrypter.getEntry("fingen.db");
+            decrypter = new AesZipFileDecrypter(new File(zipFile), new AESDecrypterBC());
+        } catch (Exception e) {
+            // Not a zip archive (no central directory) is not a wrong password
+            Log.e(TAG, "Can't open archive", e);
+            onCompleteListener.onError();
+            return;
+        }
+        ExtZipEntry entry;
+        try {
+            entry = decrypter.getEntry("fingen.db");
+        } catch (Exception e) {
+            // Damaged central directory is not a wrong password
+            Log.e(TAG, "Can't read archive entry", e);
+            try {
+                decrypter.close();
+            } catch (IOException ce) {
+                Log.w(TAG, "Can't close archive", ce);
+            }
+            onCompleteListener.onError();
+            return;
+        }
+        if (entry == null) {
+            Log.e(TAG, "No fingen.db entry in archive");
+            try {
+                decrypter.close();
+            } catch (IOException ce) {
+                Log.w(TAG, "Can't close archive", ce);
+            }
+            onCompleteListener.onError();
+            return;
+        }
+        try {
             if (entry.isEncrypted()) {
                 decrypter.extractEntry(entry, new File(location + "/fingen.db.ex"), password);
             } else {
@@ -190,58 +168,101 @@ public class FileUtils {
             Log.e(TAG, "Unzip exception", e);
             onCompleteListener.onError();
             return;
+        } finally {
+            try {
+                decrypter.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Can't close archive", e);
+            }
         }
         onCompleteListener.onComplete();
     }
 
-    public static List<File> getListFiles(Context context, File parentDir, String ext) {
-        ArrayList<File> inFiles = new ArrayList<>();
-
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            File[] files = parentDir.listFiles();
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    inFiles.addAll(getListFiles(context, file, ext));
-                } else {
-                    if (file.getName().endsWith(ext)) {
-                        inFiles.add(file);
-                    }
+    /**
+     * Display name of a document (SAF Uri), or empty string if it can't be resolved.
+     */
+    public static String getDisplayName(Context context, Uri uri) {
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                String name = cursor.getString(0);
+                if (name != null) {
+                    return name;
                 }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "getDisplayName: " + e.getMessage());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
             }
         }
-        return inFiles;
+        String last = uri.getLastPathSegment();
+        return last == null ? "" : last;
     }
 
-    public static void SelectFileFromStorage(Activity activity, int selectionType, final IOnSelectFile onSelectFileListener) {
-        final DialogProperties properties=new DialogProperties();
-        properties.selection_mode = DialogConfigs.SINGLE_MODE;
-        properties.selection_type = selectionType;
-        properties.root = new File(DialogConfigs.DEFAULT_DIR);
-        properties.error_dir = new File(DialogConfigs.DEFAULT_DIR);
-        properties.offset = new File(DialogConfigs.DEFAULT_DIR);
-        properties.extensions = new String[] {"csv", "CSV"};
+    /**
+     * Copies content of a document (SAF Uri) to a new temporary file in the app cache dir.
+     * The caller must delete the file.
+     */
+    public static File copyUriToCache(Context context, Uri uri) throws IOException {
+        return copyUriToCache(context, uri, "csv_import", ".csv");
+    }
 
-        FilePickerDialog dialog=new FilePickerDialog(activity,properties);
-        String title = "";
-        title = selectionType == DialogConfigs.FILE_SELECT ? activity.getString(R.string.ttl_select_csv_file) : activity.getString(R.string.ttl_select_export_dir);
-        dialog.setTitle(title);
-        dialog.setPositiveBtnName("Select");
-        dialog.setNegativeBtnName("Cancel");
-
-        dialog.setDialogSelectionListener(new DialogSelectionListener() {
-            @Override
-            public void onSelectedFilePaths(String[] files) {
-                if (files.length == 1 && !files[0].isEmpty()) {
-                    onSelectFileListener.OnSelectFile(files[0]);
-                }
+    /**
+     * Same as {@link #copyUriToCache(Context, Uri)} with a custom temporary file name pattern.
+     */
+    public static File copyUriToCache(Context context, Uri uri, String prefix, String suffix) throws IOException {
+        File tmp = File.createTempFile(prefix, suffix, context.getCacheDir());
+        InputStream in = context.getContentResolver().openInputStream(uri);
+        if (in == null) {
+            tmp.delete();
+            throw new IOException("Can't open " + uri);
+        }
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(tmp);
+            copyStream(in, out);
+        } catch (IOException e) {
+            tmp.delete();
+            throw e;
+        } finally {
+            in.close();
+            if (out != null) {
+                out.close();
             }
-        });
-
-        dialog.show();
+        }
+        return tmp;
     }
 
-    public interface IOnSelectFile {
-        void OnSelectFile(String FileName);
+    /**
+     * Copies a local file to a document (SAF Uri).
+     */
+    public static void copyFileToUri(Context context, File file, Uri uri) throws IOException {
+        OutputStream out = context.getContentResolver().openOutputStream(uri);
+        if (out == null) {
+            throw new IOException("Can't open " + uri);
+        }
+        InputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            copyStream(in, out);
+        } finally {
+            out.close();
+            if (in != null) {
+                in.close();
+            }
+        }
+    }
+
+    private static void copyStream(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[8192];
+        int n;
+        while ((n = in.read(buffer)) != -1) {
+            out.write(buffer, 0, n);
+        }
+        out.flush();
     }
 
 }

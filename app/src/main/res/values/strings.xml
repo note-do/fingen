@@ -278,10 +278,6 @@
     <string name="ttl_email_body" formatted="false">Write your question</string>
 
     <!-- 1. General -->
-    <!-- Titles -->
-    <string name="ttl_billing_error" formatted="false">Server connection error (code %s)</string>
-
-    <!-- 1. General -->
     <!-- Messages -->
     <string name="msg_set_date" formatted="false">Specify date</string>
 
@@ -1232,10 +1228,27 @@
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
     <string name="ttl_last_backup_to_dropbox" formatted="false">Last Dropbox backup:</string>
+    <string name="msg_dropbox_upload_failed" formatted="false">Dropbox upload failed: %s</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_auto_backup_info" formatted="false">Backups are created automatically and stored to the memory card in Fingen/\Backup</string>
+    <string name="ttl_auto_backup_info" formatted="false">Backups are created automatically and stored in the selected folder</string>
+
+    <string name="ttl_backup_folder" formatted="false">Backup folder: %s</string>
+
+    <string name="ttl_backup_folder_not_selected" formatted="false">Backup folder is not selected</string>
+
+    <string name="act_select_backup_folder" formatted="false">Select folder</string>
+
+    <string name="act_restore_other_file" formatted="false">Other file…</string>
+
+    <string name="msg_backup_saved" formatted="false">Backup saved to the selected folder</string>
+
+    <string name="msg_backup_folder_unavailable" formatted="false">Backup folder is not available. Select the folder again.</string>
+
+    <string name="msg_backup_folder_selection_failed" formatted="false">Cannot get access to the selected folder</string>
+
+    <string name="msg_backup_folder_warning" formatted="false">Local backups are not being made: the backup folder is not selected or access to it is lost. Automatic Dropbox backup works as usual. Select a folder in the Backup and restore screen.</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
@@ -1243,15 +1256,7 @@
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_rationale" formatted="false">External storage access permission is needed to backup and restore DB. Click Next, and allow access to external storage.</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
     <string name="msg_permission_rw_external_storage_denied" formatted="false">External storage access permission denied</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_never_askagain" formatted="false">External storage access permission denied</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
@@ -1319,11 +1324,9 @@
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_select_csv_file" formatted="false">Select CSV file</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_select_export_dir" formatted="false">Select file or directory</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
@@ -1805,18 +1808,6 @@
     <!-- Titles -->
     <string name="ttl_no_chart_data" formatted="false">No chart data available</string>
 
-    <!-- 23. In-app purchases -->
-    <!-- Entities -->
-    <string name="ent_pro_features" formatted="false">PRO features</string>
-
-    <!-- 23. In-app purchases -->
-    <!-- Messages -->
-    <string name="msg_inapp_purchases_not_avaliable" formatted="false">PRO features are not avaliable</string>
-
-    <!-- 23. In-app purchases -->
-    <!-- Messages -->
-    <string name="msg_thanks_for_purchase_reports" formatted="false">Thank you for your purchase! To build graphical reports, go to the "Transactions" tab, pull up the bottom panel and click Charting. Reports are based on the transactions displayed in the list, taking into account all of the filters.</string>
-
     <!-- 24. Senders -->
     <!-- Entities -->
     <string name="ent_sender" formatted="false">SMS sender</string>
@@ -1900,10 +1891,6 @@
     <!-- 25. Sync -->
     <!-- Titles -->
     <string name="ttl_sync_iap_summary" formatted="false">Allows to keep records on different devices</string>
-
-    <!-- 25. Sync -->
-    <!-- Titles -->
-    <string name="ttl_purchased" formatted="false">Purchased</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->
@@ -2108,4 +2095,12 @@
     <!-- 28. EditorConstructor -->
     <!-- Actions -->
     <string name="act_tune_editor" formatted="false">Tune the editor</string>
+    <string name="pin_code_wrong" formatted="false">Wrong PIN</string>
+    <string name="pin_code_mismatch" formatted="false">PINs do not match</string>
+    <string name="msg_backup_password_lost" formatted="false">Backup password cannot be read on this device. Enter the backup password again, backups are paused until then</string>
+    <string name="msg_backup_password_not_saved" formatted="false">Backup password was not saved</string>
+    <string name="msg_backup_password_required" formatted="false">Enter a backup password first, then turn protection on</string>
+    <string name="msg_backup_password_warning" formatted="false">Backups are not being created: the backup password cannot be read on this device. Enter the password again in the Backup and restore screen.</string>
+    <string name="msg_backup_folder_do_not_remind" formatted="false">Do not remind me</string>
+    <string name="msg_pin_reset_notice" formatted="false">PIN protection was reset after the app update. Turn it on again in Settings.</string>
 </resources>

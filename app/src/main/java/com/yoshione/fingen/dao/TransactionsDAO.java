@@ -4,8 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.support.annotation.NonNull;
-import android.support.v4.util.LongSparseArray;
+import androidx.annotation.NonNull;
+import androidx.collection.LongSparseArray;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -40,7 +40,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import io.reactivex.Single;
+import io.reactivex.rxjava3.core.Single;
 
 import static com.yoshione.fingen.DBHelper.C_ID;
 import static com.yoshione.fingen.DBHelper.T_LOG_TRANSACTIONS;

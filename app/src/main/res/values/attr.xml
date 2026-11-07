@@ -3,6 +3,7 @@
     <attr name="budgetPositiveColor" format="color" />
     <attr name="budgetNegativeColor" format="color" />
     <attr name="listItemBackground" format="color" />
+    <attr name="barBackground" format="color" />
     <attr name="listDividerBackground" format="color" />
     <attr name="windowBackground" format="color" />
     <attr name="windowBackgroundInverse" format="color" />

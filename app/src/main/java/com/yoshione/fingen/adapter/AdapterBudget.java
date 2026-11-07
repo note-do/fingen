@@ -3,8 +3,8 @@ package com.yoshione.fingen.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,15 +16,13 @@ import android.util.Log;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.classes.SumsByCabbage;
 import com.yoshione.fingen.dao.CabbagesDAO;
+import com.yoshione.fingen.databinding.ListItemBudgetBinding;
 import com.yoshione.fingen.model.Category;
 import com.yoshione.fingen.utils.CNode;
 import com.yoshione.fingen.utils.CabbageFormatter;
 import com.yoshione.fingen.utils.ScreenUtils;
 
 import java.math.BigDecimal;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by slv on 07.03.2016.
@@ -269,14 +267,14 @@ public class AdapterBudget extends RecyclerView.Adapter {
     }
 
     static class BudgetViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.textViewModelName)
         TextView textViewCategoryName;
-        @BindView(R.id.container)
         LinearLayout container;
 
         BudgetViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemBudgetBinding binding = ListItemBudgetBinding.bind(view);
+            textViewCategoryName = binding.textViewModelName;
+            container = binding.container;
         }
     }
 

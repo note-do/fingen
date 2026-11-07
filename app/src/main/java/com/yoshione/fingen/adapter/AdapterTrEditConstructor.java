@@ -1,9 +1,9 @@
 package com.yoshione.fingen.adapter;
 
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.MotionEventCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,14 +14,13 @@ import android.widget.TextView;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.adapter.helper.ItemTouchHelperAdapter;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
+import com.yoshione.fingen.databinding.ListItemTreditBinding;
 import com.yoshione.fingen.model.TrEditItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import eu.davidea.flipview.FlipView;
+import com.yoshione.fingen.widgets.FlipView;
 
 public class AdapterTrEditConstructor extends RecyclerView.Adapter implements ItemTouchHelperAdapter {
     private final OnStartDragListener mDragStartListener;
@@ -118,20 +117,20 @@ public class AdapterTrEditConstructor extends RecyclerView.Adapter implements It
     }
 
     static class ViewHolderTabOrder extends RecyclerView.ViewHolder {
-        @BindView(R.id.drag_handle)
         ImageView dragHandle;
-        @BindView(R.id.textViewModelName)
         TextView textViewModelName;
-        @BindView(R.id.container)
         ConstraintLayout container;
-        @BindView(R.id.flip_view_visible)
         FlipView mFlipViewVisible;
-        @BindView(R.id.flip_view_hide_under_more)
         FlipView mflipViewHideUnderMore;
 
         ViewHolderTabOrder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemTreditBinding binding = ListItemTreditBinding.bind(view);
+            dragHandle = binding.dragHandle;
+            textViewModelName = binding.textViewModelName;
+            container = binding.container;
+            mFlipViewVisible = binding.flipViewVisible;
+            mflipViewHideUnderMore = binding.flipViewHideUnderMore;
         }
     }
 

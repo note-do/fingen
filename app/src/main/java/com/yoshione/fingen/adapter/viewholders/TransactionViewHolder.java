@@ -1,8 +1,8 @@
 package com.yoshione.fingen.adapter.viewholders;
 
 import android.graphics.Color;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.widget.RecyclerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.yoshione.fingen.R;
+import com.yoshione.fingen.databinding.ListItemTransactions2Binding;
 import com.yoshione.fingen.interfaces.ITransactionClickListener;
 import com.yoshione.fingen.interfaces.IUnsubscribeOnDestroy;
 import com.yoshione.fingen.model.Account;
@@ -31,45 +32,27 @@ import com.yoshione.fingen.utils.CabbageFormatter;
 
 import java.math.BigDecimal;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import eu.davidea.flipview.FlipView;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import com.yoshione.fingen.widgets.FlipView;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class TransactionViewHolder extends RecyclerView.ViewHolder {
 
-    @BindView(R.id.textViewPayee)
     TextView textViewPayee;
-    @BindView(R.id.textViewAmount)
     TextView textViewAmount;
-    @BindView(R.id.textViewDate)
     TextView textViewDate;
-    @BindView(R.id.textViewAccount)
     TextView textViewAccount;
-    @BindView(R.id.textViewAccountBalance)
     TextView textViewAccountBalance;
-    @BindView(R.id.textViewDestAccountBalance)
     TextView textViewDestAccountBalance;
-    @BindView(R.id.layoutTagView)
     TagView mTagView;
-    @BindView(R.id.imageViewAutoCreated)
     ImageView imageViewAutoCreated;
-    @BindView(R.id.imageViewHasLocation)
     ImageView imageViewHasLocation;
-    @BindView(R.id.imageViewHasQR)
     ImageView imageViewHasQR;
-    @BindView(R.id.imageViewHasProducts)
     ImageView imageViewHasProducts;
-    @BindView(R.id.imageViewChevronRight)
     ImageView imageViewChevronRight;
-    @BindView(R.id.flipViewIcon)
     FlipView flipViewIcon;
-    @BindView(R.id.textViewComment)
     TextView textViewComment;
-    @BindView(R.id.spaceBottom)
     FrameLayout spaceBottom;
-    @BindView(R.id.imageViewDestAccount)
     ImageView mImageViewDestAccount;
 
     private TransactionViewHolderParams mParams;
@@ -80,7 +63,23 @@ public class TransactionViewHolder extends RecyclerView.ViewHolder {
 
     public TransactionViewHolder(TransactionViewHolderParams params, ITransactionClickListener transactionClickListener, IUnsubscribeOnDestroy unsubscriber, View v) {
         super(v);
-        ButterKnife.bind(this, v);
+        ListItemTransactions2Binding binding = ListItemTransactions2Binding.bind(v);
+        textViewPayee = binding.textViewPayee;
+        textViewAmount = binding.textViewAmount;
+        textViewDate = binding.textViewDate;
+        textViewAccount = binding.textViewAccount;
+        textViewAccountBalance = binding.textViewAccountBalance;
+        textViewDestAccountBalance = binding.textViewDestAccountBalance;
+        mTagView = binding.layoutTagView;
+        imageViewAutoCreated = binding.imageViewAutoCreated;
+        imageViewHasLocation = binding.imageViewHasLocation;
+        imageViewHasQR = binding.imageViewHasQR;
+        imageViewHasProducts = binding.imageViewHasProducts;
+        imageViewChevronRight = binding.imageViewChevronRight;
+        flipViewIcon = binding.flipViewIcon;
+        textViewComment = binding.textViewComment;
+        spaceBottom = binding.spaceBottom;
+        mImageViewDestAccount = binding.imageViewDestAccount;
         mParams = params;
         mTransactionClickListener = transactionClickListener;
         mUnsubscriber = unsubscriber;

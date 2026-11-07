@@ -1,7 +1,7 @@
 package com.yoshione.fingen.adapter;
 
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.widget.RecyclerView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,15 +9,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.yoshione.fingen.R;
+import com.yoshione.fingen.databinding.ListItemAccountSetBinding;
 import com.yoshione.fingen.interfaces.IAdapterEventsListener;
 import com.yoshione.fingen.model.AccountsSet;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import eu.davidea.flipview.FlipView;
+import com.yoshione.fingen.widgets.FlipView;
 
 /**
  * Created by slv on 01.12.2016.
@@ -95,16 +94,16 @@ public class AdapterAccountsSets extends RecyclerView.Adapter {
     }
 
     class AccountsSetViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.radioButton)
         FlipView dragHandle;
-        @BindView(R.id.textViewModelName)
         TextView textViewModelName;
-        @BindView(R.id.container)
         ConstraintLayout container;
 
         AccountsSetViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ListItemAccountSetBinding binding = ListItemAccountSetBinding.bind(itemView);
+            dragHandle = binding.radioButton;
+            textViewModelName = binding.textViewModelName;
+            container = binding.container;
         }
     }
 }

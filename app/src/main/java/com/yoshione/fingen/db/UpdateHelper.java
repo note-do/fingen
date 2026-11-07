@@ -7,7 +7,6 @@ import android.util.Pair;
 
 import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.classes.TableInfo;
-import com.yoshione.fingen.dao.SendersDAO;
 import com.yoshione.fingen.utils.ColorUtils;
 import com.yoshione.fingen.utils.DateTimeFormatter;
 import com.yoshione.fingen.utils.Translit;
@@ -16,7 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.requery.android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase;
 
 /**
  * Created by slv on 28.03.2017.
@@ -381,19 +380,19 @@ public class UpdateHelper {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
                         ContentValues values = new ContentValues();
-                        values.put("Name", cursor.getString(cursor.getColumnIndex("Object")));
-                        phoneNo = cursor.getString(cursor.getColumnIndex("Pattern"));
+                        values.put("Name", cursor.getString(cursor.getColumnIndexOrThrow("Object")));
+                        phoneNo = cursor.getString(cursor.getColumnIndexOrThrow("Pattern"));
                         values.put("PhoneNo", phoneNo);
                         values.put("AmountPos", 0);
-                        values.put("BalcancePos", 1);
+                        values.put("BalancePos", 1);
                         values.put("DateFormat", "");
                         values.put("LeadingCurrencySymbol", false);
                         values.put("IsActive", 1);
 
-                        try {
-                            senders.add(new Pair<>(phoneNo, SendersDAO.getInstance(context).createItem(values, -1, true)));
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        //Пишем напрямую в той же транзакции миграции: SendersDAO во время апгрейда ждет конца миграции
+                        long senderId = db.insert("ref_Senders", null, values);
+                        if (senderId >= 0) {
+                            senders.add(new Pair<>(phoneNo, senderId));
                         }
 
                         cursor.moveToNext();
@@ -414,16 +413,39 @@ public class UpdateHelper {
             try {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
-                        ContentValues values = new ContentValues();
-                        for (Pair<String, Long> sender : senders) {
-                            if (sender.first.toLowerCase().equals(cursor.getString(cursor.getColumnIndex("Sender")).toLowerCase())) {
-                                values.put("_id", cursor.getLong(cursor.getColumnIndex("_id")));
-                                values.put("DateTime", cursor.getString(cursor.getColumnIndex("DateTime")));
-                                values.put("Sender", sender.second);
-                                values.put("Body", cursor.getString(cursor.getColumnIndex("Body")));
-                                db.insert("tempsms", null, values);
+                        String smsSender = cursor.getString(cursor.getColumnIndexOrThrow("Sender"));
+                        long senderId = 0;
+                        if (smsSender != null && !smsSender.trim().isEmpty()) {
+                            String key = smsSender.trim().toLowerCase();
+                            Long found = null;
+                            for (Pair<String, Long> sender : senders) {
+                                if (sender.first != null && sender.first.trim().toLowerCase().equals(key)) {
+                                    found = sender.second;
+                                    break;
+                                }
+                            }
+                            if (found == null) {
+                                //Отправитель без маркера: создаем запись, чтобы не терять SMS
+                                found = insertSmsSender(db, smsSender, smsSender);
+                                if (found == null) {
+                                    found = insertSmsSender(db, smsSender + " (SMS)", smsSender);
+                                }
+                                if (found != null) {
+                                    senders.add(new Pair<>(smsSender, found));
+                                }
+                            }
+                            if (found != null) {
+                                senderId = found;
                             }
                         }
+                        ContentValues values = new ContentValues();
+                        values.put("_id", cursor.getLong(cursor.getColumnIndexOrThrow("_id")));
+                        String dateTime = cursor.getString(cursor.getColumnIndexOrThrow("DateTime"));
+                        values.put("DateTime", dateTime == null ? "" : dateTime);
+                        values.put("Sender", senderId);
+                        String body = cursor.getString(cursor.getColumnIndexOrThrow("Body"));
+                        values.put("Body", body == null ? "" : body);
+                        db.insert("tempsms", null, values);
                         cursor.moveToNext();
                     }
                 }
@@ -433,6 +455,20 @@ public class UpdateHelper {
         }
         db.execSQL("DROP TABLE log_Incoming_SMS");
         db.execSQL("ALTER TABLE tempsms RENAME TO log_Incoming_SMS");
+    }
+
+    /** Inserts a sender with default parser settings, returns its id or null if Name or PhoneNo is already used. */
+    private static Long insertSmsSender(SQLiteDatabase db, String name, String phoneNo) {
+        ContentValues values = new ContentValues();
+        values.put("Name", name);
+        values.put("PhoneNo", phoneNo);
+        values.put("AmountPos", 0);
+        values.put("BalancePos", 1);
+        values.put("DateFormat", "");
+        values.put("LeadingCurrencySymbol", false);
+        values.put("isActive", 1);
+        long id = db.insert("ref_Senders", null, values);
+        return id >= 0 ? id : null;
     }
 
     public static void update18(SQLiteDatabase db, Context context) {
@@ -452,36 +488,36 @@ public class UpdateHelper {
                     ContentValues values = new ContentValues();
                     while (!cursor.isAfterLast()) {
                         values.clear();
-                        values.put("DateTime", dtf.parseDateTimeSqlString(cursor.getString(cursor.getColumnIndex("DateTime"))).getTime());
-                        values.put("SrcAccount", cursor.getLong(cursor.getColumnIndex("SrcAccount")));
-                        values.put("Payee", cursor.getLong(cursor.getColumnIndex("Payee")));
-                        values.put("Category", cursor.getLong(cursor.getColumnIndex("Category")));
-                        values.put("Amount", cursor.getDouble(cursor.getColumnIndex("Amount")));
-                        values.put("Project", cursor.getLong(cursor.getColumnIndex("Project")));
-                        values.put("Department", cursor.getLong(cursor.getColumnIndex("Department")));
-                        values.put("Location", cursor.getLong(cursor.getColumnIndex("Location")));
-                        values.put("Comment", cursor.getString(cursor.getColumnIndex("Comment")));
-                        values.put("File", cursor.getString(cursor.getColumnIndex("File")));
-                        values.put("DestAccount", cursor.getLong(cursor.getColumnIndex("DestAccount")));
-                        values.put("ExchangeRate", cursor.getDouble(cursor.getColumnIndex("ExchangeRate")));
-                        values.put("AutoCreated", cursor.getInt(cursor.getColumnIndex("AutoCreated")) == 1);
-                        if (!cursor.isNull(cursor.getColumnIndex("Lat"))) {
-                            values.put("Lat", cursor.getDouble(cursor.getColumnIndex("Lat")));
+                        values.put("DateTime", dtf.parseDateTimeSqlString(cursor.getString(cursor.getColumnIndexOrThrow("DateTime"))).getTime());
+                        values.put("SrcAccount", cursor.getLong(cursor.getColumnIndexOrThrow("SrcAccount")));
+                        values.put("Payee", cursor.getLong(cursor.getColumnIndexOrThrow("Payee")));
+                        values.put("Category", cursor.getLong(cursor.getColumnIndexOrThrow("Category")));
+                        values.put("Amount", cursor.getDouble(cursor.getColumnIndexOrThrow("Amount")));
+                        values.put("Project", cursor.getLong(cursor.getColumnIndexOrThrow("Project")));
+                        values.put("Department", cursor.getLong(cursor.getColumnIndexOrThrow("Department")));
+                        values.put("Location", cursor.getLong(cursor.getColumnIndexOrThrow("Location")));
+                        values.put("Comment", cursor.getString(cursor.getColumnIndexOrThrow("Comment")));
+                        values.put("File", cursor.getString(cursor.getColumnIndexOrThrow("File")));
+                        values.put("DestAccount", cursor.getLong(cursor.getColumnIndexOrThrow("DestAccount")));
+                        values.put("ExchangeRate", cursor.getDouble(cursor.getColumnIndexOrThrow("ExchangeRate")));
+                        values.put("AutoCreated", cursor.getInt(cursor.getColumnIndexOrThrow("AutoCreated")) == 1);
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow("Lat"))) {
+                            values.put("Lat", cursor.getDouble(cursor.getColumnIndexOrThrow("Lat")));
                         } else {
                             values.put("Lat", 0);
                         }
-                        if (!cursor.isNull(cursor.getColumnIndex("Lon"))) {
-                            values.put("Lon", cursor.getDouble(cursor.getColumnIndex("Lon")));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow("Lon"))) {
+                            values.put("Lon", cursor.getDouble(cursor.getColumnIndexOrThrow("Lon")));
                         } else {
                             values.put("Lon", 0);
                         }
-                        if (!cursor.isNull(cursor.getColumnIndex("Accuracy"))) {
-                            values.put("Accuracy", cursor.getInt(cursor.getColumnIndex("Accuracy")));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow("Accuracy"))) {
+                            values.put("Accuracy", cursor.getInt(cursor.getColumnIndexOrThrow("Accuracy")));
                         } else {
                             values.put("Accuracy", -1);
                         }
-                        if (!cursor.isNull(cursor.getColumnIndex("SimpleDebt"))) {
-                            values.put("SimpleDebt", cursor.getLong(cursor.getColumnIndex("SimpleDebt")));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow("SimpleDebt"))) {
+                            values.put("SimpleDebt", cursor.getLong(cursor.getColumnIndexOrThrow("SimpleDebt")));
                         } else {
                             values.put("SimpleDebt", -1);
                         }
@@ -637,7 +673,7 @@ public class UpdateHelper {
             try {
                 if (cursorDebts.moveToFirst()) {
                     while (!cursorDebts.isAfterLast()) {
-                        debtIDs.add(cursorDebts.getLong(cursorDebts.getColumnIndex("_id")));
+                        debtIDs.add(cursorDebts.getLong(cursorDebts.getColumnIndexOrThrow("_id")));
                         cursorDebts.moveToNext();
                     }
                 }
@@ -735,7 +771,8 @@ public class UpdateHelper {
             if (cursor.moveToFirst()) {
                 while (!cursor.isAfterLast()) {
                     cv.clear();
-                    cv.put("SearchString", Translit.toTranslit(cursor.getString(1).toLowerCase()));
+                    String comment = cursor.getString(1);
+                    cv.put("SearchString", Translit.toTranslit(comment == null ? "" : comment.toLowerCase()));
                     db.update(tableName, cv, "_id = " + cursor.getString(0), null);
                     cursor.moveToNext();
                 }

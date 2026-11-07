@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
@@ -8,21 +8,17 @@
     android:layout_height="wrap_content"
     android:background="?listItemBackground">
 
-    <eu.davidea.flipview.FlipView
+    <com.yoshione.fingen.widgets.FlipView
         android:id="@+id/drag_handle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:inAnimation="@anim/grow_from_middle_x_axis"
-        android:outAnimation="@anim/grow_from_middle_x_axis"
         android:padding="16dp"
-        app:checked="false"
-        app:enableInitialAnimation="false"
-        app:frontBackgroundColor="@android:color/transparent"
         app:frontImage="@drawable/ic_drag"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:rearBackgroundColor="@android:color/transparent" />
+        />
 
     <ImageView
         android:id="@+id/color_tag"
@@ -74,4 +70,4 @@
         tools:ignore="ContentDescription"
         tools:src="@drawable/ic_expand_more" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

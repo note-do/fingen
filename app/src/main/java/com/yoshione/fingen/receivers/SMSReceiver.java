@@ -10,12 +10,9 @@ import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.telephony.SmsMessage;
 
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.answers.Answers;
-import com.crashlytics.android.answers.CustomEvent;
 import com.yoshione.fingen.ActivityEditTransaction;
 import com.yoshione.fingen.ActivityMain;
 import com.yoshione.fingen.BuildConfig;
@@ -42,8 +39,6 @@ import com.yoshione.fingen.utils.SmsParser;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import io.fabric.sdk.android.Fabric;
-
 /**
  * Created by slv on 29.10.2015.
  *
@@ -61,11 +56,6 @@ public class SMSReceiver extends BroadcastReceiver {
 
         if (action != null && action.equals(ACTION_SMS_RECEIVED)) {
 
-            if (!BuildConfig.DEBUG) {
-                if (!Fabric.isInitialized()) {
-                    Fabric.with(context, new Crashlytics());
-                }
-            }
             String address = null;
             StringBuilder str = new StringBuilder();
             SmsMessage[] msgs = getMessagesFromIntent(intent);
@@ -93,11 +83,6 @@ public class SMSReceiver extends BroadcastReceiver {
             Sender sender = SendersDAO.getInstance(context).getSenderByPhoneNo(address);
 
             if (sender.getID() >= 0) {
-                if (!BuildConfig.DEBUG) {
-                    if (!Fabric.isInitialized()) {
-                        Answers.getInstance().logCustom(new CustomEvent("SMS received"));
-                    }
-                }
                 Sms sms = new Sms(-1, new Date(), sender.getID(), str.toString());
                 parseSMS(context, sms);
             }
@@ -119,15 +104,11 @@ public class SMSReceiver extends BroadcastReceiver {
                         return;
                     }
 
-                    if (!BuildConfig.DEBUG) {
-                        Answers.getInstance().logCustom(new CustomEvent("Transaction created from SMS"));
-                    }
-
                     Intent notificationIntent = new Intent(context, ActivityMain.class);
                     notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     notificationIntent.putExtra("action", ActivityMain.ACTION_OPEN_TRANSACTIONS_LIST);
                     PendingIntent contentIntent = PendingIntent.getActivity(context,
-                            0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                            0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                     Resources res = context.getResources();
                     Notification.Builder builder = NotificationHelper.getInstance(context).getNotification();
@@ -148,22 +129,11 @@ public class SMSReceiver extends BroadcastReceiver {
                         intentEdit.putExtra("transaction", transaction);
                         intentEdit.putExtra("EXIT", true);
                         PendingIntent pIntentEdit = PendingIntent.getActivity(context,
-                                RequestCodes.REQUEST_CODE_EDIT_TRANSACTION_FROM_NOTIFYCATION, intentEdit, PendingIntent.FLAG_CANCEL_CURRENT);
+                                RequestCodes.REQUEST_CODE_EDIT_TRANSACTION_FROM_NOTIFYCATION, intentEdit, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                         builder//.setContentTitle(res.getString(R.string.notif_ticker_transaction_auto_created))// Заголовок уведомления
                                 .setContentText(TransactionManager.transactionToString(transaction, context))// Текст уведомления
                                 .addAction(android.R.drawable.ic_menu_edit, context.getString(R.string.act_edit), pIntentEdit);
-
-                        if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(FgConst.PREF_ENABLE_SCAN_QR, true)) {
-                            Intent intentScanQR = new Intent(context, ActivityEditTransaction.class);
-                            intentScanQR.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            intentScanQR.putExtra("transaction", transaction);
-                            intentScanQR.putExtra("scan_qr", true);
-                            intentScanQR.putExtra("EXIT", true);
-                            PendingIntent pIntentScanQR = PendingIntent.getActivity(context,
-                                    RequestCodes.REQUEST_CODE_SCAN_QR, intentScanQR, PendingIntent.FLAG_CANCEL_CURRENT);
-                            builder.addAction(R.drawable.ic_scan_qr_gray, context.getString(R.string.ttl_scan_qr), pIntentScanQR);
-                        }
                     } else {
                         builder.setContentText(res.getString(R.string.notif_count_of_new_transactions))
                                 .setNumber(notificationCount + 1); // Текст уведомления
@@ -193,7 +163,7 @@ public class SMSReceiver extends BroadcastReceiver {
 
                         /*Pending intent*/
                         contentIntent = PendingIntent.getActivity(context,
-                                RequestCodes.REQUEST_CODE_EDIT_TRANSACTION, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                                RequestCodes.REQUEST_CODE_EDIT_TRANSACTION, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
                         /*Строим уведомление*/
                         String s = res.getString(R.string.notif_create_correcting_transaction);

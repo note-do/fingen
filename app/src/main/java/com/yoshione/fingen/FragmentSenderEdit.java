@@ -4,6 +4,7 @@
 
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.ContentResolver;
@@ -16,11 +17,11 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,16 +34,13 @@ import android.widget.NumberPicker;
 import android.widget.Toast;
 
 import com.yoshione.fingen.dao.SendersDAO;
+import com.yoshione.fingen.databinding.FragmentSenderEditBinding;
 import com.yoshione.fingen.model.Sender;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import butterknife.Unbinder;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -57,18 +55,12 @@ import permissions.dispatcher.RuntimePermissions;
 @RuntimePermissions
 public class FragmentSenderEdit extends DialogFragment {
 
-    Unbinder unbinder;
-    @BindView(R.id.editTextName)
+    private FragmentSenderEditBinding mBinding;
     EditText mEditTextName;
-    @BindView(R.id.editTextPhoneNo)
     EditText mEditTextPhoneNo;
-    @BindView(R.id.editTextAmountPos)
     EditText mEditTextAmountPos;
-    @BindView(R.id.editTextBalancePos)
     EditText mEditTextBalancePos;
-    @BindView(R.id.imageButtonSelectSender)
     ImageButton mImageButtonSelectSender;
-    @BindView(R.id.checkBoxAddCreditLimitToBalance)
     CheckBox mCheckBoxAddCreditLimitToBalance;
     private Sender mSender;
 
@@ -91,7 +83,17 @@ public class FragmentSenderEdit extends DialogFragment {
         String title = getArguments().getString("title");
         mSender = getArguments().getParcelable("sender");
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_sender_edit, null);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentSenderEditBinding.bind(view);
+        mEditTextName = mBinding.editTextName;
+        mEditTextPhoneNo = mBinding.editTextPhoneNo;
+        mEditTextAmountPos = mBinding.editTextAmountPos;
+        mEditTextBalancePos = mBinding.editTextBalancePos;
+        mImageButtonSelectSender = mBinding.imageButtonSelectSender;
+        mCheckBoxAddCreditLimitToBalance = mBinding.checkBoxAddCreditLimitToBalance;
+        mBinding.editTextAmountPos.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
+        mBinding.editTextBalancePos.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
+        mBinding.imageButtonSelectSender.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
+        mBinding.checkBoxAddCreditLimitToBalance.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
 
         if (mSender != null) {
             mEditTextName.setText(mSender.getName());
@@ -151,7 +153,6 @@ public class FragmentSenderEdit extends DialogFragment {
     }
 
     @SuppressWarnings("ResourceType")
-    @OnClick({R.id.editTextAmountPos, R.id.editTextBalancePos, R.id.imageButtonSelectSender, R.id.checkBoxAddCreditLimitToBalance})
     public void onClick(View view) {
         int[] attrs = {android.R.attr.background, android.R.attr.textColorPrimary};
         TypedArray ta = getActivity().obtainStyledAttributes(getThemeId(), attrs);
@@ -231,7 +232,7 @@ public class FragmentSenderEdit extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     @NeedsPermission(Manifest.permission.READ_SMS)

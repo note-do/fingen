@@ -8,37 +8,36 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 
 //import com.arellomobile.mvp.MvpDelegate;
-import com.github.omadahealth.lollipin.lib.PinCompatActivity;
 import com.yoshione.fingen.ActivityMain;
 import com.yoshione.fingen.BuildConfig;
 import com.yoshione.fingen.FGApplication;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.interfaces.IUnsubscribeOnDestroy;
 import com.yoshione.fingen.utils.ViewServer;
+import com.yoshione.fingen.utils.WindowInsetsHelper;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
  * Created by slv on 18.11.2015.
  *
  */
-public abstract class ToolbarActivity extends PinCompatActivity implements IUnsubscribeOnDestroy {
+public abstract class ToolbarActivity extends AppCompatActivity implements IUnsubscribeOnDestroy {
 //    private MvpDelegate<? extends ToolbarActivity> mMvpDelegate;
 
     protected final String TAG = this.getClass().getName();
-    @BindView(R.id.toolbar)
     public Toolbar toolbar;
     private CompositeDisposable mCompositeDisposable;
 
@@ -56,8 +55,10 @@ public abstract class ToolbarActivity extends PinCompatActivity implements IUnsu
 
 //        getMvpDelegate().onCreate(savedInstanceState);
 
+        WindowInsetsHelper.enable(this);
         setContentView(getLayoutResourceId());
-        ButterKnife.bind(this);
+        toolbar = findViewById(R.id.toolbar);
+        setupWindowInsets();
         setSupportActionBar(toolbar);
 
         FGApplication.getAppComponent().inject(this);
@@ -73,11 +74,19 @@ public abstract class ToolbarActivity extends PinCompatActivity implements IUnsu
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ToolbarActivity.this.onBackPressed();
+                getOnBackPressedDispatcher().onBackPressed();
             }
         });
 
         ViewServer.get(this).addWindow(this);
+    }
+
+    /**
+     * Edge-to-edge: by default AppBar gets the top inset, root gets the rest.
+     * Screens with their own structure (ActivityMain) override this method.
+     */
+    protected void setupWindowInsets() {
+        WindowInsetsHelper.applyToRoot(getContentRoot(), toolbar != null ? (View) toolbar.getParent() : null);
     }
 
     @Override
@@ -129,6 +138,13 @@ public abstract class ToolbarActivity extends PinCompatActivity implements IUnsu
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    /**
+     * Root view of the layout set by getLayoutResourceId(), used to bind ViewBinding.
+     */
+    protected View getContentRoot() {
+        return ((ViewGroup) findViewById(android.R.id.content)).getChildAt(0);
     }
 
     protected abstract int getLayoutResourceId();

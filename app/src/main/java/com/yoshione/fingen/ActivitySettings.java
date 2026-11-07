@@ -4,32 +4,29 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.widget.TextViewCompat;
-import android.support.v7.app.ActionBar;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceFragmentCompat;
-import android.support.v7.preference.PreferenceScreen;
-import android.support.v7.widget.AppCompatTextView;
-import android.support.v7.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+import androidx.core.widget.TextViewCompat;
+import androidx.appcompat.app.ActionBar;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
+import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import com.yoshione.fingen.utils.WindowInsetsHelper;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
-import com.github.omadahealth.lollipin.lib.PinCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import com.yoshione.fingen.utils.IconGenerator;
 
-import net.xpece.android.support.preference.PreferenceScreenNavigationStrategy;
-
-//import net.xpece.android.support.preference.Fixes;
-
-public class ActivitySettings extends PinCompatActivity  implements
+public class ActivitySettings extends AppCompatActivity implements
         PreferenceFragmentCompat.OnPreferenceStartScreenCallback,
         PreferenceFragmentCompat.OnPreferenceDisplayDialogCallback,
-        FragmentManager.OnBackStackChangedListener,
-        PreferenceScreenNavigationStrategy.ReplaceFragment.Callbacks  {
+        FragmentManager.OnBackStackChangedListener {
 
     private Toolbar mToolbar;
     private TextSwitcher mTitleSwitcher;
@@ -37,8 +34,6 @@ public class ActivitySettings extends PinCompatActivity  implements
     private CharSequence mTitle;
 
     private FragmentSettings mSettingsFragment;
-
-    private PreferenceScreenNavigationStrategy.ReplaceFragment mReplaceFragmentStrategy;
 
     @SuppressLint("PrivateResource")
     @Override
@@ -49,9 +44,10 @@ public class ActivitySettings extends PinCompatActivity  implements
             default: setTheme(R.style.AppThemeLight); break;
         }
         super.onCreate(savedInstanceState);
+        WindowInsetsHelper.enable(this);
         setContentView(R.layout.activity_settings);
-
-        mReplaceFragmentStrategy = new PreferenceScreenNavigationStrategy.ReplaceFragment(this, R.anim.abc_fade_in, R.anim.abc_fade_out, R.anim.abc_fade_in, R.anim.abc_fade_out);
+        WindowInsetsHelper.applyToRoot(((ViewGroup) findViewById(android.R.id.content)).getChildAt(0),
+                (View) findViewById(R.id.toolbar).getParent());
 
         if (savedInstanceState == null) {
             mSettingsFragment = FragmentSettings.newInstance(null);
@@ -98,12 +94,12 @@ public class ActivitySettings extends PinCompatActivity  implements
         mTitleSwitcher.setInAnimation(this, R.anim.abc_fade_in);
         mTitleSwitcher.setOutAnimation(this, R.anim.abc_fade_out);
 
-        android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
     }
 
     @Override
     protected void onDestroy() {
-        android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         super.onDestroy();
     }
 
@@ -141,7 +137,7 @@ public class ActivitySettings extends PinCompatActivity  implements
         int id = item.getItemId();
         switch (id) {
             case android.R.id.home: {
-                onBackPressed();
+                getOnBackPressedDispatcher().onBackPressed();
                 return true;
             }
 //            case R.id.github: {
@@ -160,19 +156,17 @@ public class ActivitySettings extends PinCompatActivity  implements
 
     @Override
     public boolean onPreferenceStartScreen(final PreferenceFragmentCompat preferenceFragmentCompat, final PreferenceScreen preferenceScreen) {
-        mReplaceFragmentStrategy.onPreferenceStartScreen(getSupportFragmentManager(), preferenceFragmentCompat, preferenceScreen);
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(R.anim.abc_fade_in, R.anim.abc_fade_out, R.anim.abc_fade_in, R.anim.abc_fade_out)
+                .replace(R.id.content, FragmentSettings.newInstance(preferenceScreen.getKey()), preferenceScreen.getKey())
+                .addToBackStack(preferenceScreen.getKey())
+                .commit();
         return true;
-//        return false; // Turn off to try ReplaceRoot strategy.
     }
 
     @Override
     public void onBackStackChanged() {
         mSettingsFragment = (FragmentSettings) getSupportFragmentManager().findFragmentByTag("Settings");
-    }
-
-    @Override
-    public PreferenceFragmentCompat onBuildPreferenceFragment(final String rootKey) {
-        return FragmentSettings.newInstance(rootKey);
     }
 
     @Override

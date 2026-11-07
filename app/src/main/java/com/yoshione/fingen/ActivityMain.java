@@ -1,5 +1,6 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.databinding.ActivityMainBinding;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
@@ -8,53 +9,59 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import com.google.android.material.appbar.AppBarLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import com.google.android.material.tabs.TabLayout;
+import androidx.activity.OnBackPressedCallback;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.ViewPager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.ContextThemeWrapper;
+import androidx.appcompat.widget.Toolbar;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
+import com.google.android.material.badge.ExperimentalBadgeUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import com.yoshione.fingen.utils.WindowInsetsHelper;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-import com.mikepenz.actionitembadge.library.ActionItemBadge;
-import com.mikepenz.actionitembadge.library.utils.BadgeStyle;
-import com.mikepenz.actionitembadge.library.utils.NumberUtils;
-import com.mikepenz.materialdrawer.AccountHeader;
-import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yoshione.fingen.adapter.TransactionsArrayAdapter;
 import com.yoshione.fingen.dao.SendersDAO;
 import com.yoshione.fingen.dao.SmsDAO;
@@ -62,13 +69,12 @@ import com.yoshione.fingen.dao.SmsMarkersDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
 import com.yoshione.fingen.filters.AbstractFilter;
 import com.yoshione.fingen.filters.AccountFilter;
-import com.yoshione.fingen.fts.ActivityScanQR;
-import com.yoshione.fingen.iab.BillingService;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.ITransactionItemEventListener;
 import com.yoshione.fingen.managers.AccountsSetManager;
 import com.yoshione.fingen.managers.TransactionManager;
 import com.yoshione.fingen.model.AccountsSet;
+import com.yoshione.fingen.backup.BackupPassword;
 import com.yoshione.fingen.model.BaseModel;
 import com.yoshione.fingen.model.Events;
 import com.yoshione.fingen.model.Sender;
@@ -80,6 +86,7 @@ import com.yoshione.fingen.utils.ColorUtils;
 import com.yoshione.fingen.utils.Lg;
 import com.yoshione.fingen.utils.NotificationCounter;
 import com.yoshione.fingen.utils.NotificationHelper;
+import com.yoshione.fingen.utils.BackupFolder;
 import com.yoshione.fingen.utils.PrefUtils;
 import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.utils.ScreenUtils;
@@ -97,10 +104,7 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import dagger.Lazy;
-import io.fabric.sdk.android.Fabric;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -116,58 +120,34 @@ public class ActivityMain extends ToolbarActivity {
     public static final int THEME_LIGHT = 0;
     public static final int THEME_DARK = 1;
 
+    // The backup folder warning is shown once per app launch
+    private static boolean sBackupFolderWarningChecked = false;
+
     private static final int MSG_UPDATE_LISTS = 1;
     private static final int MSG_UPDATE_SMS_COUNTERS = 3;
 
     private static final int ACCOUNT_CLICK_ACTION_LIST_TRANSACTIONS = 0;
     private static final int ACCOUNT_CLICK_ACTION_NEW_TRANSACTION = 1;
 
-    private static final int DRAWER_ITEM_ID_DEBTS = 1;
-    private static final int DRAWER_ITEM_ID_REFERENCES = 3;
-    private static final int DRAWER_ITEM_ID_BUDGETS = 5;
-    private static final int DRAWER_ITEM_ID_INCOMING_SMS = 6;
-    private static final int DRAWER_ITEM_ID_ADDITIONAL = 7;
-    private static final int DRAWER_ITEM_ID_SETTINGS = 8;
-    private static final int DRAWER_ITEM_ID_SUPPORT = 9;
-    private static final int DRAWER_ITEM_ID_HELP = 11;
-    private static final int DRAWER_ITEM_ID_ABOUT = 10;
-    private static final int DRAWER_ITEM_ID_PRO = 12;
 
-    @BindView(R.id.pager)
+    private ActivityMainBinding mBinding;
     ViewPager viewPager;
-    @BindView(R.id.tabLayout)
     TabLayout tabLayout;
-    @Nullable
-    @BindView(R.id.sliding_layout_transactions)
-    SlidingUpPanelLayout mSlidingUpTransactions;
-    @Nullable
-    @BindView(R.id.sliding_layout_accounts)
-    SlidingUpPanelLayout mSlidingUpAccounts;
-    @BindView(R.id.coordinatorLayout)
     CoordinatorLayout coordinatorLayout;
-    @BindView(R.id.appbar)
     AppBarLayout mAppBarLayout;
-    @BindView(R.id.textViewSubtitle)
     TextView mTextViewActiveSet;
-    @BindView(R.id.buttonTemplates)
     Button mButtonTemplates;
-    @BindView(R.id.buttonScanQR)
-    Button mButtonScanQR;
-    @BindView(R.id.buttonNewExpense)
     Button mButtonNewExpense;
-    @BindView(R.id.buttonNewIncome)
     Button mButtonNewIncome;
-    @BindView(R.id.buttonNewTransfer)
     Button mButtonNewTransfer;
-    @BindView(R.id.buttonsBar)
     LinearLayout mButtonsBar;
-    @BindView(R.id.buttonsBarContainer)
     FrameLayout mButtonsBarContainer;
 
     private FragmentAccounts fragmentAccounts;
     FragmentTransactions fragmentTransactions;
     private FragmentSummary fragmentSummary;
-    private Drawer mMaterialDrawer = null;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mNavigationView;
     FragmentStatePagerAdapter fragmentPagerAdapter;
     private final List<Fragment> fragments = new ArrayList<>();
     private final SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener =
@@ -181,9 +161,8 @@ public class ActivityMain extends ToolbarActivity {
     private volatile boolean waitForQueue = false;
     UpdateUIHandler mUpdateUIHandler;
     private int mUnreadSms = 0;
+    private BadgeDrawable mInboxBadge;
 
-    @Inject
-    Lazy<BillingService> mBillingService;
     @Inject
     Lazy<SmsMarkersDAO> mSmsMarkersDAO;
     @Inject
@@ -201,6 +180,26 @@ public class ActivityMain extends ToolbarActivity {
     @Override
     protected String getLayoutTitle() {
         return getString(R.string.app_name);
+    }
+
+    @Override
+    protected void setupWindowInsets() {
+        // The root is DrawerLayout: insets go to the AppBar (top) and the bottom buttons bar,
+        // the rest is left unconsumed so that NavigationView handles its own insets
+        final View root = getContentRoot();
+        final View content = ((ViewGroup) root).getChildAt(0);
+        final View appBar = root.findViewById(R.id.appbar);
+        final View buttonsBar = root.findViewById(R.id.buttonsBarContainer);
+        final int appBarTop = appBar.getPaddingTop();
+        final int buttonsBottom = buttonsBar.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+            Insets i = WindowInsetsHelper.contentInsets(insets);
+            appBar.setPadding(appBar.getPaddingLeft(), appBarTop + i.top, appBar.getPaddingRight(), appBar.getPaddingBottom());
+            buttonsBar.setPadding(buttonsBar.getPaddingLeft(), buttonsBar.getPaddingTop(), buttonsBar.getPaddingRight(), buttonsBottom + i.bottom);
+            content.setPadding(i.left, 0, i.right, 0);
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(root);
     }
 
     @Override
@@ -224,13 +223,26 @@ public class ActivityMain extends ToolbarActivity {
 
         mUpdateUIHandler = new UpdateUIHandler(this);
 
-        if (!BuildConfig.DEBUG) {
-            Fabric.with(this, new Crashlytics());
-        }
-
         mPreferences.edit().putBoolean(FgConst.PREF_SWITCH_TAB_ON_START, true).apply();
 
-        ButterKnife.bind(this);
+        mBinding = ActivityMainBinding.bind(getContentRoot());
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                handleBackPressed();
+            }
+        });
+        viewPager = mBinding.pager;
+        tabLayout = findViewById(R.id.tabLayout);
+        coordinatorLayout = mBinding.coordinatorLayout;
+        mAppBarLayout = findViewById(R.id.appbar);
+        mTextViewActiveSet = findViewById(R.id.textViewSubtitle);
+        mButtonTemplates = mBinding.buttonTemplates;
+        mButtonNewExpense = mBinding.buttonNewExpense;
+        mButtonNewIncome = mBinding.buttonNewIncome;
+        mButtonNewTransfer = mBinding.buttonNewTransfer;
+        mButtonsBar = mBinding.buttonsBar;
+        mButtonsBarContainer = mBinding.buttonsBarContainer;
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -241,10 +253,8 @@ public class ActivityMain extends ToolbarActivity {
 
         buildDrawer();
 
-        ImageButton drawerToggle = getNavButtonView(toolbar);
-        if (drawerToggle != null) {
-            drawerToggle.setImageDrawable(getDrawable(R.drawable.ic_menu_white));
-        }
+        toolbar.setNavigationIcon(R.drawable.ic_menu_white);
+        toolbar.setNavigationOnClickListener(view -> mDrawerLayout.openDrawer(GravityCompat.START));
         addFragments();
 
         setupBottomBar();
@@ -292,18 +302,28 @@ public class ActivityMain extends ToolbarActivity {
         });
     }
 
+    @OptIn(markerClass = ExperimentalBadgeUtils.class)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        MenuItem menuItemInbox = menu.findItem(R.id.action_incoming);
-        Drawable icon = ContextCompat.getDrawable(this, R.drawable.ic_sms_white);
-        int badgeColor = ContextCompat.getColor(this, R.color.negative_color);
-        BadgeStyle badgeStyle = new BadgeStyle(BadgeStyle.Style.DEFAULT, com.mikepenz.actionitembadge.library.R.layout.menu_action_item_badge, badgeColor, badgeColor, -1);
+        if (mInboxBadge != null) {
+            BadgeUtils.detachBadgeDrawable(mInboxBadge, toolbar, R.id.action_incoming);
+            mInboxBadge = null;
+        }
         if (mUnreadSms > 0) {
-            ActionItemBadge.update(this, menuItemInbox, icon, badgeStyle, NumberUtils.formatNumber(mUnreadSms));
-        } else {
-            ActionItemBadge.hide(menu.findItem(R.id.action_incoming));
+            // BadgeDrawable requires a MaterialComponents theme; the app theme is AppCompat,
+            // so the badge is created in a wrapped context only
+            Context badgeContext = new ContextThemeWrapper(this, com.google.android.material.R.style.Theme_MaterialComponents_Light);
+            BadgeDrawable badge = BadgeDrawable.create(badgeContext);
+            badge.setBackgroundColor(ContextCompat.getColor(this, R.color.negative_color));
+            badge.setNumber(mUnreadSms);
+            mInboxBadge = badge;
+            toolbar.post(() -> {
+                if (mInboxBadge == badge) {
+                    BadgeUtils.attachBadgeDrawable(badge, toolbar, R.id.action_incoming);
+                }
+            });
         }
         return true;
     }
@@ -486,6 +506,9 @@ public class ActivityMain extends ToolbarActivity {
         }
 
         checkPermissionsAndShowAlert();
+        checkBackupFolder();
+        checkPinResetNotice();
+        checkRestoreFailed();
 
         List<String> tabs = PrefUtils.getTabsOrder(mPreferences);
         boolean actual = true;
@@ -518,101 +541,64 @@ public class ActivityMain extends ToolbarActivity {
         super.onStop();
     }
 
-    private Drawable getIcon(int id) {
-        return ContextCompat.getDrawable(this, id);
+    private void buildDrawer() {
+        mDrawerLayout = findViewById(R.id.drawerLayout);
+        mNavigationView = findViewById(R.id.navigationView);
+
+        mDrawerLayout.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                // Скрываем клавиатуру при открытии Navigation Drawer
+                InputMethodManager inputMethodManager = (InputMethodManager) ActivityMain.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+                if (ActivityMain.this.getCurrentFocus() != null & inputMethodManager != null) {
+                    inputMethodManager.hideSoftInputFromWindow(ActivityMain.this.getCurrentFocus().getWindowToken(), 0);
+                }
+            }
+        });
+
+        mNavigationView.setNavigationItemSelectedListener(item -> {
+            onDrawerItemSelected(item.getItemId());
+            mDrawerLayout.closeDrawer(GravityCompat.START);
+            return true;
+        });
     }
 
-    private void buildDrawer() {
-        AccountHeader headerResult;
-        headerResult = new AccountHeaderBuilder()
-                .withHeightDp(16)
-                .withActivity(this)
-//                .withHeaderBackground(R.drawable.header)
-                .withCompactStyle(true)
-                .build();
-
-
-        mMaterialDrawer = new DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(toolbar)
-                .withTranslucentStatusBar(true)
-                .withAccountHeader(headerResult)
-                .withSelectedItem(-1)
-                .addDrawerItems(
-                        new PrimaryDrawerItem().withName(R.string.ent_debts).withIcon(getIcon(R.drawable.ic_drawer_debts)).withIdentifier(DRAWER_ITEM_ID_DEBTS),
-                        new PrimaryDrawerItem().withName(R.string.ent_budget).withIcon(getIcon(R.drawable.ic_drawer_budget)).withIdentifier(DRAWER_ITEM_ID_BUDGETS),
-                        new PrimaryDrawerItem().withName(R.string.ent_references).withIcon(getIcon(R.drawable.ic_drawer_references)).withIdentifier(DRAWER_ITEM_ID_REFERENCES),
-                        new PrimaryDrawerItem().withName(R.string.ent_incoming).withIcon(getIcon(R.drawable.ic_drawer_inbox)).withIdentifier(DRAWER_ITEM_ID_INCOMING_SMS),
-                        new PrimaryDrawerItem().withName(R.string.ent_additional).withIcon(getIcon(R.drawable.ic_drawer_additional)).withIdentifier(DRAWER_ITEM_ID_ADDITIONAL),
-                        new DividerDrawerItem(),
-                        new PrimaryDrawerItem().withName(R.string.ent_pro_features).withIcon(getIcon(R.drawable.ic_drawer_pro))
-                                .withIconColor(ContextCompat.getColor(this, R.color.ColorMain)).withIdentifier(DRAWER_ITEM_ID_PRO),
-                        new PrimaryDrawerItem().withName(R.string.ent_settings).withIcon(getIcon(R.drawable.ic_drawer_settings)).withIdentifier(DRAWER_ITEM_ID_SETTINGS),
-                        new PrimaryDrawerItem().withName(R.string.ent_help).withIcon(getIcon(R.drawable.ic_drawer_help)).withIdentifier(DRAWER_ITEM_ID_HELP),
-                        new PrimaryDrawerItem().withName(R.string.act_ask_question).withIcon(getIcon(R.drawable.ic_drawer_support)).withIdentifier(DRAWER_ITEM_ID_SUPPORT),
-                        new PrimaryDrawerItem().withName(R.string.ent_about).withIcon(getIcon(R.drawable.ic_drawer_about)).withIdentifier(DRAWER_ITEM_ID_ABOUT)
-                )
-                .withOnDrawerListener(new Drawer.OnDrawerListener() {
-                    @Override
-                    public void onDrawerOpened(View drawerView) {
-                        // Скрываем клавиатуру при открытии Navigation Drawer
-                        InputMethodManager inputMethodManager = (InputMethodManager) ActivityMain.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-                        if (ActivityMain.this.getCurrentFocus() != null & inputMethodManager != null) {
-                            inputMethodManager.hideSoftInputFromWindow(ActivityMain.this.getCurrentFocus().getWindowToken(), 0);
-                        }
-                    }
-
-                    @Override
-                    public void onDrawerClosed(View drawerView) {
-                    }
-
-                    @Override
-                    public void onDrawerSlide(View view, float v) {
-
-                    }
-                })
-                .withOnDrawerItemClickListener((view, position, drawerItem) -> {
-                    if (drawerItem instanceof PrimaryDrawerItem) {
-                        Intent intent;
-                        switch ((int) drawerItem.getIdentifier()) {
-                            case DRAWER_ITEM_ID_DEBTS:
+    private void onDrawerItemSelected(int itemId) {
+        Intent intent;
+        switch (itemId) {
+                            case R.id.drawer_debts:
                                 intent = new Intent(ActivityMain.this, ActivityDebtsAndCredits.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
-                            case DRAWER_ITEM_ID_REFERENCES:
+                            case R.id.drawer_references:
                                 ActivityMain.this.openReferences();
                                 break;
-                            case DRAWER_ITEM_ID_INCOMING_SMS: {
+                            case R.id.drawer_incoming_sms: {
                                 intent = new Intent(ActivityMain.this, ActivitySmsList.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_BUDGETS: {
+                            case R.id.drawer_budgets: {
                                 intent = new Intent(ActivityMain.this, ActivityBudget.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_ADDITIONAL: {
+                            case R.id.drawer_additional: {
                                 intent = new Intent(ActivityMain.this, ActivityAdditional.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_PRO: {
-                                intent = new Intent(ActivityMain.this, ActivityPro.class);
-                                startActivityForResult(intent, RequestCodes.REQUEST_CODE_OPEN_PRO);
-                                break;
-                            }
-                            case DRAWER_ITEM_ID_SETTINGS: {
+                            case R.id.drawer_settings: {
                                 intent = new Intent(ActivityMain.this, ActivitySettings.class);
                                 ActivityMain.this.startActivityForResult(intent, RequestCodes.REQUEST_CODE_OPEN_PREFERENCES);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_HELP: {
+                            case R.id.drawer_help: {
                                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://faq.fingen-app.com/"));
                                 startActivity(browserIntent);
                                 break;
                             }
-                            case DRAWER_ITEM_ID_SUPPORT: {
+                            case R.id.drawer_support: {
                                 intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("message/rfc822");
                                 intent.putExtra(Intent.EXTRA_EMAIL,  new String[] {"support@fingen-app.com"});
@@ -622,16 +608,12 @@ public class ActivityMain extends ToolbarActivity {
                                 startActivity(Intent.createChooser(intent, "Send Email"));
                                 break;
                             }
-                            case DRAWER_ITEM_ID_ABOUT: {
+                            case R.id.drawer_about: {
                                 intent = new Intent(ActivityMain.this, ActivityAbout.class);
                                 ActivityMain.this.startActivity(intent);
                                 break;
                             }
                         }
-                    }
-                    return false;
-                })
-                .build();
     }
 
     @Override
@@ -641,14 +623,6 @@ public class ActivityMain extends ToolbarActivity {
             inputMethodManager.hideSoftInputFromWindow(ActivityMain.this.getCurrentFocus().getWindowToken(), 0);
         }
         return true;
-    }
-
-    private ImageButton getNavButtonView(Toolbar toolbar) {
-        for (int i = 0; i < toolbar.getChildCount(); i++)
-            if (toolbar.getChildAt(i) instanceof ImageButton)
-                return (ImageButton) toolbar.getChildAt(i);
-
-        return null;
     }
 
     @Override
@@ -662,7 +636,6 @@ public class ActivityMain extends ToolbarActivity {
         NotificationCounter notificationCounter = new NotificationCounter(mPreferences);
         notificationCounter.removeNotification(SMSReceiver.NOTIFICATION_ID_TRANSACTION_AUTO_CREATED);
 
-        mMaterialDrawer.deselect();
         updateCounters();
 
 //        updateLists();
@@ -676,29 +649,29 @@ public class ActivityMain extends ToolbarActivity {
 
     private long mLastBackPressed;
 
-    @Override
-    public void onBackPressed() {
+    private void handleBackPressed() {
         // Закрываем Navigation Drawer по нажатию системной кнопки "Назад" если он открыт
-        ButterKnife.bind(this);
-        if (mMaterialDrawer.isDrawerOpen())
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START))
         {
-            mMaterialDrawer.closeDrawer();
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         }
         else if (
                 fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentAccounts.class) &
-                        (mSlidingUpAccounts != null &&
-                                (mSlidingUpAccounts.getPanelState() ==
-                                        SlidingUpPanelLayout.PanelState.EXPANDED ||
-                                        mSlidingUpAccounts.getPanelState() ==
-                                                SlidingUpPanelLayout.PanelState.ANCHORED)
+                        (fragmentAccounts != null && fragmentAccounts.mBottomSheetBehavior != null &&
+                                (fragmentAccounts.mBottomSheetBehavior.getState() ==
+                                        BottomSheetBehavior.STATE_EXPANDED ||
+                                        fragmentAccounts.mBottomSheetBehavior.getState() ==
+                                                BottomSheetBehavior.STATE_HALF_EXPANDED)
                         )
                 )
         {
-            mSlidingUpAccounts.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            fragmentAccounts.mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
-        else if (fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentTransactions.class) & (mSlidingUpTransactions != null &&
-                (mSlidingUpTransactions.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || mSlidingUpTransactions.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED))) {
-            mSlidingUpTransactions.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        else if (fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentTransactions.class) & (fragmentTransactions != null &&
+                fragmentTransactions.mBottomSheetBehavior != null &&
+                (fragmentTransactions.mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED ||
+                        fragmentTransactions.mBottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED))) {
+            fragmentTransactions.mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         } else if (fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentTransactions.class) && fragmentTransactions.mFabMenuController.isFABOpen()) {
             fragmentTransactions.mFabMenuController.closeFABMenu();
         } else if (fragments.get(viewPager.getCurrentItem()).getClass().equals(FragmentTransactions.class) && fragmentTransactions.mCardViewSearch != null && fragmentTransactions.mCardViewSearch.getVisibility() == View.VISIBLE) {
@@ -711,7 +684,6 @@ public class ActivityMain extends ToolbarActivity {
                 mLastBackPressed = System.currentTimeMillis();
                 Toast.makeText(this, getString(R.string.msg_press_back_again_to_exit), Toast.LENGTH_SHORT).show();
             } else {
-                super.onBackPressed();
                 finishAndRemoveTask();
             }
         }
@@ -721,52 +693,41 @@ public class ActivityMain extends ToolbarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_MENU:
-                mMaterialDrawer.openDrawer();
+                mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
         }
         return super.onKeyDown(keyCode, event);
     }
 
-    //<editor-fold desc="Получаем права на доступ к external storage" defaultstate="collapsed">
-    @NeedsPermission({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void getExternalStoragepermission() {
-        Log.d(TAG, "getExternalStoragepermission");
-    }
-
-    @OnShowRationale({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void showRationaleForExStorage(PermissionRequest request) {
-        showExStorageRationaleDialog(R.string.msg_permission_rw_external_storage_rationale, request);
-    }
-
-    @OnPermissionDenied({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void onExStorageDenied() {
-        Toast.makeText(this, R.string.msg_permission_rw_external_storage_denied, Toast.LENGTH_SHORT).show();
-    }
-
-    @OnNeverAskAgain({Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE})
-    void onExStorageNeverAskAgain() {
-        Toast.makeText(this, R.string.msg_permission_rw_external_storage_never_askagain, Toast.LENGTH_SHORT).show();
-    }
-
-    private void showExStorageRationaleDialog(@StringRes int messageResId, final PermissionRequest request) {
-        new AlertDialog.Builder(this)
-                .setPositiveButton(R.string.act_next, (dialog, which) -> request.proceed())
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> request.cancel())
-                .setCancelable(false)
-                .setMessage(messageResId)
-                .show();
-    }
-    //</editor-fold>
-
     //<editor-fold desc="Получаем права на чтение смс" defaultstate="collapsed">
     @NeedsPermission(Manifest.permission.RECEIVE_SMS)
     void getReceiveSmsPermission() {
         Log.d(TAG, "getReceiveSmsPermission");
+        requestPostNotificationsIfNeeded();
     }
 
     @OnShowRationale(Manifest.permission.RECEIVE_SMS)
     void showRationaleForReceiveSms(PermissionRequest request) {
         showRationaleDialog(R.string.msg_permission_recieve_sms_rationale, request);
+    }
+
+    // The second system dialog can't be shown together with the first one, so
+    // POST_NOTIFICATIONS is requested after the SMS request is answered (any answer)
+    @OnPermissionDenied(Manifest.permission.RECEIVE_SMS)
+    void onReceiveSmsDenied() {
+        requestPostNotificationsIfNeeded();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.RECEIVE_SMS)
+    void onReceiveSmsNeverAskAgain() {
+        requestPostNotificationsIfNeeded();
+    }
+
+    private void requestPostNotificationsIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, RequestCodes.REQUEST_CODE_POST_NOTIFICATIONS);
+        }
     }
 
     @Override
@@ -784,6 +745,97 @@ public class ActivityMain extends ToolbarActivity {
                 .show();
     }
     //</editor-fold>
+
+    /**
+     * On app start warns the user if local backups can't be saved: the folder is not selected,
+     * access to it was revoked, or the last copy to it failed.
+     */
+    private void checkBackupFolder() {
+        if (sBackupFolderWarningChecked) {
+            return;
+        }
+        sBackupFolderWarningChecked = true;
+        final Context appContext = getApplicationContext();
+        new Thread(() -> {
+            // "Do not remind" mutes the folder warning only. The flag PREF_BACKUP_FOLDER_UNAVAILABLE is also
+            // set by BackupWorker when the folder is missing, so a failed copy can't be told apart: it is muted too.
+            boolean folderProblem = !mPreferences.getBoolean(FgConst.PREF_BACKUP_FOLDER_REMINDER_OFF, false)
+                    && (!BackupFolder.isAvailable(appContext)
+                    || mPreferences.getBoolean(FgConst.PREF_BACKUP_FOLDER_UNAVAILABLE, false));
+            // the lost password stops all backups, so it is never muted
+            boolean passwordProblem = BackupPassword.hasWarning(appContext);
+            if (folderProblem || passwordProblem) {
+                runOnUiThread(() -> {
+                    if (isFinishing()) {
+                        return;
+                    }
+                    if (passwordProblem) {
+                        showBackupPasswordWarning();
+                    }
+                    if (folderProblem) {
+                        showBackupFolderWarning();
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void showBackupPasswordWarning() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.ent_backup_data)
+                .setMessage(R.string.msg_backup_password_warning)
+                .setPositiveButton(R.string.ent_backup_data, (dialog, which) ->
+                        startActivity(new Intent(this, ActivityBackup.class)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void showBackupFolderWarning() {
+        final CheckBox doNotRemind = new CheckBox(this);
+        doNotRemind.setText(R.string.msg_backup_folder_do_not_remind);
+        final int padding = (int) (24 * getResources().getDisplayMetrics().density);
+        final FrameLayout container = new FrameLayout(this);
+        container.setPadding(padding, padding / 2, padding, 0);
+        container.addView(doNotRemind);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.ent_backup_data)
+                .setMessage(R.string.msg_backup_folder_warning)
+                .setView(container)
+                .setPositiveButton(R.string.ent_backup_data, (dialog, which) ->
+                        startActivity(new Intent(this, ActivityBackup.class)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setOnDismissListener(dialog -> {
+                    if (doNotRemind.isChecked()) {
+                        mPreferences.edit().putBoolean(FgConst.PREF_BACKUP_FOLDER_REMINDER_OFF, true).apply();
+                    }
+                })
+                .show();
+    }
+
+    /**
+     * One-time notice: PIN of the old lock library was reset (see PinLockManager.init)
+     */
+    private void checkPinResetNotice() {
+        if (!mPreferences.getBoolean(FgConst.PREF_PIN_RESET_NOTICE_PENDING, false)) {
+            return;
+        }
+        mPreferences.edit().putBoolean(FgConst.PREF_PIN_RESET_NOTICE_PENDING, false).apply();
+        new AlertDialog.Builder(this)
+                .setMessage(R.string.msg_pin_reset_notice)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+    }
+
+    /**
+     * Restore failed after the connection was closed: the app was restarted, show the error (see DBHelper.restoreDB)
+     */
+    private void checkRestoreFailed() {
+        if (!mPreferences.getBoolean(FgConst.PREF_RESTORE_FAILED, false)) {
+            return;
+        }
+        mPreferences.edit().putBoolean(FgConst.PREF_RESTORE_FAILED, false).commit();
+        Toast.makeText(this, "Error on restore DB", Toast.LENGTH_SHORT).show();
+    }
 
     private void checkPermissionsAndShowAlert() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
@@ -803,7 +855,6 @@ public class ActivityMain extends ToolbarActivity {
                 ActivityMainPermissionsDispatcher.getReceiveSmsPermissionWithPermissionCheck(this);
             }
         }
-        ActivityMainPermissionsDispatcher.getExternalStoragepermissionWithPermissionCheck(this);
     }
 
     private void openReferences() {
@@ -1030,11 +1081,7 @@ public class ActivityMain extends ToolbarActivity {
     private void setupBottomBar() {
         BottomButtonClickListener clickListener = new BottomButtonClickListener();
 
-        boolean scanQR = mPreferences.getBoolean(FgConst.PREF_ENABLE_SCAN_QR, true);
-        mButtonScanQR.setVisibility(scanQR ? View.VISIBLE : View.GONE);
-
         mButtonTemplates.setOnClickListener(clickListener);
-        mButtonScanQR.setOnClickListener(clickListener);
         mButtonNewExpense.setOnClickListener(clickListener);
         mButtonNewIncome.setOnClickListener(clickListener);
         mButtonNewTransfer.setOnClickListener(clickListener);
@@ -1049,9 +1096,6 @@ public class ActivityMain extends ToolbarActivity {
                 intent.putExtra("model", new Template());
                 intent.putExtra("requestCode", RequestCodes.REQUEST_CODE_SELECT_MODEL);
                 ActivityMain.this.startActivityForResult(intent, RequestCodes.REQUEST_CODE_SELECT_MODEL);
-            } else if (v.getId() == R.id.buttonScanQR) {
-                Intent intent = new Intent(ActivityMain.this, ActivityScanQR.class);
-                startActivityForResult(intent, RequestCodes.REQUEST_CODE_SCAN_QR);
             } else {
                 Transaction transaction = new Transaction(PrefUtils.getDefDepID(ActivityMain.this));
                 Intent intent = new Intent(ActivityMain.this, ActivityEditTransaction.class);

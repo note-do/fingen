@@ -1,5 +1,7 @@
 package com.yoshione.fingen;
 
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
+import com.yoshione.fingen.databinding.ActivityImportSmsBinding;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -10,10 +12,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AppCompatCheckBox;
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatCheckBox;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,9 +37,6 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 import java.util.Calendar;
 import java.util.Date;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -59,19 +58,13 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
     private final static int HANDLER_OPERATION_UPDATE = 2;
     private final static int HANDLER_OPERATION_COMPLETE = 3;
 
-    @BindView(R.id.progressbar)
+    private ActivityImportSmsBinding mBinding;
     ProgressBar progressbar;
-    @BindView(R.id.editTextSender)
     EditText editTextSender;
-    @BindView(R.id.editTextStartDate)
     EditText editTextStartDate;
-    @BindView(R.id.editTextStartTime)
     EditText editTextStartTime;
-    @BindView(R.id.editTextEndDate)
     EditText editTextEndDate;
-    @BindView(R.id.editTextEndTime)
     EditText editTextEndTime;
-    @BindView(R.id.checkboxAutoCreateTransactions)
     AppCompatCheckBox checkboxAutoCreateTransactions;
 
     private int mCurrentProgress;
@@ -99,7 +92,19 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityImportSmsBinding.bind(getContentRoot());
+        progressbar = mBinding.progressbar;
+        editTextSender = mBinding.editTextSender;
+        editTextStartDate = mBinding.editTextStartDate;
+        editTextStartTime = mBinding.editTextStartTime;
+        editTextEndDate = mBinding.editTextEndDate;
+        editTextEndTime = mBinding.editTextEndTime;
+        checkboxAutoCreateTransactions = mBinding.checkboxAutoCreateTransactions;
+        mBinding.editTextSender.setOnClickListener(new DebouncingOnClickListener(v -> onClick()));
+        mBinding.editTextStartDate.setOnClickListener(new DebouncingOnClickListener(v -> onDateClick(v)));
+        mBinding.editTextEndDate.setOnClickListener(new DebouncingOnClickListener(v -> onDateClick(v)));
+        mBinding.editTextStartTime.setOnClickListener(new DebouncingOnClickListener(v -> onTimeClick(v)));
+        mBinding.editTextEndTime.setOnClickListener(new DebouncingOnClickListener(v -> onTimeClick(v)));
 
         progressbarArr[0] = progressbar;
         progressbar.setProgress(0);
@@ -155,7 +160,6 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
         editTextEndTime.setText(dateTimeFormatter.getTimeShortString(mEndDate));
     }
 
-    @OnClick({R.id.editTextStartDate, R.id.editTextEndDate})
     public void onDateClick(View view) {
         Calendar calendar = Calendar.getInstance();
         switch (view.getId()) {
@@ -194,7 +198,6 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
         initDates();
     }
 
-    @OnClick({R.id.editTextStartTime, R.id.editTextEndTime})
     public void onTimeClick(View view) {
         Calendar calendar = Calendar.getInstance();
         switch (view.getId()) {
@@ -325,7 +328,6 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
         handler.sendMessage(handler.obtainMessage(HANDLER_OPERATION_COMPLETE, 0, 0, s));
     }
 
-    @OnClick(R.id.editTextSender)
     public void onClick() {
         Intent intent = new Intent(this.getApplicationContext(), ActivityList.class);
         intent.putExtra("showHomeButton", false);

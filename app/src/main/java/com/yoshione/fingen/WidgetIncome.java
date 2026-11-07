@@ -30,7 +30,7 @@ public class WidgetIncome extends AppWidgetProvider {
         Uri data = Uri.withAppendedPath(Uri.parse("ABCD" + "://widget/id/"),String.valueOf(appWidgetIds[0]));
         configIntent.setData(data);
 
-        PendingIntent configPendingIntent = PendingIntent.getActivity(context, 0, configIntent, 0);
+        PendingIntent configPendingIntent = PendingIntent.getActivity(context, 0, configIntent, PendingIntent.FLAG_IMMUTABLE);
 
         remoteViews.setOnClickPendingIntent(R.id.widgetContainer, configPendingIntent);
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);

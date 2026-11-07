@@ -1,16 +1,15 @@
 package com.yoshione.fingen;
 
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -20,9 +19,9 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.builder.ColorPickerClickListener;
-import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.skydoves.colorpickerview.ColorEnvelope;
+import com.skydoves.colorpickerview.ColorPickerDialog;
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener;
 import com.yoshione.fingen.adapter.AdapterTreeModel;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
 import com.yoshione.fingen.adapter.helper.SimpleItemTouchHelperCallback;
@@ -30,6 +29,7 @@ import com.yoshione.fingen.dao.AbstractDAO;
 import com.yoshione.fingen.dao.BaseDAO;
 import com.yoshione.fingen.dao.CategoriesDAO;
 import com.yoshione.fingen.dao.ProjectsDAO;
+import com.yoshione.fingen.databinding.FragmentTreeModelListBinding;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IAdapterEventsListener;
 import com.yoshione.fingen.interfaces.IUpdateTreeListsEvents;
@@ -59,33 +59,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
-
 /**
  * A simple {@link Fragment} subclass.
  */
 public class FragmentTreeModelList extends Fragment implements OnStartDragListener, IUpdateTreeListsEvents {
 
-    @BindView(R.id.recycler_view)
     ContextMenuRecyclerView mRecyclerView;
 
     AdapterTreeModel adapter;
-    @BindView(R.id.fabAddModel)
     FloatingActionButton fabAddModel;
-    @BindView(R.id.fabAddNestedModel)
     FloatingActionButton fabAddNestedModel;
-    Unbinder unbinder;
-    @BindView(R.id.fabBGLayout)
+    private FragmentTreeModelListBinding mBinding;
     View mFabBGLayout;
-    @BindView(R.id.fabAddModelLayout)
     LinearLayout mFabAddModelLayout;
-    @BindView(R.id.fabAddNestedModelLayout)
     LinearLayout mFabAddNestedModelLayout;
-    @BindView(R.id.fabMenuButtonRoot)
     FloatingActionButton mFabMenuButtonRoot;
-    @BindView(R.id.fabMenuButtonRootLayout)
     LinearLayout mFabMenuButtonRootLayout;
     private ItemTouchHelper mItemTouchHelper;
     private String mFilter = "";
@@ -126,7 +114,15 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tree_model_list, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mBinding = FragmentTreeModelListBinding.bind(view);
+        mRecyclerView = mBinding.recyclerView;
+        fabAddModel = mBinding.fabAddModel;
+        fabAddNestedModel = mBinding.fabAddNestedModel;
+        mFabBGLayout = mBinding.fabBGLayout;
+        mFabAddModelLayout = mBinding.fabAddModelLayout;
+        mFabAddNestedModelLayout = mBinding.fabAddNestedModelLayout;
+        mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
+        mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
 
         mInputModel = Objects.requireNonNull(getArguments()).getParcelable("model");
         FabMenuItemClickListener fabMenuItemClickListener = new FabMenuItemClickListener();
@@ -240,7 +236,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        mBinding = null;
     }
 
     @Override
@@ -332,16 +328,16 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
             }
             case R.id.action_select_color: {
                 final IAbstractModel model = dao.getModelById(info.id);
-                ColorPickerDialogBuilder
-                        .with(Objects.requireNonNull(getActivity()))
+                ColorPickerDialog.Builder colorDialogBuilder = new ColorPickerDialog.Builder(requireActivity());
+                colorDialogBuilder.getColorPickerView().setInitialColor(model.getColor());
+                colorDialogBuilder
                         .setTitle(getActivity().getResources().getString(R.string.ttl_select_color))
-                        .initialColor(model.getColor())
-                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
-                        .lightnessSliderOnly()
-                        .density(12)
-                        .setPositiveButton("ok", new ColorPickerClickListener() {
+                        .attachBrightnessSlideBar(true)
+                        .attachAlphaSlideBar(false)
+                        .setPositiveButton("ok", new ColorEnvelopeListener() {
                             @Override
-                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                            public void onColorSelected(ColorEnvelope envelope, boolean fromUser) {
+                                int selectedColor = envelope.getColor();
                                 IAbstractModel model1 = dao.getModelById(model.getID());
                                 if (model.getClass().equals(Category.class)) {
                                     ((Category) model1).setColor(selectedColor);
@@ -368,7 +364,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                                 dialog.cancel();
                             }
                         })
-                        .build()
+                        .create()
                         .show();
                 break;
             }

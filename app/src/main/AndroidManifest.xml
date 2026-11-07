@@ -6,18 +6,12 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
-    <uses-permission android:name="com.android.vending.BILLING"/>
-    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
-    <uses-permission android:name="com.yoshione.fingen.gcm.permission.C2D_MESSAGE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -29,58 +23,18 @@
     <application
         android:name=".FGApplication"
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/ic_main"
         android:label="@string/app_name"
         android:resizeableActivity="false"
         android:theme="@style/AppThemeLight"
-        tools:node="replace"
         tools:targetApi="n">
 
-        <service
-            android:name="com.evernote.android.job.v21.PlatformJobService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-        <service
-            android:name="com.evernote.android.job.v14.PlatformAlarmService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-        <service
-            android:name="com.evernote.android.job.v14.PlatformAlarmServiceExact"
-            android:exported="false"/>
         <receiver
-            android:name="com.evernote.android.job.v14.PlatformAlarmReceiver"
-            android:exported="false">
-            <intent-filter>
-                <!-- Keep the filter for legacy intents -->
-                <action android:name="com.evernote.android.job.v14.RUN_JOB"/>
-                <action android:name="net.vrallev.android.job.v14.RUN_JOB"/>
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="com.evernote.android.job.JobBootReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
-                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
-            </intent-filter>
-        </receiver>
-        <service
-            android:name="com.evernote.android.job.gcm.PlatformGcmService"
-            android:enabled="false"
+            android:name=".receivers.SMSReceiver"
             android:exported="true"
-            android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
-            <intent-filter>
-                <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
-            </intent-filter>
-        </service>
-        <service
-            android:name="com.evernote.android.job.JobRescheduleService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE"/>
-
-        <receiver android:name=".receivers.SMSReceiver">
+            android:permission="android.permission.BROADCAST_SMS">
             <intent-filter android:priority="2147483647">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
             </intent-filter>
@@ -88,13 +42,10 @@
         <receiver
             android:name=".receivers.CustomIntentReceiver"
             android:enabled="true"
+            android:exported="false"/>
+        <receiver
+            android:name=".WidgetExpense"
             android:exported="true">
-            <intent-filter>
-                <action android:name="com.yoshione.fingen.intent.action.CREATE_TRANSACTION"/>
-                <action android:name="com.yoshione.fingen.intent.action.CREATE_SMS"/>
-            </intent-filter>
-        </receiver>
-        <receiver android:name=".WidgetExpense">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
@@ -103,7 +54,9 @@
                 android:label="@string/ent_outcome"
                 android:resource="@xml/widget_info_outcome"/>
         </receiver>
-        <receiver android:name=".WidgetIncome">
+        <receiver
+            android:name=".WidgetIncome"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
@@ -112,7 +65,9 @@
                 android:label="@string/ent_income"
                 android:resource="@xml/widget_info_income"/>
         </receiver>
-        <receiver android:name=".WidgetTransfer">
+        <receiver
+            android:name=".WidgetTransfer"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
@@ -122,16 +77,10 @@
                 android:resource="@xml/widget_info_transfer"/>
         </receiver>
 
-        <receiver android:name=".receivers.CalcReciever">
-            <intent-filter>
-                <action android:name="com.yoshione.fingen.intent.action.ACT_CALC_DONE"/>
-            </intent-filter>
-        </receiver>
-
         <activity
             android:name=".ActivityMain"
+            android:exported="true"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
             android:theme="@style/splashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -153,96 +102,74 @@
         <activity
             android:name=".ActivityEditAccount"
             android:label=""
-            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden"/>
         <activity
-            android:name=".ActivityReferences"
-            android:screenOrientation="portrait"/>
+            android:name=".ActivityReferences"/>
         <activity
             android:name=".ActivityModelList"
-            android:screenOrientation="portrait">
+            android:exported="true">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".ActivitySmsList"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivitySettings"
             android:label="@string/ent_settings"
-            android:screenOrientation="portrait"
             android:theme="@style/ActivitySettingsTheme"/>
         <activity
             android:name=".ActivityList"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityAdditional"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityImportCSV"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityImportCSVAdvanced"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityExportCSV"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityBackup"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityImportSms"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityEditCredit"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityBudget"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityEditLocation2"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityAbout"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityReports"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityAccounts"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityTransactions"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeLight"/>
-        <activity
-            android:name=".ActivityPro"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityDebtsAndCredits"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".calc.CalculatorActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name=".ActivityShortcut"
+            android:exported="true"
             android:theme="@style/Theme.Transparent">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT"/>
@@ -250,11 +177,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".widgets.CustomPinActivity"
-            android:screenOrientation="portrait"
+            android:name=".lock.PinActivity"
             android:theme="@style/AppThemeLight"/>
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
+            android:exported="true"
             android:configChanges="orientation|keyboard"
             android:launchMode="singleTask">
             <intent-filter>
@@ -264,23 +191,10 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".fts.ActivityScanQR"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeLight"
-            android:noHistory="true"/>
-        <activity
-            android:name=".fts.ActivityFtsLogin"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeLight"
-            android:noHistory="true"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${mapsApiKey}"/>
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="${fabricApiKey}"/>
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

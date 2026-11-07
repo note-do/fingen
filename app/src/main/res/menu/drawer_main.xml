@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/drawer_debts"
+            android:icon="@drawable/ic_drawer_debts"
+            android:title="@string/ent_debts" />
+        <item
+            android:id="@+id/drawer_budgets"
+            android:icon="@drawable/ic_drawer_budget"
+            android:title="@string/ent_budget" />
+        <item
+            android:id="@+id/drawer_references"
+            android:icon="@drawable/ic_drawer_references"
+            android:title="@string/ent_references" />
+        <item
+            android:id="@+id/drawer_incoming_sms"
+            android:icon="@drawable/ic_drawer_inbox"
+            android:title="@string/ent_incoming" />
+        <item
+            android:id="@+id/drawer_additional"
+            android:icon="@drawable/ic_drawer_additional"
+            android:title="@string/ent_additional" />
+    </group>
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/drawer_settings"
+            android:icon="@drawable/ic_drawer_settings"
+            android:title="@string/ent_settings" />
+        <item
+            android:id="@+id/drawer_help"
+            android:icon="@drawable/ic_drawer_help"
+            android:title="@string/ent_help" />
+        <item
+            android:id="@+id/drawer_support"
+            android:icon="@drawable/ic_drawer_support"
+            android:title="@string/act_ask_question" />
+        <item
+            android:id="@+id/drawer_about"
+            android:icon="@drawable/ic_drawer_about"
+            android:title="@string/ent_about" />
+    </group>
+
+</menu>

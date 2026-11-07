@@ -2,11 +2,11 @@ package com.yoshione.fingen.adapter;
 
 import android.app.Activity;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MotionEventCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Pair;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -23,6 +23,7 @@ import com.yoshione.fingen.R;
 import com.yoshione.fingen.adapter.helper.ItemTouchHelperAdapter;
 import com.yoshione.fingen.adapter.helper.OnStartDragListener;
 import com.yoshione.fingen.dao.AccountsDAO;
+import com.yoshione.fingen.databinding.ListItemAccount2Binding;
 import com.yoshione.fingen.managers.AccountManager;
 import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.BaseModel;
@@ -37,10 +38,8 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by slv on 17.09.2015.
@@ -261,27 +260,16 @@ public class AdapterAccounts extends RecyclerView.Adapter implements ItemTouchHe
 
     class AccountViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.imageViewAccountIcon)
         ImageView imageViewIcon;
-        @BindView(R.id.textViewAccountName)
         TextView textViewName;
-        @BindView(R.id.textViewAccountType)
         TextView textViewType;
-        @BindView(R.id.textViewAccountCurBalance)
         TextView textViewCurBalance;
-        @BindView(R.id.textViewIncome)
         TextView textViewIncome;
-        @BindView(R.id.textViewOutcome)
         TextView textViewOutcome;
-        @BindView(R.id.spaceBottom)
         FrameLayout mSpaceBottom;
-        @BindView(R.id.spaceBottomFinal)
         FrameLayout mSpaceBottomFinal;
-        @BindView(R.id.progres_bar_layout)
         ConstraintLayout mProgresBarLayout;
-        @BindView(R.id.progress_bar)
         ProgressBar mProgressBar;
-        @BindView(R.id.progress_bar_text)
         TextView mProgressBarTextView;
 
         public Account account;
@@ -289,7 +277,18 @@ public class AdapterAccounts extends RecyclerView.Adapter implements ItemTouchHe
         AccountViewHolder(View v) {
             super(v);
 
-            ButterKnife.bind(this, v);
+            ListItemAccount2Binding binding = ListItemAccount2Binding.bind(v);
+            imageViewIcon = binding.imageViewAccountIcon;
+            textViewName = binding.textViewAccountName;
+            textViewType = binding.textViewAccountType;
+            textViewCurBalance = binding.textViewAccountCurBalance;
+            textViewIncome = binding.textViewIncome;
+            textViewOutcome = binding.textViewOutcome;
+            mSpaceBottom = binding.spaceBottom;
+            mSpaceBottomFinal = binding.spaceBottomFinal;
+            mProgresBarLayout = binding.progresBarLayout;
+            mProgressBar = binding.progressBar;
+            mProgressBarTextView = binding.progressBarText;
 
             v.setOnClickListener(new View.OnClickListener() {
                 @Override

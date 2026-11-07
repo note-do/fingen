@@ -1,6 +1,6 @@
 package com.yoshione.fingen.adapter.viewholders;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -8,9 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.yoshione.fingen.R;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.yoshione.fingen.databinding.ListItemUserPermissionBinding;
 
 /**
  * Created by slv on 14.03.2017.
@@ -18,19 +16,19 @@ import butterknife.ButterKnife;
  */
 
 public class UserPermissionViewHolder extends RecyclerView.ViewHolder {
-    @BindView(R.id.imageViewIcon)
     ImageView imageViewIcon;
-    @BindView(R.id.textViewEmail)
     TextView mTextViewEmail;
-    @BindView(R.id.checkBoxRead)
     CheckBox mCheckBoxRead;
-    @BindView(R.id.checkBoxWrite)
     CheckBox mCheckBoxWrite;
 
     public UserPermissionViewHolder(View itemView) {
         super(itemView);
         itemView.setLongClickable(true);
-        ButterKnife.bind(this, itemView);
+        ListItemUserPermissionBinding binding = ListItemUserPermissionBinding.bind(itemView);
+        imageViewIcon = binding.imageViewIcon;
+        mTextViewEmail = binding.textViewEmail;
+        mCheckBoxRead = binding.checkBoxRead;
+        mCheckBoxWrite = binding.checkBoxWrite;
     }
 
     public void setEmail(String email) {

@@ -1,17 +1,15 @@
 package com.yoshione.fingen;
 
-import android.Manifest;
+import com.yoshione.fingen.utils.DebouncingOnClickListener;
+import com.yoshione.fingen.databinding.ActivityImportCsvBinding;
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.SwitchCompat;
+import androidx.appcompat.widget.SwitchCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,8 +17,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import com.github.angads25.filepicker.model.DialogConfigs;
 
 import android.util.Log;
 import com.yoshione.fingen.interfaces.IProgressEventsListener;
@@ -31,38 +27,40 @@ import com.yoshione.fingen.widgets.ToolbarActivity;
 import java.io.File;
 import java.io.IOException;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
-
-@RuntimePermissions
 public class ActivityImportCSV extends ToolbarActivity implements IProgressEventsListener {
 
+    private static final int REQUEST_PICK_CSV = 1;
+    private static final String STATE_URI = "csv_uri";
     private final static int HANDLER_OPERATION_HIDE = 0;
     private final static int HANDLER_OPERATION_SHOW = 1;
     private final static int HANDLER_OPERATION_UPDATE = 2;
     private final static int HANDLER_OPERATION_TOAST = 3;
     private static final ProgressBar[] numberProgressBarArr = new ProgressBar[]{null};
     private static final Activity[] activityArr = new Activity[]{null};
-    @BindView(R.id.editTextFileName)
+    private ActivityImportCsvBinding mBinding;
     EditText editTextFileName;
-    @BindView(R.id.progressbar)
     ProgressBar progressbar;
-    @BindView(R.id.switchCompatSkipDuplicates)
     SwitchCompat mSwitchCompatSkipDuplicates;
     UpdateProgressHandler handler;
     private int mCurrentProgress;
+    private Uri mUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ButterKnife.bind(this);
+        mBinding = ActivityImportCsvBinding.bind(getContentRoot());
+        editTextFileName = findViewById(R.id.editTextFileName);
+        progressbar = mBinding.progressbar;
+        mSwitchCompatSkipDuplicates = mBinding.switchCompatSkipDuplicates;
+        findViewById(R.id.editTextFileName).setOnClickListener(new DebouncingOnClickListener(v -> OnSelectFileClick()));
+
+        if (savedInstanceState != null) {
+            String uri = savedInstanceState.getString(STATE_URI);
+            if (uri != null) {
+                mUri = Uri.parse(uri);
+                editTextFileName.setText(FileUtils.getDisplayName(this, mUri));
+            }
+        }
 
         progressbar.setProgress(0);
         numberProgressBarArr[0] = progressbar;
@@ -77,6 +75,14 @@ public class ActivityImportCSV extends ToolbarActivity implements IProgressEvent
                 PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("financisto_csv_skip_diplicates", b).apply();
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mUri != null) {
+            outState.putString(STATE_URI, mUri.toString());
+        }
     }
 
     @Override
@@ -105,38 +111,45 @@ public class ActivityImportCSV extends ToolbarActivity implements IProgressEvent
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_import :
-                ActivityImportCSVPermissionsDispatcher.importCSVWithPermissionCheck(ActivityImportCSV.this);
+                importCSV();
                 return true;
             default:
                 return false;
         }
     }
 
-    @OnClick(R.id.editTextFileName)
     void OnSelectFileClick() {
-        ActivityImportCSVPermissionsDispatcher.SelectFileWithPermissionCheck(ActivityImportCSV.this);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/*");
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"text/*", "text/csv", "text/comma-separated-values"});
+        startActivityForResult(intent, REQUEST_PICK_CSV);
     }
 
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void SelectFile() {
-        FileUtils.SelectFileFromStorage(ActivityImportCSV.this, DialogConfigs.FILE_SELECT, new FileUtils.IOnSelectFile() {
-            @Override
-            public void OnSelectFile(String FileName) {
-                editTextFileName.setText(FileName);
-            }
-        });
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PICK_CSV && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            mUri = data.getData();
+            editTextFileName.setText(FileUtils.getDisplayName(this, mUri));
+        }
     }
 
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
     void importCSV() {
-        String path = editTextFileName.getText().toString();
-        File f = new File(path);
-        if (!f.exists()) {
+        if (mUri == null) {
+            Toast.makeText(ActivityImportCSV.this, getString(R.string.msg_file_not_exist), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final File tmp;
+        try {
+            tmp = FileUtils.copyUriToCache(this, mUri);
+        } catch (IOException | SecurityException e) {
+            Log.e("csv", "copy failed: " + e.getMessage());
             Toast.makeText(ActivityImportCSV.this, getString(R.string.msg_file_not_exist), Toast.LENGTH_SHORT).show();
             return;
         }
 
-        final CsvImporter csvImporter = new CsvImporter(this, path, 0, false);
+        final CsvImporter csvImporter = new CsvImporter(this, tmp.getPath(), 0, false);
 
         csvImporter.setmCsvImportProgressChangeListener(this);
 
@@ -152,55 +165,12 @@ public class ActivityImportCSV extends ToolbarActivity implements IProgressEvent
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    tmp.delete();
                 }
             }
         });
         t.start();
-    }
-
-    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void showRationaleForReadExternalStorage(PermissionRequest request) {
-        // NOTE: Show a rationale to explain why the permission is needed, e.g. with a dialog.
-        // Call proceed() or cancel() on the provided PermissionRequest to continue or abort
-        showRationaleDialog(R.string.msg_permission_read_external_storage_rationale, request);
-    }
-
-    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void onReadExternalStorageDenied() {
-        // NOTE: Deal with a denied permission, e.g. by showing specific UI
-        // or disabling certain functionality
-        Toast.makeText(this, R.string.msg_permission_read_external_storage_denied, Toast.LENGTH_SHORT).show();
-    }
-
-    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void onReadExternalStorageNeverAskAgain() {
-        Toast.makeText(this, R.string.msg_permission_read_external_storage_never_askagain, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // NOTE: delegate the permission handling to generated method
-        ActivityImportCSVPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
-    }
-
-    private void showRationaleDialog(@StringRes int messageResId, final PermissionRequest request) {
-        new AlertDialog.Builder(this)
-                .setPositiveButton(R.string.act_next, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        request.proceed();
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        request.cancel();
-                    }
-                })
-                .setCancelable(false)
-                .setMessage(messageResId)
-                .show();
     }
 
     @Override

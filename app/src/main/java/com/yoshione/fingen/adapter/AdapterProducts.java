@@ -4,9 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.graphics.Color;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +22,8 @@ import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.dao.CategoriesDAO;
 import com.yoshione.fingen.dao.ProductsDAO;
 import com.yoshione.fingen.dao.ProjectsDAO;
+import com.yoshione.fingen.databinding.ListItemAddProductBinding;
+import com.yoshione.fingen.databinding.ListItemProductBinding;
 import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.model.Category;
@@ -35,9 +37,7 @@ import com.yoshione.fingen.utils.ScreenUtils;
 
 import java.math.BigDecimal;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import eu.davidea.flipview.FlipView;
+import com.yoshione.fingen.widgets.FlipView;
 
 /**
  * Created by slv on 02.02.2018.
@@ -144,20 +144,20 @@ public class AdapterProducts extends RecyclerView.Adapter {
     }
 
     class ProductViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.textViewProductName)
         TextView mTextViewProductName;
-        @BindView(R.id.layoutTagView)
         TagView mTagView;
-        @BindView(R.id.imageButtonDeleteProduct)
         ImageButton mImageButtonDeleteProduct;
-        @BindView(R.id.textViewSum)
         TextView mTextViewSum;
-        @BindView(R.id.flipViewIcon)
         FlipView flipViewIcon;
 
         ProductViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemProductBinding binding = ListItemProductBinding.bind(view);
+            mTextViewProductName = binding.textViewProductName;
+            mTagView = binding.layoutTagView;
+            mImageButtonDeleteProduct = binding.imageButtonDeleteProduct;
+            mTextViewSum = binding.textViewSum;
+            flipViewIcon = binding.flipViewIcon;
         }
 
         void bindViewHolder(View itemView, final int position, Transaction transaction, boolean residue, final Activity activity,
@@ -252,12 +252,12 @@ public class AdapterProducts extends RecyclerView.Adapter {
     }
 
     static class AddProductViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.textViewAddProduct)
         TextView mTextViewAddProduct;
 
         AddProductViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemAddProductBinding binding = ListItemAddProductBinding.bind(view);
+            mTextViewAddProduct = binding.textViewAddProduct;
         }
 
         void bindViewHolder(View itemView, final int position, final Transaction transaction, final Activity activity, final IProductChangedListener listener) {
@@ -272,12 +272,12 @@ public class AdapterProducts extends RecyclerView.Adapter {
     }
 
     static class MoveResidueViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.textViewAddProduct)
         TextView mTextViewAddProduct;
 
         MoveResidueViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            ListItemAddProductBinding binding = ListItemAddProductBinding.bind(view);
+            mTextViewAddProduct = binding.textViewAddProduct;
         }
 
         void bindViewHolder(View itemView, final Transaction transaction, final Activity activity,
