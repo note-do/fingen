@@ -32,6 +32,7 @@ import com.yoshione.fingen.model.Sender;
 import com.yoshione.fingen.utils.DateTimeFormatter;
 import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.utils.SmsImporter;
+import com.yoshione.fingen.utils.SmsSupport;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
 import java.util.Calendar;
@@ -92,6 +93,11 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SmsSupport.isAvailable(this)) {
+            // Нет телефонии: импорт SMS невозможен
+            finish();
+            return;
+        }
         mBinding = ActivityImportSmsBinding.bind(getContentRoot());
         progressbar = mBinding.progressbar;
         editTextSender = mBinding.editTextSender;
@@ -338,6 +344,7 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == RequestCodes.REQUEST_CODE_SELECT_MODEL) {
             if (data != null) {
                 IAbstractModel model = data.getParcelableExtra("model");

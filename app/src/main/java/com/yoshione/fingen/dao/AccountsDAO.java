@@ -63,8 +63,8 @@ public class AccountsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         account.setLast4Digits(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_LAST4DIGITS)));
         account.setComment(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_COMMENT)));
         account.setStartBalance(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_STARTBALANCE))));
-        account.setIncome(new BigDecimal(cursor.getDouble(cursor.getColumnIndex("Income"))));
-        account.setExpense(new BigDecimal(cursor.getDouble(cursor.getColumnIndex("Expense"))));
+        account.setIncome(new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("Income"))));
+        account.setExpense(new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("Expense"))));
 
         account.setIsClosed(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_ISCLOSED)) == 1);
         account.setOrder(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_ORDER)));

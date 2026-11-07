@@ -232,6 +232,7 @@ public class ActivityEditCredit extends ToolbarActivity implements FragmentPayee
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == RequestCodes.REQUEST_CODE_SELECT_MODEL && data != null) {
             IAbstractModel model = data.getParcelableExtra("model");
             switch (model.getModelType()) {

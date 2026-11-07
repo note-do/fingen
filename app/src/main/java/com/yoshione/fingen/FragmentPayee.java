@@ -21,7 +21,6 @@ import com.yoshione.fingen.adapter.NestedItemFullNameAdapter;
 import com.yoshione.fingen.databinding.FrgTePayeeBinding;
 import com.yoshione.fingen.model.AutocompleteItem;
 
-import java.util.Objects;
 
 /**
  * Created by Leonid on 27.09.2015.
@@ -88,7 +87,7 @@ public class FragmentPayee extends Fragment {
         edPayee.setText(mCallback.getPayeeName(), TextView.BufferType.EDITABLE);
         mTextInputLayoutPayee.setHint(mCallback.getPayeeHint());
 
-        if (mCallback.getPayeeSelectionStyle() == 0 && Objects.requireNonNull(getActivity()).getClass().equals(ActivityEditTransaction.class)) {
+        if (mCallback.getPayeeSelectionStyle() == 0 && requireActivity().getClass().equals(ActivityEditTransaction.class)) {
             setAutocompleteAdapter();
 
             edPayee.addTextChangedListener(new TextWatcher() {

@@ -692,7 +692,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             items[i] = accountList.get(i).getName();
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setTitle(getActivity().getResources().getString(R.string.ttl_select_accounts));
         builder.setMultiChoiceItems(items, checkedItems,
                 (dialog1, indexSelected, isChecked) -> {
@@ -731,7 +731,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         intent.putExtra("filterID", filter.getId());
         intent.putExtra("checked_ids", filter.getIDsSet());
         intent.putExtra("requestCode", RequestCodes.REQUEST_CODE_BULK_SELECT_MODEL);
-        Objects.requireNonNull(getActivity()).startActivityForResult(intent, RequestCodes.REQUEST_CODE_BULK_SELECT_MODEL);
+        requireActivity().startActivityForResult(intent, RequestCodes.REQUEST_CODE_BULK_SELECT_MODEL);
     }
 
     @SuppressWarnings("WrongConstant")
@@ -741,14 +741,14 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             case R.id.action_add: {
                 Intent intent = new Intent(getActivity(), ActivityEditTransaction.class);
                 intent.putExtra("transaction", new Transaction(PrefUtils.getDefDepID(getActivity())));
-                Objects.requireNonNull(getActivity()).startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_TRANSACTION);
+                requireActivity().startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_TRANSACTION);
                 break;
             }
             case R.id.action_filter_on_selected:
             case R.id.action_select_on_selected: {
                 Transaction transaction = mTransactionsDAO.getTransactionByID(info.id);
 
-                final AlertDialog.Builder builderSingle = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+                final AlertDialog.Builder builderSingle = new AlertDialog.Builder(requireActivity());
                 builderSingle.setTitle(getActivity().getResources().getString(R.string.ttl_new_filter));
 
                 final ArrayAdapter<IAbstractModel> arrayAdapter = new ArrayAdapter<>(
@@ -790,7 +790,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
                     intent.putExtra("transaction", transaction);
                     intent.putExtra("src_transaction", srcTransaction);
                     intent.putExtra("focus_to_category", true);
-                    Objects.requireNonNull(getActivity()).startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_TRANSACTION);
+                    requireActivity().startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_TRANSACTION);
                 }
                 break;
             }
@@ -799,7 +799,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
                 transaction.setDateTime(new Date());
                 Intent intent = new Intent(getActivity(), ActivityEditTransaction.class);
                 intent.putExtra("transaction", transaction);
-                Objects.requireNonNull(getActivity()).startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_TRANSACTION);
+                requireActivity().startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_TRANSACTION);
                 break;
             }
             case R.id.action_create_template: {
@@ -815,13 +815,13 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
             case R.id.action_edit: {
                 Intent intent = new Intent(getActivity(), ActivityEditTransaction.class);
                 intent.putExtra("transaction", mTransactionsDAO.getTransactionByID(info.id));
-                Objects.requireNonNull(getActivity()).startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_TRANSACTION);
+                requireActivity().startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_TRANSACTION);
                 break;
             }
             case R.id.action_delete: {
                 final List<IAbstractModel> transactionsToDelete = new ArrayList<>();
                 transactionsToDelete.add(mTransactionsDAO.getTransactionByID(info.id));
-                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireActivity());
                 alertDialogBuilder
                         .setTitle(R.string.ttl_confirm_action)
                         .setMessage(R.string.msg_confirm_delete_transaction)
@@ -1043,7 +1043,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
                     break;
                 }
                 case R.id.fabEditSelected: {
-                    final AlertDialog.Builder builderSingle = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+                    final AlertDialog.Builder builderSingle = new AlertDialog.Builder(requireActivity());
                     builderSingle.setTitle(getActivity().getResources().getString(R.string.ttl_change_selected_param));
 
                     final ArrayAdapter<StringIntItem> arrayAdapter = new ArrayAdapter<>(
@@ -1104,7 +1104,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
                 }
                 case R.id.fabDeleteSelected: {
                     final List<IAbstractModel> transactionsToDelete = adapterT.removeSelectedTransactions();
-                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(requireActivity());
                     alertDialogBuilder
                             .setTitle(R.string.ttl_confirm_action)
                             .setMessage(R.string.msg_confirm_delete_selected_transactions)
@@ -1125,7 +1125,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     private void animatePullMe() {
         if (!mPullMeBended) {
             mPullMeBended = true;
-            mImageViewPullMe.setImageDrawable(Objects.requireNonNull(getContext()).getDrawable(R.drawable.pull_me_animated));
+            mImageViewPullMe.setImageDrawable(requireContext().getDrawable(R.drawable.pull_me_animated));
             ((Animatable) mImageViewPullMe.getDrawable()).start();
         }
     }
@@ -1133,7 +1133,7 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
     private void animatePullMeReverse() {
         if (mPullMeBended) {
             mPullMeBended = false;
-            mImageViewPullMe.setImageDrawable(Objects.requireNonNull(getContext()).getDrawable(R.drawable.pull_me_animated_reverse));
+            mImageViewPullMe.setImageDrawable(requireContext().getDrawable(R.drawable.pull_me_animated_reverse));
             ((Animatable) mImageViewPullMe.getDrawable()).start();
         }
     }

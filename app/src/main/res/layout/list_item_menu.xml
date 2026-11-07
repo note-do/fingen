@@ -13,6 +13,8 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:scaleType="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription"
         tools:src="@drawable/ic_drawer_references" />
 

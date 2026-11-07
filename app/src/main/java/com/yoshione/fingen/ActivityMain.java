@@ -90,6 +90,7 @@ import com.yoshione.fingen.utils.BackupFolder;
 import com.yoshione.fingen.utils.PrefUtils;
 import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.utils.ScreenUtils;
+import com.yoshione.fingen.utils.SmsSupport;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -311,7 +312,12 @@ public class ActivityMain extends ToolbarActivity {
             BadgeUtils.detachBadgeDrawable(mInboxBadge, toolbar, R.id.action_incoming);
             mInboxBadge = null;
         }
-        if (mUnreadSms > 0) {
+        boolean incomingVisible = isIncomingVisible();
+        MenuItem incomingItem = menu.findItem(R.id.action_incoming);
+        if (incomingItem != null) {
+            incomingItem.setVisible(incomingVisible);
+        }
+        if (incomingVisible && mUnreadSms > 0) {
             // BadgeDrawable requires a MaterialComponents theme; the app theme is AppCompat,
             // so the badge is created in a wrapped context only
             Context badgeContext = new ContextThemeWrapper(this, com.google.android.material.R.style.Theme_MaterialComponents_Light);
@@ -326,6 +332,20 @@ public class ActivityMain extends ToolbarActivity {
             });
         }
         return true;
+    }
+
+    // Без телефонии «Входящие» показываются, только если в списке есть записи
+    private boolean isIncomingVisible() {
+        return SmsSupport.isAvailable(this) || mUnreadSms > 0;
+    }
+
+    private void updateIncomingDrawerItem() {
+        if (mNavigationView != null) {
+            MenuItem item = mNavigationView.getMenu().findItem(R.id.drawer_incoming_sms);
+            if (item != null) {
+                item.setVisible(isIncomingVisible());
+            }
+        }
     }
 
     @Override
@@ -561,6 +581,7 @@ public class ActivityMain extends ToolbarActivity {
             mDrawerLayout.closeDrawer(GravityCompat.START);
             return true;
         });
+        updateIncomingDrawerItem();
     }
 
     private void onDrawerItemSelected(int itemId) {
@@ -838,6 +859,9 @@ public class ActivityMain extends ToolbarActivity {
     }
 
     private void checkPermissionsAndShowAlert() {
+        if (!SmsSupport.isAvailable(this)) {
+            return;
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
             List<SmsMarker> smsMarkers;
             try {
@@ -906,12 +930,14 @@ public class ActivityMain extends ToolbarActivity {
 
     private void updateCounters() {
         Thread t = new Thread(() -> {
+            int unreadSms;
             try {
-                mUnreadSms = mSmsDAO.get().getAllModels().size();
+                unreadSms = mSmsDAO.get().getAllModels().size();
             } catch (Exception e) {
-                mUnreadSms = 0;
+                unreadSms = 0;
             }
-            mUpdateUIHandler.sendMessage(mUpdateUIHandler.obtainMessage(MSG_UPDATE_SMS_COUNTERS, mUnreadSms, 0));
+            // mUnreadSms is written only on the UI thread (handler)
+            mUpdateUIHandler.sendMessage(mUpdateUIHandler.obtainMessage(MSG_UPDATE_SMS_COUNTERS, unreadSms, 0));
         });
         t.start();
     }
@@ -1066,11 +1092,16 @@ public class ActivityMain extends ToolbarActivity {
         @Override
         public void handleMessage(Message msg) {
             final ActivityMain activity = mActivity.get();
+            if (activity == null) {
+                return;
+            }
             switch (msg.what) {
                 case MSG_UPDATE_LISTS:
                     activity.updateLists();
                     break;
                 case MSG_UPDATE_SMS_COUNTERS:
+                    activity.mUnreadSms = msg.arg1;
+                    activity.updateIncomingDrawerItem();
                     activity.invalidateOptionsMenu();
                     break;
             }

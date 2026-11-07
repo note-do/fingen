@@ -97,7 +97,7 @@ public class FragmentSummary extends BaseListFragment {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater menuInflater = Objects.requireNonNull(getActivity()).getMenuInflater();
+        MenuInflater menuInflater = requireActivity().getMenuInflater();
         menuInflater.inflate(R.menu.context_menu_summary, menu);
     }
 
@@ -119,7 +119,7 @@ public class FragmentSummary extends BaseListFragment {
                     intent.putExtra("caption", summaryItem.getName());
                     intent.putExtra(FgConst.HIDE_FAB, true);
                     intent.putExtra(FgConst.LOCK_SLIDINGUP_PANEL, true);
-                    Objects.requireNonNull(getActivity()).startActivity(intent);
+                    requireActivity().startActivity(intent);
                     break;
                 case R.id.action_show_report:
                     intent = new Intent(getActivity(), ActivityReports.class);
@@ -133,7 +133,7 @@ public class FragmentSummary extends BaseListFragment {
     }
 
     private SummaryItem getSummaryItemByID(int id) {
-        Resources res = Objects.requireNonNull(getActivity()).getResources();
+        Resources res = requireActivity().getResources();
         DateTimeFormatter df = DateTimeFormatter.getInstance(getActivity());
         SimpleDateFormat dateFormat;
         Calendar cal = Calendar.getInstance();
@@ -178,7 +178,7 @@ public class FragmentSummary extends BaseListFragment {
     @Override
     @SuppressWarnings("unchecked")
     public void loadData(long itemID) {
-        Set<String> defValues = new HashSet<>(Arrays.asList(Objects.requireNonNull(getActivity()).getResources().getStringArray(R.array.pref_summary_items_values)));
+        Set<String> defValues = new HashSet<>(Arrays.asList(requireActivity().getResources().getStringArray(R.array.pref_summary_items_values)));
         Set<String> set = mPreferences.getStringSet("summary_items", defValues);
 
         List<SummaryItem> items = new ArrayList<>();

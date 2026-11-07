@@ -36,6 +36,7 @@ public class SmsEditText extends androidx.appcompat.widget.AppCompatEditText {
     }
 
     protected void onSelectionChanged(int selStart, int selEnd) {
+        super.onSelectionChanged(selStart, selEnd);
         if (listeners != null && listeners.size() > 0) {
             for (onSelectionChangedListener l : listeners) {
                 if (l != null) {
