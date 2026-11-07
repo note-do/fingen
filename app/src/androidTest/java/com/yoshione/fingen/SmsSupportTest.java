@@ -29,10 +29,10 @@ import org.junit.runner.RunWith;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Devices without telephony: the "Incoming" entry is shown only when there are SMS records,
@@ -74,7 +74,8 @@ public class SmsSupportTest {
 
     @Test
     public void noTelephony_noSmsRecords_noSmsDialog_incomingHidden() throws Exception {
-        assertEquals("precondition: log_Incoming_SMS must be empty", 0, countSmsRecords());
+        // DbSnapshot restores only rows added by the test, so existing rows are not deleted: skip instead
+        assumeTrue("log_Incoming_SMS is not empty on this device", countSmsRecords() == 0);
 
         SmsSupport.setOverrideForTesting(false);
         mActivity = ScreenTestUtils.launch(ActivityMain.class, null);

@@ -14,7 +14,6 @@ import com.yoshione.fingen.utils.Lg;
 import com.yoshione.fingen.widgets.ContextMenuRecyclerView;
 import com.yoshione.fingen.widgets.FgLinearLayoutManager;
 
-
 /**
  * Created by slv on 08.11.2016.
  * Базовый фрагмент, от которого наследуются фрагменты на главном экране (те, что во ViewPager)

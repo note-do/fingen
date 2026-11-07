@@ -930,12 +930,14 @@ public class ActivityMain extends ToolbarActivity {
 
     private void updateCounters() {
         Thread t = new Thread(() -> {
+            int unreadSms;
             try {
-                mUnreadSms = mSmsDAO.get().getAllModels().size();
+                unreadSms = mSmsDAO.get().getAllModels().size();
             } catch (Exception e) {
-                mUnreadSms = 0;
+                unreadSms = 0;
             }
-            mUpdateUIHandler.sendMessage(mUpdateUIHandler.obtainMessage(MSG_UPDATE_SMS_COUNTERS, mUnreadSms, 0));
+            // mUnreadSms is written only on the UI thread (handler)
+            mUpdateUIHandler.sendMessage(mUpdateUIHandler.obtainMessage(MSG_UPDATE_SMS_COUNTERS, unreadSms, 0));
         });
         t.start();
     }
@@ -1095,6 +1097,7 @@ public class ActivityMain extends ToolbarActivity {
                     activity.updateLists();
                     break;
                 case MSG_UPDATE_SMS_COUNTERS:
+                    activity.mUnreadSms = msg.arg1;
                     activity.updateIncomingDrawerItem();
                     activity.invalidateOptionsMenu();
                     break;

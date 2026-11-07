@@ -68,11 +68,15 @@ final class ScreenTestUtils {
         Intent intent = extras != null ? extras : new Intent();
         intent.setClassName(instrumentation.getTargetContext(), cls.getName());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        instrumentation.startActivitySync(intent);
+        final Activity started = instrumentation.startActivitySync(intent);
         long end = System.currentTimeMillis() + TIMEOUT_MS;
         while (System.currentTimeMillis() < end) {
             assertTrue(cls.getSimpleName() + " reached RESUMED on a device where it must close",
                     findResumed(cls) == null);
+            if (isFinished(started)) {
+                return;
+            }
+            // Fallback: the lifecycle monitor (weak references)
             Activity a = findAnyStage(cls);
             if (a != null && (a.isFinishing() || a.isDestroyed())) {
                 return;
@@ -80,6 +84,20 @@ final class ScreenTestUtils {
             Thread.sleep(300);
         }
         assertTrue(cls.getSimpleName() + " did not finish", false);
+    }
+
+    private static boolean isFinished(final Activity activity) {
+        if (activity == null) {
+            return false;
+        }
+        final boolean[] result = {false};
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                result[0] = activity.isFinishing() || activity.isDestroyed();
+            }
+        });
+        return result[0];
     }
 
     private static Activity findAnyStage(final Class<? extends Activity> cls) {
