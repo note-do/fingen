@@ -19,6 +19,9 @@
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false"/>
 
     <application
         android:name=".FGApplication"

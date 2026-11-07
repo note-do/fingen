@@ -5,6 +5,7 @@
 package com.yoshione.fingen;
 
 import com.yoshione.fingen.utils.DebouncingOnClickListener;
+import com.yoshione.fingen.utils.SmsSupport;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.ContentResolver;
@@ -89,6 +90,9 @@ public class FragmentSenderEdit extends DialogFragment {
         mEditTextAmountPos = mBinding.editTextAmountPos;
         mEditTextBalancePos = mBinding.editTextBalancePos;
         mImageButtonSelectSender = mBinding.imageButtonSelectSender;
+        if (!SmsSupport.isAvailable(getActivity())) {
+            mImageButtonSelectSender.setVisibility(View.GONE);
+        }
         mCheckBoxAddCreditLimitToBalance = mBinding.checkBoxAddCreditLimitToBalance;
         mBinding.editTextAmountPos.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));
         mBinding.editTextBalancePos.setOnClickListener(new DebouncingOnClickListener(v -> onClick(v)));

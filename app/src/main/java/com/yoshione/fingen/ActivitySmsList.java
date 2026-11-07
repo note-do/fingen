@@ -18,6 +18,7 @@ import com.yoshione.fingen.model.Sms;
 import com.yoshione.fingen.model.Transaction;
 import com.yoshione.fingen.utils.RequestCodes;
 import com.yoshione.fingen.utils.SmsParser;
+import com.yoshione.fingen.utils.SmsSupport;
 import com.yoshione.fingen.widgets.ToolbarActivity;
 
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class ActivitySmsList extends ToolbarActivity {
         super.onCreateOptionsMenu(menu);
         menu.findItem(R.id.action_paste).setIcon(getDrawable(R.drawable.ic_paste_white));
         menu.findItem(R.id.action_import).setIcon(getDrawable(R.drawable.ic_import_white));
+        menu.findItem(R.id.action_import).setVisible(SmsSupport.isAvailable(this));
         menu.findItem(R.id.action_import).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {

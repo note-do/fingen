@@ -120,6 +120,5 @@ public class ActivityAdditional extends ToolbarActivity {
         AdapterMenuItems adapter = new AdapterMenuItems(menuItemList);
         adapter.setHasStableIds(true);
         recyclerView.setAdapter(adapter);
-        recyclerView.setHasFixedSize(true);
     }
 }
