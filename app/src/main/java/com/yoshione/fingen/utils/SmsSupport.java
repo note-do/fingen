@@ -33,7 +33,7 @@ public class SmsSupport {
      * Для тестов: принудительно задаёт результат {@link #isAvailable(Context)}, null сбрасывает.
      */
     @VisibleForTesting
-    public static synchronized void setOverrideForTesting(@Nullable Boolean value) {
+    static synchronized void setOverrideForTesting(@Nullable Boolean value) {
         sOverride = value;
     }
 }

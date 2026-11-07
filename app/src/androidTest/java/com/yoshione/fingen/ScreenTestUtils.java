@@ -14,14 +14,14 @@ import static org.junit.Assert.assertTrue;
 /**
  * Helpers for smoke tests: start a screen, wait for RESUMED, check that the content is displayed.
  */
-final class ScreenTestUtils {
+public final class ScreenTestUtils {
 
     static final long TIMEOUT_MS = 30000;
 
     private ScreenTestUtils() {
     }
 
-    static Activity launch(Class<? extends Activity> cls, Intent extras) throws Exception {
+    public static Activity launch(Class<? extends Activity> cls, Intent extras) throws Exception {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         Intent intent = extras != null ? extras : new Intent();
         intent.setClassName(instrumentation.getTargetContext(), cls.getName());
@@ -147,7 +147,7 @@ final class ScreenTestUtils {
         assertTrue(activity.getClass().getSimpleName() + ": view is not displayed", shown[0]);
     }
 
-    static void finish(final Activity activity) {
+    public static void finish(final Activity activity) {
         if (activity == null) {
             return;
         }

@@ -1,4 +1,4 @@
-package com.yoshione.fingen;
+package com.yoshione.fingen.utils;
 
 import android.Manifest;
 import android.app.Activity;
@@ -16,9 +16,13 @@ import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
 
 import com.google.android.material.navigation.NavigationView;
+import com.yoshione.fingen.ActivityMain;
+import com.yoshione.fingen.ActivitySmsList;
+import com.yoshione.fingen.DbSnapshot;
+import com.yoshione.fingen.R;
+import com.yoshione.fingen.ScreenTestUtils;
 import com.yoshione.fingen.dao.SmsDAO;
 import com.yoshione.fingen.model.Sms;
-import com.yoshione.fingen.utils.SmsSupport;
 
 import org.junit.After;
 import org.junit.Before;
