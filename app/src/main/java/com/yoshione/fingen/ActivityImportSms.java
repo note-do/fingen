@@ -338,6 +338,7 @@ public class ActivityImportSms extends ToolbarActivity implements IProgressEvent
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == RequestCodes.REQUEST_CODE_SELECT_MODEL) {
             if (data != null) {
                 IAbstractModel model = data.getParcelableExtra("model");

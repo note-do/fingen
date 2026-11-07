@@ -1017,8 +1017,8 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
             return new Pair<>(first, last);
         }
         cursor.moveToFirst();
-        first = new Date(cursor.getLong(cursor.getColumnIndex("minDate")));
-        last = new Date(cursor.getLong(cursor.getColumnIndex("maxDate")));
+        first = new Date(cursor.getLong(cursor.getColumnIndexOrThrow("minDate")));
+        last = new Date(cursor.getLong(cursor.getColumnIndexOrThrow("maxDate")));
         cursor.close();
 
         return new Pair<>(first, last);

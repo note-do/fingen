@@ -1904,6 +1904,7 @@ public class ActivityEditTransaction extends ToolbarActivity implements
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         getIntent().removeExtra("focus_to_category");
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_SELECT_MODEL && data != null) {
             IAbstractModel model = data.getParcelableExtra("model");

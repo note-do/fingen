@@ -124,7 +124,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
         mFabMenuButtonRoot = mBinding.fabMenuButtonRoot;
         mFabMenuButtonRootLayout = mBinding.fabMenuButtonRootLayout;
 
-        mInputModel = Objects.requireNonNull(getArguments()).getParcelable("model");
+        mInputModel = requireArguments().getParcelable("model");
         FabMenuItemClickListener fabMenuItemClickListener = new FabMenuItemClickListener();
         switch (mInputModel.getModelType()) {
             case IAbstractModel.MODEL_TYPE_CABBAGE:
@@ -249,7 +249,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater menuInflater = Objects.requireNonNull(getActivity()).getMenuInflater();
+        MenuInflater menuInflater = requireActivity().getMenuInflater();
         switch (mInputModel.getModelType()) {
             case IAbstractModel.MODEL_TYPE_CATEGORY:
             case IAbstractModel.MODEL_TYPE_PROJECT:
@@ -307,10 +307,10 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                         startActivity(intent);
                         break;
                     case IAbstractModel.MODEL_TYPE_CABBAGE:
-                        CabbageManager.showEditdialog((Cabbage) model, Objects.requireNonNull(getActivity()).getSupportFragmentManager(), getActivity());
+                        CabbageManager.showEditdialog((Cabbage) model, requireActivity().getSupportFragmentManager(), getActivity());
                         break;
                     case IAbstractModel.MODEL_TYPE_SENDER:
-                        SenderManager.showEditDialog((Sender) model, Objects.requireNonNull(getActivity()).getSupportFragmentManager(), getActivity());
+                        SenderManager.showEditDialog((Sender) model, requireActivity().getSupportFragmentManager(), getActivity());
                         break;
                 }
                 break;
@@ -319,7 +319,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                 IAbstractModel model = dao.getModelById(info.id);
                 OnSelectParentModelListener listener = new OnSelectParentModelListener(model);
                 AbstractModelManager.ShowSelectNestedModelDialog(
-                        Objects.requireNonNull(getActivity()).getResources().getString(R.string.ttl_select_parent_item),
+                        requireActivity().getResources().getString(R.string.ttl_select_parent_item),
                         getActivity(),
                         adapter.getTree(),
                         adapter.getItemAtPos(info.position),
@@ -369,7 +369,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                 break;
             }
             case R.id.action_sort: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
                 builder.setTitle(R.string.ttl_confirm_action);
                 builder.setMessage(R.string.ttl_sort_items_confirmation);
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -391,7 +391,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                 break;
             }
             case R.id.action_delete: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
                 builder.setTitle(R.string.ttl_confirm_action);
                 builder.setMessage(R.string.ttl_delete_item_confirm);
 
@@ -469,10 +469,10 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                                     getActivity(), null);
                             break;
                         case IAbstractModel.MODEL_TYPE_CABBAGE:
-                            CabbageManager.showEditdialog(new Cabbage(), Objects.requireNonNull(getActivity()).getSupportFragmentManager(), getActivity());
+                            CabbageManager.showEditdialog(new Cabbage(), requireActivity().getSupportFragmentManager(), getActivity());
                             break;
                         case IAbstractModel.MODEL_TYPE_SENDER:
-                            SenderManager.showEditDialog(new Sender(), Objects.requireNonNull(getActivity()).getSupportFragmentManager(), getActivity());
+                            SenderManager.showEditDialog(new Sender(), requireActivity().getSupportFragmentManager(), getActivity());
                             break;
                         case IAbstractModel.MODEL_TYPE_LOCATION:
                             Intent intent = new Intent(getActivity(), ActivityEditLocation2.class);
@@ -487,7 +487,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                         case IAbstractModel.MODEL_TYPE_PAYEE:
                         case IAbstractModel.MODEL_TYPE_PROJECT:
                         case IAbstractModel.MODEL_TYPE_DEPARTMENT:
-                            AbstractModelManager.ShowSelectNestedModelDialog(Objects.requireNonNull(getActivity()).getResources().getString(R.string.ttl_select_parent_item),
+                            AbstractModelManager.ShowSelectNestedModelDialog(requireActivity().getResources().getString(R.string.ttl_select_parent_item),
                                     getActivity(), adapter.getTree(), null, new AbstractModelManager.EditDialogEventsListener() {
                                         @Override
                                         public void OnOkClick(IAbstractModel parent) {
@@ -499,7 +499,7 @@ public class FragmentTreeModelList extends Fragment implements OnStartDragListen
                                     });
                             break;
                         case IAbstractModel.MODEL_TYPE_LOCATION:
-                            AbstractModelManager.ShowSelectNestedModelDialog(Objects.requireNonNull(getActivity()).getResources().getString(R.string.ttl_select_parent_item),
+                            AbstractModelManager.ShowSelectNestedModelDialog(requireActivity().getResources().getString(R.string.ttl_select_parent_item),
                                     getActivity(), adapter.getTree(), null, new AbstractModelManager.EditDialogEventsListener() {
                                         @Override
                                         public void OnOkClick(IAbstractModel parent) {

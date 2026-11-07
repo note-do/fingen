@@ -80,8 +80,8 @@ public class SmsImporter {
             TransactionsDAO transactionsDAO = TransactionsDAO.getInstance(mContext);
             while (cursor.moveToNext()) {
 //                String address = cursor.getString(cursor.getColumnIndex("address"));
-                Date date = new Date(cursor.getLong(cursor.getColumnIndex("date")));
-                String msg = cursor.getString(cursor.getColumnIndex("body"));
+                Date date = new Date(cursor.getLong(cursor.getColumnIndexOrThrow("date")));
+                String msg = cursor.getString(cursor.getColumnIndexOrThrow("body"));
 
                 boolean filtered = date.after(mStartDate);
                 filtered = filtered & date.before(mEndDate);

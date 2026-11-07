@@ -156,13 +156,13 @@ public class CreditsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
     }
 
     private Category cursorToCategoryWithPlanFact(Cursor cursor, Context context) {
-        Account account = AccountsDAO.getInstance(context).getAccountByID(cursor.getLong(cursor.getColumnIndex(DBHelper.C_REF_DEBTS_ACCOUNT)));
+        Account account = AccountsDAO.getInstance(context).getAccountByID(cursor.getLong(cursor.getColumnIndexOrThrow(DBHelper.C_REF_DEBTS_ACCOUNT)));
         Cabbage cabbage = AccountManager.getCabbage(account, context);
         BigDecimal plan;
         BigDecimal fact;
-        plan = new BigDecimal(cursor.getDouble(cursor.getColumnIndex(DBHelper.C_REF_CATEGORIES_PLAN)));
-        fact = new BigDecimal(cursor.getDouble(cursor.getColumnIndex("t1")))
-                .add(new BigDecimal(cursor.getDouble(cursor.getColumnIndex("t2"))));
+        plan = new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.C_REF_CATEGORIES_PLAN)));
+        fact = new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("t1")))
+                .add(new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("t2"))));
         SumsByCabbage sums = new SumsByCabbage(cabbage.getID(), BigDecimal.ZERO, BigDecimal.ZERO);
         if (plan.compareTo(BigDecimal.ZERO) < 0) {
             sums.setOutPlan(plan);
@@ -175,7 +175,7 @@ public class CreditsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
             sums.setInTrSum(fact);
         }
 
-        long categoryId = AdapterBudget.BUDGET_ITEM_DEBTS_ROOT - cursor.getLong(cursor.getColumnIndex(DBHelper.C_ID));
+        long categoryId = AdapterBudget.BUDGET_ITEM_DEBTS_ROOT - cursor.getLong(cursor.getColumnIndexOrThrow(DBHelper.C_ID));
 
         Category category = new Category();
 

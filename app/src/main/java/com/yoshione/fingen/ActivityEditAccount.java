@@ -120,6 +120,7 @@ public class ActivityEditAccount extends ToolbarActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if ((requestCode == RequestCodes.REQUEST_CODE_SELECT_MODEL) && (resultCode == RESULT_OK) && data != null) {
             IAbstractModel model = data.getParcelableExtra("model");
             if (model.getModelType() == IAbstractModel.MODEL_TYPE_CABBAGE) {

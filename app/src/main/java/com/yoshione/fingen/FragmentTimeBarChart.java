@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -128,7 +127,7 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
                 intent.putParcelableArrayListExtra("filter_list", filters);
                 intent.putExtra(FgConst.HIDE_FAB, true);
                 intent.putExtra(FgConst.LOCK_SLIDINGUP_PANEL, true);
-                Objects.requireNonNull(getActivity()).startActivity(intent);
+                requireActivity().startActivity(intent);
             }
         });
 
@@ -239,7 +238,7 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
         }
 
         BarDataSet<DateRangeSum> setExpense = new BarDataSet<>(yValsExpense, getString(R.string.ent_outcome));
-        setExpense.setColor(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.negative_color));
+        setExpense.setColor(ContextCompat.getColor(requireActivity(), R.color.negative_color));
         setExpense.setValueFormatter(getValueFormatter());
         setExpense.setDrawValuesEnabled(mDrawBarLabels);
         BarDataSet<DateRangeSum> setIncome = new BarDataSet<>(yValsIncome, getString(R.string.ent_income));
@@ -278,9 +277,9 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
             yValsSum.add(barEntry);
             xVals.add(String.format("%s (%s)", df.format(entry.getDate()), formatValue(sum.abs().floatValue())));
             if (sum.compareTo(BigDecimal.ZERO) >= 0) {
-                colors.add(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.positive_color));
+                colors.add(ContextCompat.getColor(requireActivity(), R.color.positive_color));
             } else {
-                colors.add(ContextCompat.getColor(Objects.requireNonNull(getActivity()), R.color.negative_color));
+                colors.add(ContextCompat.getColor(requireActivity(), R.color.negative_color));
             }
             i++;
         }
@@ -396,7 +395,7 @@ public class FragmentTimeBarChart extends Fragment implements OnChartValueSelect
     }
 
     private Pair<Date, Date> getPairDates(Date date) {
-        int dateRange = PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity())).getInt("report_date_range", 0);
+        int dateRange = PreferenceManager.getDefaultSharedPreferences(requireActivity()).getInt("report_date_range", 0);
         Calendar c = Calendar.getInstance();
         c.setTime(date);
         c.set(Calendar.HOUR_OF_DAY, 23);

@@ -14,7 +14,6 @@ import com.yoshione.fingen.utils.Lg;
 import com.yoshione.fingen.widgets.ContextMenuRecyclerView;
 import com.yoshione.fingen.widgets.FgLinearLayoutManager;
 
-import java.util.Objects;
 
 /**
  * Created by slv on 08.11.2016.
@@ -49,7 +48,7 @@ public class BaseListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Lg.log("%s onCreateView", getClass().getName());
-        View view = inflater.inflate(Objects.requireNonNull(getArguments()).getInt(LAYOUT_NAME_PARAM), container, false);
+        View view = inflater.inflate(requireArguments().getInt(LAYOUT_NAME_PARAM), container, false);
         recyclerView = view.findViewById(R.id.recycler_view);
         FgLinearLayoutManager layoutManager = new FgLinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
@@ -93,13 +92,13 @@ public class BaseListFragment extends Fragment {
         if (getView() != null && getUserVisibleHint() && !isUpdating) {
             update(itemID);
         } else {
-            PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity())).edit().putBoolean(mForceUpdateParam, true).apply();
+            PreferenceManager.getDefaultSharedPreferences(requireActivity()).edit().putBoolean(mForceUpdateParam, true).apply();
         }
     }
 
     private void updateIfNecessary(long itemID) {
         Lg.log("%s updateIfNecessary", getClass().getName());
-        if (getView() != null && getUserVisibleHint() && !isUpdating && PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity())).getBoolean(mForceUpdateParam, false)) {
+        if (getView() != null && getUserVisibleHint() && !isUpdating && PreferenceManager.getDefaultSharedPreferences(requireActivity()).getBoolean(mForceUpdateParam, false)) {
             update(itemID);
         }
     }
@@ -109,7 +108,7 @@ public class BaseListFragment extends Fragment {
 
         loadData(itemID);
 
-        PreferenceManager.getDefaultSharedPreferences(Objects.requireNonNull(getActivity())).edit().putBoolean(mForceUpdateParam, false).apply();
+        PreferenceManager.getDefaultSharedPreferences(requireActivity()).edit().putBoolean(mForceUpdateParam, false).apply();
 
         isUpdating = false;
     }

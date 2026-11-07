@@ -342,17 +342,17 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
             case R.id.action_add: {
                 Intent intent = new Intent(getActivity(), ActivityEditAccount.class);
                 intent.putExtra("account", new Account());
-                Objects.requireNonNull(getActivity()).startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_ACCOUNT);
+                requireActivity().startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_ACCOUNT);
                 break;
             }
             case R.id.action_edit: {
                 Intent intent = new Intent(getActivity(), ActivityEditAccount.class);
                 intent.putExtra("account", mAccountsDAO.get().getAccountByID(info.id));
-                Objects.requireNonNull(getActivity()).startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_ACCOUNT);
+                requireActivity().startActivityForResult(intent, RequestCodes.REQUEST_CODE_EDIT_ACCOUNT);
                 break;
             }
             case R.id.action_delete: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
                 builder.setTitle(R.string.ttl_confirm_action);
                 Account account = mAccountsDAO.get().getAccountByID(info.id);
                 builder.setMessage(String.format(getString(R.string.msg_delete_account_confirmation), account.getName()));
@@ -366,7 +366,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
                 break;
             }
             case R.id.action_show_transactions: {
-                if (Objects.requireNonNull(getActivity()).getClass().equals(ActivityMain.class)) {
+                if (requireActivity().getClass().equals(ActivityMain.class)) {
                     ActivityMain activityMain = (ActivityMain) getActivity();
                     if (activityMain.fragmentTransactions.adapterF != null) {
                         Account account = mAccountsDAO.get().getAccountByID(info.id);
@@ -395,7 +395,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
                 startActivity(intent);
                 break;
             case R.id.action_balance_adjustment: {
-                AlertDialog.Builder builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()));
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
                 final Account account = mAccountsDAO.get().getAccountByID(info.id);
                 Cabbage cabbage = AccountManager.getCabbage(account, getActivity());
                 builder.setTitle(getString(R.string.ttl_enter_actual_balance));
@@ -421,7 +421,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
                 break;
             }
             case R.id.action_sort: {
-                AccountManager.showSortDialog(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), getActivity());
+                AccountManager.showSortDialog(requireActivity().getSupportFragmentManager(), getActivity());
                 break;
             }
             case R.id.action_drag_mode: {
@@ -557,7 +557,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     private void animatePullMe() {
         if (!mPullMeBended) {
             mPullMeBended = true;
-            mImageViewPullMe.setImageDrawable(Objects.requireNonNull(getContext()).getDrawable(R.drawable.pull_me_animated));
+            mImageViewPullMe.setImageDrawable(requireContext().getDrawable(R.drawable.pull_me_animated));
             ((Animatable) mImageViewPullMe.getDrawable()).start();
         }
     }
@@ -565,7 +565,7 @@ public class FragmentAccounts extends BaseListFragment implements OnStartDragLis
     private void animatePullMeReverse() {
         if (mPullMeBended) {
             mPullMeBended = false;
-            mImageViewPullMe.setImageDrawable(Objects.requireNonNull(getContext()).getDrawable(R.drawable.pull_me_animated_reverse));
+            mImageViewPullMe.setImageDrawable(requireContext().getDrawable(R.drawable.pull_me_animated_reverse));
             ((Animatable) mImageViewPullMe.getDrawable()).start();
         }
     }
