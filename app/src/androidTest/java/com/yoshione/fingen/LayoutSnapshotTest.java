@@ -32,7 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
-import org.junit.BeforeClass;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,7 +57,8 @@ import static org.junit.Assert.assertTrue;
  * activity_backup, activity_edit_transaction, fragment_date_filter_settings, fragment_model_list,
  * fragment_tree_model_list, list_item_menu, list_item_summary.
  *
- * Tag: -Pandroid.testInstrumentationRunnerArguments.snapTag=before (default "default").
+ * Runs only when the snapTag argument is passed, otherwise all tests are skipped:
+ * -Pandroid.testInstrumentationRunnerArguments.snapTag=before.
  * Output: /storage/emulated/0/Download/fingen_snapshots/<tag>/ (MediaStore, survives uninstall).
  * Pull: adb pull /storage/emulated/0/Download/fingen_snapshots/<tag> <dir>.
  */
@@ -74,21 +75,28 @@ public class LayoutSnapshotTest {
     @Rule
     public final SystemDialogsRule dialogs = new SystemDialogsRule();
 
+    private static String sClearedTag;
+
     private Context mContext;
     private DbSnapshot mSnapshot;
     private String mTag;
     private Activity mActivity;
     private android.app.DialogFragment mDialog;
 
-    @BeforeClass
-    public static void clearPreviousRun() throws Exception {
-        // Previous run with the same tag is replaced by this one (once per class, not per test).
-        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-                .executeShellCommand("rm -rf " + DEVICE_ROOT + resolveTag());
-    }
-
     @Before
     public void setUp() throws Exception {
+        // Must be first: without snapTag each test is reported as skipped and nothing is deleted.
+        Assume.assumeTrue("LayoutSnapshotTest runs only with "
+                        + "-Pandroid.testInstrumentationRunnerArguments.snapTag=<tag>",
+                InstrumentationRegistry.getArguments().getString(ARG_SNAP_TAG) != null);
+        // Previous run with the same tag is replaced by this one (once per tag per process, not per test).
+        String tag = resolveTag();
+        if (!tag.equals(sClearedTag)) {
+            UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+                    .executeShellCommand("rm -rf " + DEVICE_ROOT + tag);
+            sClearedTag = tag;
+        }
+
         mContext = InstrumentationRegistry.getTargetContext();
         mTag = resolveTag();
         mActivity = null;
@@ -127,7 +135,9 @@ public class LayoutSnapshotTest {
             }
         });
         ScreenTestUtils.finish(mActivity);
-        mSnapshot.restore(mContext);
+        if (mSnapshot != null) {
+            mSnapshot.restore(mContext);
+        }
     }
 
     @Test
