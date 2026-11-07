@@ -16,6 +16,7 @@ import com.yoshione.fingen.model.Credit;
 import com.yoshione.fingen.model.Location;
 import com.yoshione.fingen.model.Template;
 import com.yoshione.fingen.utils.RequestCodes;
+import com.yoshione.fingen.utils.SmsSupport;
 
 import org.junit.After;
 import org.junit.Before;
@@ -143,7 +144,12 @@ public class ScreenLaunchTest {
 
     @Test
     public void importSms() throws Exception {
-        check(ActivityImportSms.class, null);
+        if (SmsSupport.isAvailable(InstrumentationRegistry.getTargetContext())) {
+            check(ActivityImportSms.class, null);
+        } else {
+            // без телефонии ActivityImportSms закрывается в onCreate и не должен дойти до RESUMED
+            ScreenTestUtils.launchExpectingFinish(ActivityImportSms.class, null);
+        }
     }
 
     @Test

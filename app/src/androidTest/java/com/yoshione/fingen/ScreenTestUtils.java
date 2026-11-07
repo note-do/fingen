@@ -59,6 +59,47 @@ final class ScreenTestUtils {
         return result[0];
     }
 
+    /**
+     * Starts the activity and waits until it is finishing (or destroyed) without reaching RESUMED.
+     * Used for screens that close themselves on devices without the required feature.
+     */
+    static void launchExpectingFinish(Class<? extends Activity> cls, Intent extras) throws Exception {
+        Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        Intent intent = extras != null ? extras : new Intent();
+        intent.setClassName(instrumentation.getTargetContext(), cls.getName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        instrumentation.startActivitySync(intent);
+        long end = System.currentTimeMillis() + TIMEOUT_MS;
+        while (System.currentTimeMillis() < end) {
+            assertTrue(cls.getSimpleName() + " reached RESUMED on a device where it must close",
+                    findResumed(cls) == null);
+            Activity a = findAnyStage(cls);
+            if (a != null && (a.isFinishing() || a.isDestroyed())) {
+                return;
+            }
+            Thread.sleep(300);
+        }
+        assertTrue(cls.getSimpleName() + " did not finish", false);
+    }
+
+    private static Activity findAnyStage(final Class<? extends Activity> cls) {
+        final Activity[] result = {null};
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
+            @Override
+            public void run() {
+                for (Stage stage : Stage.values()) {
+                    for (Activity a : ActivityLifecycleMonitorRegistry.getInstance()
+                            .getActivitiesInStage(stage)) {
+                        if (cls.isInstance(a)) {
+                            result[0] = a;
+                        }
+                    }
+                }
+            }
+        });
+        return result[0];
+    }
+
     /** Content root of the activity must be attached, visible and have a size. */
     static void assertContentDisplayed(final Activity activity) {
         final boolean[] shown = {false};
