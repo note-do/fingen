@@ -380,8 +380,8 @@ public class UpdateHelper {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
                         ContentValues values = new ContentValues();
-                        values.put("Name", cursor.getString(cursor.getColumnIndex("Object")));
-                        phoneNo = cursor.getString(cursor.getColumnIndex("Pattern"));
+                        values.put("Name", cursor.getString(cursor.getColumnIndexOrThrow("Object")));
+                        phoneNo = cursor.getString(cursor.getColumnIndexOrThrow("Pattern"));
                         values.put("PhoneNo", phoneNo);
                         values.put("AmountPos", 0);
                         values.put("BalancePos", 1);
@@ -413,7 +413,7 @@ public class UpdateHelper {
             try {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
-                        String smsSender = cursor.getString(cursor.getColumnIndex("Sender"));
+                        String smsSender = cursor.getString(cursor.getColumnIndexOrThrow("Sender"));
                         long senderId = 0;
                         if (smsSender != null && !smsSender.trim().isEmpty()) {
                             String key = smsSender.trim().toLowerCase();
@@ -439,11 +439,11 @@ public class UpdateHelper {
                             }
                         }
                         ContentValues values = new ContentValues();
-                        values.put("_id", cursor.getLong(cursor.getColumnIndex("_id")));
-                        String dateTime = cursor.getString(cursor.getColumnIndex("DateTime"));
+                        values.put("_id", cursor.getLong(cursor.getColumnIndexOrThrow("_id")));
+                        String dateTime = cursor.getString(cursor.getColumnIndexOrThrow("DateTime"));
                         values.put("DateTime", dateTime == null ? "" : dateTime);
                         values.put("Sender", senderId);
-                        String body = cursor.getString(cursor.getColumnIndex("Body"));
+                        String body = cursor.getString(cursor.getColumnIndexOrThrow("Body"));
                         values.put("Body", body == null ? "" : body);
                         db.insert("tempsms", null, values);
                         cursor.moveToNext();
@@ -488,36 +488,36 @@ public class UpdateHelper {
                     ContentValues values = new ContentValues();
                     while (!cursor.isAfterLast()) {
                         values.clear();
-                        values.put("DateTime", dtf.parseDateTimeSqlString(cursor.getString(cursor.getColumnIndex("DateTime"))).getTime());
-                        values.put("SrcAccount", cursor.getLong(cursor.getColumnIndex("SrcAccount")));
-                        values.put("Payee", cursor.getLong(cursor.getColumnIndex("Payee")));
-                        values.put("Category", cursor.getLong(cursor.getColumnIndex("Category")));
-                        values.put("Amount", cursor.getDouble(cursor.getColumnIndex("Amount")));
-                        values.put("Project", cursor.getLong(cursor.getColumnIndex("Project")));
-                        values.put("Department", cursor.getLong(cursor.getColumnIndex("Department")));
-                        values.put("Location", cursor.getLong(cursor.getColumnIndex("Location")));
-                        values.put("Comment", cursor.getString(cursor.getColumnIndex("Comment")));
-                        values.put("File", cursor.getString(cursor.getColumnIndex("File")));
-                        values.put("DestAccount", cursor.getLong(cursor.getColumnIndex("DestAccount")));
-                        values.put("ExchangeRate", cursor.getDouble(cursor.getColumnIndex("ExchangeRate")));
-                        values.put("AutoCreated", cursor.getInt(cursor.getColumnIndex("AutoCreated")) == 1);
-                        if (!cursor.isNull(cursor.getColumnIndex("Lat"))) {
-                            values.put("Lat", cursor.getDouble(cursor.getColumnIndex("Lat")));
+                        values.put("DateTime", dtf.parseDateTimeSqlString(cursor.getString(cursor.getColumnIndexOrThrow("DateTime"))).getTime());
+                        values.put("SrcAccount", cursor.getLong(cursor.getColumnIndexOrThrow("SrcAccount")));
+                        values.put("Payee", cursor.getLong(cursor.getColumnIndexOrThrow("Payee")));
+                        values.put("Category", cursor.getLong(cursor.getColumnIndexOrThrow("Category")));
+                        values.put("Amount", cursor.getDouble(cursor.getColumnIndexOrThrow("Amount")));
+                        values.put("Project", cursor.getLong(cursor.getColumnIndexOrThrow("Project")));
+                        values.put("Department", cursor.getLong(cursor.getColumnIndexOrThrow("Department")));
+                        values.put("Location", cursor.getLong(cursor.getColumnIndexOrThrow("Location")));
+                        values.put("Comment", cursor.getString(cursor.getColumnIndexOrThrow("Comment")));
+                        values.put("File", cursor.getString(cursor.getColumnIndexOrThrow("File")));
+                        values.put("DestAccount", cursor.getLong(cursor.getColumnIndexOrThrow("DestAccount")));
+                        values.put("ExchangeRate", cursor.getDouble(cursor.getColumnIndexOrThrow("ExchangeRate")));
+                        values.put("AutoCreated", cursor.getInt(cursor.getColumnIndexOrThrow("AutoCreated")) == 1);
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow("Lat"))) {
+                            values.put("Lat", cursor.getDouble(cursor.getColumnIndexOrThrow("Lat")));
                         } else {
                             values.put("Lat", 0);
                         }
-                        if (!cursor.isNull(cursor.getColumnIndex("Lon"))) {
-                            values.put("Lon", cursor.getDouble(cursor.getColumnIndex("Lon")));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow("Lon"))) {
+                            values.put("Lon", cursor.getDouble(cursor.getColumnIndexOrThrow("Lon")));
                         } else {
                             values.put("Lon", 0);
                         }
-                        if (!cursor.isNull(cursor.getColumnIndex("Accuracy"))) {
-                            values.put("Accuracy", cursor.getInt(cursor.getColumnIndex("Accuracy")));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow("Accuracy"))) {
+                            values.put("Accuracy", cursor.getInt(cursor.getColumnIndexOrThrow("Accuracy")));
                         } else {
                             values.put("Accuracy", -1);
                         }
-                        if (!cursor.isNull(cursor.getColumnIndex("SimpleDebt"))) {
-                            values.put("SimpleDebt", cursor.getLong(cursor.getColumnIndex("SimpleDebt")));
+                        if (!cursor.isNull(cursor.getColumnIndexOrThrow("SimpleDebt"))) {
+                            values.put("SimpleDebt", cursor.getLong(cursor.getColumnIndexOrThrow("SimpleDebt")));
                         } else {
                             values.put("SimpleDebt", -1);
                         }
@@ -673,7 +673,7 @@ public class UpdateHelper {
             try {
                 if (cursorDebts.moveToFirst()) {
                     while (!cursorDebts.isAfterLast()) {
-                        debtIDs.add(cursorDebts.getLong(cursorDebts.getColumnIndex("_id")));
+                        debtIDs.add(cursorDebts.getLong(cursorDebts.getColumnIndexOrThrow("_id")));
                         cursorDebts.moveToNext();
                     }
                 }

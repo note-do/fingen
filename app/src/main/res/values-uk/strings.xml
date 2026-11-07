@@ -3,11 +3,11 @@
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_total" formatted="false">Итого</string>
+    <string name="ent_total" formatted="false">Разом</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_income" formatted="false">Приход</string>
+    <string name="ent_income" formatted="false">Дохід</string>
 
     <!-- 1. General -->
     <!-- Entities -->
@@ -15,15 +15,15 @@
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="cancel" formatted="false">Отмена</string>
+    <string name="cancel" formatted="false">Скасувати</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_outcome" formatted="false">Расход</string>
+    <string name="ent_outcome" formatted="false">Витрата</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_name" formatted="false">Название</string>
+    <string name="ent_name" formatted="false">Назва</string>
 
     <!-- 1. General -->
     <!-- Entities -->
@@ -35,39 +35,39 @@
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_time" formatted="false">Время</string>
+    <string name="ent_time" formatted="false">Час</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_amount" formatted="false">Сумма</string>
+    <string name="ent_amount" formatted="false">Сума</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_comment" formatted="false">Комментарий</string>
+    <string name="ent_comment" formatted="false">Коментар</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_search" formatted="false">Поиск</string>
+    <string name="ent_search" formatted="false">Пошук</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="sort_type_asc" formatted="false">По возрастанию</string>
+    <string name="sort_type_asc" formatted="false">За зростанням</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="sort_type_desc" formatted="false">По убыванию</string>
+    <string name="sort_type_desc" formatted="false">За спаданням</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_start_date" formatted="false">Начальная дата</string>
+    <string name="ent_start_date" formatted="false">Початкова дата</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_end_date" formatted="false">Конечная дата</string>
+    <string name="ent_end_date" formatted="false">Кінцева дата</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_date_range" formatted="false">Диапазон дат</string>
+    <string name="ent_date_range" formatted="false">Діапазон дат</string>
 
     <!-- 1. General -->
     <!-- Entities -->
@@ -75,27 +75,27 @@
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_date_range_week" formatted="false">Неделя</string>
+    <string name="ent_date_range_week" formatted="false">Тиждень</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_date_range_month" formatted="false">Месяц</string>
+    <string name="ent_date_range_month" formatted="false">Місяць</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_date_range_year" formatted="false">Год</string>
+    <string name="ent_date_range_year" formatted="false">Рік</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_date_range_current" formatted="false">Текущий</string>
+    <string name="ent_date_range_current" formatted="false">Поточний</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_date_range_past" formatted="false">Прошедший</string>
+    <string name="ent_date_range_past" formatted="false">Минулий</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_date_range_current_and_past" formatted="false">Тек. и прош.</string>
+    <string name="ent_date_range_current_and_past" formatted="false">Пот. і мин.</string>
 
     <!-- 1. General -->
     <!-- Entities -->
@@ -107,35 +107,35 @@
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_both" formatted="false">Оба</string>
+    <string name="ent_both" formatted="false">Обидва</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_exchange_rate" formatted="false">Обменный курс</string>
+    <string name="ent_exchange_rate" formatted="false">Курс обміну</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_additional" formatted="false">Дополнительно</string>
+    <string name="ent_additional" formatted="false">Додатково</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_references" formatted="false">Справочники</string>
+    <string name="ent_references" formatted="false">Довідники</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_help" formatted="false">Справка</string>
+    <string name="ent_help" formatted="false">Довідка</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_percent" formatted="false">Процент</string>
+    <string name="ent_percent" formatted="false">Відсоток</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_percents" formatted="false">Проценты</string>
+    <string name="ent_percents" formatted="false">Відсотки</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_more" formatted="false">Ещё</string>
+    <string name="ent_more" formatted="false">Ще</string>
 
     <!-- 1. General -->
     <!-- Entities -->
@@ -143,11 +143,11 @@
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_item" formatted="false">Элемент</string>
+    <string name="ent_item" formatted="false">Елемент</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_nested_item" formatted="false">Вложенный элемент</string>
+    <string name="ent_nested_item" formatted="false">Вкладений елемент</string>
 
     <!-- 1. General -->
     <!-- Entities -->
@@ -155,15 +155,15 @@
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_summary" formatted="false">Сводка</string>
+    <string name="ent_summary" formatted="false">Зведення</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_date_time" formatted="false">Дата, время</string>
+    <string name="ent_date_time" formatted="false">Дата, час</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_payee_dest_account" formatted="false">Получатель или счет назначения</string>
+    <string name="ent_payee_dest_account" formatted="false">Одержувач або рахунок призначення</string>
 
     <!-- 1. General -->
     <!-- Entities -->
@@ -171,195 +171,195 @@
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_monday" formatted="false">Понедельник</string>
+    <string name="ent_monday" formatted="false">Понеділок</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_sunday" formatted="false">Воскресенье</string>
+    <string name="ent_sunday" formatted="false">Неділя</string>
 
     <!-- 1. General -->
     <!-- Entities -->
-    <string name="ent_undefined" formatted="false">Не определено</string>
+    <string name="ent_undefined" formatted="false">Не визначено</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_create" formatted="false">Создать</string>
+    <string name="act_create" formatted="false">Створити</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_select" formatted="false">Выбрать</string>
+    <string name="act_select" formatted="false">Вибрати</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_add" formatted="false">Добавить</string>
+    <string name="act_add" formatted="false">Додати</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_add_nested" formatted="false">Добавить вложенный</string>
+    <string name="act_add_nested" formatted="false">Додати вкладений</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_edit" formatted="false">Редактировать</string>
+    <string name="act_edit" formatted="false">Редагувати</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_delete" formatted="false">Удалить</string>
+    <string name="act_delete" formatted="false">Видалити</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_delete_all" formatted="false">Удалить все</string>
+    <string name="act_delete_all" formatted="false">Видалити все</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_undo" formatted="false">Отменить</string>
+    <string name="act_undo" formatted="false">Скасувати</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_duplicate" formatted="false">Дублировать</string>
+    <string name="act_duplicate" formatted="false">Дублювати</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_sort" formatted="false">Сортировать</string>
+    <string name="act_sort" formatted="false">Сортувати</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_paste" formatted="false">Вставить из буфера обмена</string>
+    <string name="act_paste" formatted="false">Вставити</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_next" formatted="false">Далее</string>
+    <string name="act_next" formatted="false">Далі</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_save" formatted="false">Сохранить</string>
+    <string name="act_save" formatted="false">Зберегти</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_ask_question" formatted="false">Задать вопрос</string>
+    <string name="act_ask_question" formatted="false">Поставити запитання</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_new_expense" formatted="false">Новый расход</string>
+    <string name="act_new_expense" formatted="false">Нова витрата</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_new_income" formatted="false">Новый приход</string>
+    <string name="act_new_income" formatted="false">Новий дохід</string>
 
     <!-- 1. General -->
     <!-- Actions -->
-    <string name="act_new_transfer" formatted="false">Новый перевод</string>
+    <string name="act_new_transfer" formatted="false">Новий переказ</string>
 
     <!-- 1. General -->
     <!-- Titles -->
-    <string name="ttl_enter_new_name" formatted="false">Введите новое название</string>
+    <string name="ttl_enter_new_name" formatted="false">Введіть нову назву</string>
 
     <!-- 1. General -->
     <!-- Titles -->
-    <string name="ttl_confirm_action" formatted="false">Подтвердите действие</string>
+    <string name="ttl_confirm_action" formatted="false">Підтвердьте дію</string>
 
     <!-- 1. General -->
     <!-- Titles -->
-    <string name="ttl_select_action" formatted="false">Выберите действие</string>
+    <string name="ttl_select_action" formatted="false">Виберіть дію</string>
 
     <!-- 1. General -->
     <!-- Titles -->
-    <string name="ttl_error" formatted="false">Ошибка</string>
+    <string name="ttl_error" formatted="false">Помилка</string>
 
     <!-- 1. General -->
     <!-- Titles -->
-    <string name="ttl_delete_item_confirm" formatted="false">Удалить элемент?</string>
+    <string name="ttl_delete_item_confirm" formatted="false">Видалити елемент?</string>
 
     <!-- 1. General -->
     <!-- Titles -->
-    <string name="ttl_email_subject" formatted="false">Вопрос по приложению Fingen</string>
+    <string name="ttl_email_subject" formatted="false">Запитання щодо застосунку Fingen</string>
 
     <!-- 1. General -->
     <!-- Titles -->
-    <string name="ttl_email_body" formatted="false">Напишите свой вопрос</string>
+    <string name="ttl_email_body" formatted="false">Напишіть своє запитання</string>
 
     <!-- 1. General -->
     <!-- Messages -->
-    <string name="msg_set_date" formatted="false">Укажите дату</string>
+    <string name="msg_set_date" formatted="false">Вкажіть дату</string>
 
     <!-- 1. General -->
     <!-- Messages -->
-    <string name="msg_set_time" formatted="false">Укажите время</string>
+    <string name="msg_set_time" formatted="false">Вкажіть час</string>
 
     <!-- 1. General -->
     <!-- Messages -->
-    <string name="msg_invalid_data_in_fields" formatted="false">Не все поля заполнены корректно</string>
+    <string name="msg_invalid_data_in_fields" formatted="false">Некоректні дані</string>
 
     <!-- 1. General -->
     <!-- Messages -->
-    <string name="msg_error_on_write_to_db" formatted="false">Ошибка при записи в базу. Операция отменена.</string>
+    <string name="msg_error_on_write_to_db" formatted="false">Помилка запису до БД. Операцію скасовано.</string>
 
     <!-- 1. General -->
     <!-- Messages -->
-    <string name="msg_error_on_read_from_db" formatted="false">Ошибка при чтении из базы данных</string>
+    <string name="msg_error_on_read_from_db" formatted="false">Помилка читання з БД</string>
 
     <!-- 1. General -->
     <!-- Messages -->
-    <string name="msg_press_back_again_to_exit" formatted="false">Нажмите еще раз для выхода</string>
+    <string name="msg_press_back_again_to_exit" formatted="false">Натисніть ще раз для виходу</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_account" formatted="false">Счет</string>
+    <string name="ent_account" formatted="false">Рахунок</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_accounts" formatted="false">Счета</string>
+    <string name="ent_accounts" formatted="false">Рахунки</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_emitent" formatted="false">Эмитент</string>
+    <string name="ent_emitent" formatted="false">Емітент</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_last4digits" formatted="false">Последние 4 цифры номера карты</string>
+    <string name="ent_last4digits" formatted="false">Останні 4 цифри номера картки</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_start_balance" formatted="false">Начальный баланс</string>
+    <string name="ent_start_balance" formatted="false">Початковий баланс</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_credit_limit" formatted="false">Кредитный лимит</string>
+    <string name="ent_credit_limit" formatted="false">Кредитний ліміт</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_account_isclosed" formatted="false">Счет закрыт</string>
+    <string name="ent_account_isclosed" formatted="false">Рахунок закрито</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_new_account" formatted="false">Новый счет</string>
+    <string name="ent_new_account" formatted="false">Новий рахунок</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_edit_account" formatted="false">Редактирование счета</string>
+    <string name="ent_edit_account" formatted="false">Редагування рахунку</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_all_accounts" formatted="false">Все счета</string>
+    <string name="ent_all_accounts" formatted="false">Усі рахунки</string>
 
     <!-- 2. Accounts -->
     <!-- Entities -->
-    <string name="ent_active_account_set" formatted="false">Активный набор счетов</string>
+    <string name="ent_active_account_set" formatted="false">Активний набір рахунків</string>
 
     <!-- 2. Accounts -->
     <!-- Account types -->
-    <string name="account_type_cash" formatted="false">Наличные</string>
+    <string name="account_type_cash" formatted="false">Готівка</string>
 
     <!-- 2. Accounts -->
     <!-- Account types -->
-    <string name="account_type_bank_account" formatted="false">Счет</string>
+    <string name="account_type_bank_account" formatted="false">Банківський рахунок</string>
 
     <!-- 2. Accounts -->
     <!-- Account types -->
-    <string name="account_type_debit_card" formatted="false">Дебетовая карта</string>
+    <string name="account_type_debit_card" formatted="false">Дебетова картка</string>
 
     <!-- 2. Accounts -->
     <!-- Account types -->
-    <string name="account_type_credit_card" formatted="false">Кредитная карта</string>
+    <string name="account_type_credit_card" formatted="false">Кредитна картка</string>
 
     <!-- 2. Accounts -->
     <!-- Account types -->
@@ -367,63 +367,63 @@
 
     <!-- 2. Accounts -->
     <!-- Account types -->
-    <string name="account_type_red" formatted="false">Пассив</string>
+    <string name="account_type_red" formatted="false">Пасив</string>
 
     <!-- 2. Accounts -->
     <!-- Account types -->
-    <string name="account_type_other" formatted="false">Другое</string>
+    <string name="account_type_other" formatted="false">Інше</string>
 
     <!-- 2. Accounts -->
     <!-- Account sort types -->
-    <string name="acc_sort_type_custom" formatted="false">Вручную</string>
+    <string name="acc_sort_type_custom" formatted="false">Вручну</string>
 
     <!-- 2. Accounts -->
     <!-- Account sort types -->
-    <string name="acc_sort_type_date_creation" formatted="false">По дате создания</string>
+    <string name="acc_sort_type_date_creation" formatted="false">За датою створення</string>
 
     <!-- 2. Accounts -->
     <!-- Account sort types -->
-    <string name="acc_sort_type_date_last_operation" formatted="false">По дате последней транзакции</string>
+    <string name="acc_sort_type_date_last_operation" formatted="false">За датою останньої операції</string>
 
     <!-- 2. Accounts -->
     <!-- Account sort types -->
-    <string name="acc_sort_type_balance" formatted="false">По балансу</string>
+    <string name="acc_sort_type_balance" formatted="false">За балансом</string>
 
     <!-- 2. Accounts -->
     <!-- Account sort types -->
-    <string name="acc_sort_type_type" formatted="false">По типу</string>
+    <string name="acc_sort_type_type" formatted="false">За типом</string>
 
     <!-- 2. Accounts -->
     <!-- Account sort types -->
-    <string name="acc_sort_type_alphabet" formatted="false">По алфавиту</string>
+    <string name="acc_sort_type_alphabet" formatted="false">За алфавітом</string>
 
     <!-- 2. Accounts -->
     <!-- Actions -->
-    <string name="act_drag_mode" formatted="false">Режим ручной сортировки</string>
+    <string name="act_drag_mode" formatted="false">Ручне впорядкування рахунків</string>
 
     <!-- 2. Accounts -->
     <!-- Actions -->
-    <string name="act_balance_adjustment" formatted="false">Корректировка баланса</string>
+    <string name="act_balance_adjustment" formatted="false">Коригування балансу</string>
 
     <!-- 2. Accounts -->
     <!-- Actions -->
-    <string name="act_add_accounts_set" formatted="false">Набор счетов</string>
+    <string name="act_add_accounts_set" formatted="false">Набір рахунків</string>
 
     <!-- 2. Accounts -->
     <!-- Actions -->
-    <string name="act_edit_name" formatted="false">Изменить название</string>
+    <string name="act_edit_name" formatted="false">Змінити назву</string>
 
     <!-- 2. Accounts -->
     <!-- Actions -->
-    <string name="act_edit_accounts" formatted="false">Изменить счета</string>
+    <string name="act_edit_accounts" formatted="false">Змінити рахунки</string>
 
     <!-- 2. Accounts -->
     <!-- Titles -->
-    <string name="ttl_sort_accounts" formatted="false">Сортировка счетов</string>
+    <string name="ttl_sort_accounts" formatted="false">Впорядкування рахунків</string>
 
     <!-- 2. Accounts -->
     <!-- Titles -->
-    <string name="ttl_accounts_sort_type" formatted="false">Сортировать по ...</string>
+    <string name="ttl_accounts_sort_type" formatted="false">Сортувати за…</string>
 
     <!-- 2. Accounts -->
     <!-- Titles -->
@@ -431,119 +431,119 @@
 
     <!-- 2. Accounts -->
     <!-- Titles -->
-    <string name="ttl_enter_actual_balance" formatted="false">Введите актуальный баланс</string>
+    <string name="ttl_enter_actual_balance" formatted="false">Введіть актуальний баланс</string>
 
     <!-- 2. Accounts -->
     <!-- Titles -->
-    <string name="ttl_pull_to_create_account" formatted="false">Потяните вверх для создания нового счета</string>
+    <string name="ttl_pull_to_create_account" formatted="false">Потягніть угору, щоб створити рахунок</string>
 
     <!-- 2. Accounts -->
     <!-- Messages -->
-    <string name="msg_delete_account_confirmation" formatted="false">Удалить счет %s? Будут удалены все транзакции по этому счету.</string>
+    <string name="msg_delete_account_confirmation" formatted="false">Видалити рахунок %s? Усі транзакції за цим рахунком буде видалено.</string>
 
     <!-- 2. Accounts -->
     <!-- Messages -->
-    <string name="msg_delete_account_set_confirmation" formatted="false">Удалить набор счетов %s?</string>
+    <string name="msg_delete_account_set_confirmation" formatted="false">Видалити набір рахунків %s?</string>
 
     <!-- 2. Accounts -->
     <!-- Messages -->
-    <string name="hint_press_back_to_exit_drag_mode" formatted="false">Нажмите кнопку Назад для выхода из режима перетаскивания</string>
+    <string name="hint_press_back_to_exit_drag_mode" formatted="false">Натисніть кнопку «Назад», щоб вийти з режиму перетягування</string>
 
     <!-- 2. Accounts -->
     <!-- Errors -->
-    <string name="err_specify_account_name" formatted="false">Укажите название счета</string>
+    <string name="err_specify_account_name" formatted="false">Вкажіть назву рахунку</string>
 
     <!-- 2. Accounts -->
     <!-- Errors -->
-    <string name="err_specify_account_currency" formatted="false">Укажите валюту счета</string>
+    <string name="err_specify_account_currency" formatted="false">Вкажіть валюту рахунку</string>
 
     <!-- 2. Accounts -->
     <!-- Errors -->
-    <string name="err_account_name_must_be_unique" formatted="false">Название счета должно быть уникальным</string>
+    <string name="err_account_name_must_be_unique" formatted="false">Назва рахунку має бути унікальною</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_transaction" formatted="false">Транзакция</string>
+    <string name="ent_transaction" formatted="false">Транзакція</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_transactions" formatted="false">Транзакции</string>
+    <string name="ent_transactions" formatted="false">Транзакції</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_transfer" formatted="false">Перевод</string>
+    <string name="ent_transfer" formatted="false">Переказ</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_payment" formatted="false">Платеж</string>
+    <string name="ent_payment" formatted="false">Платіж</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_dest_account" formatted="false">Счет назначения</string>
+    <string name="ent_dest_account" formatted="false">Рахунок призначення</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_dest_amount" formatted="false">Сумма в валюте получателя</string>
+    <string name="ent_dest_amount" formatted="false">Сума у валюті одержувача</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_new_transfer" formatted="false">Новый перевод</string>
+    <string name="ent_new_transfer" formatted="false">Новий переказ</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_edit_transaction" formatted="false">Редактирование транзакции</string>
+    <string name="ent_edit_transaction" formatted="false">Редагування транзакції</string>
 
     <!-- 3. Transactions -->
     <!-- Entities -->
-    <string name="ent_edit_transfer" formatted="false">Редактирование перевода</string>
+    <string name="ent_edit_transfer" formatted="false">Редагування переказу</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_create_transaction" formatted="false">Новая транзакция</string>
+    <string name="act_create_transaction" formatted="false">Нова транзакція</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_create_transaction_from_sms" formatted="false">Создать транзакцию</string>
+    <string name="act_create_transaction_from_sms" formatted="false">Створити транзакцію</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_show_transactions" formatted="false">Показать транзакции</string>
+    <string name="act_show_transactions" formatted="false">Показати транзакції</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_select_all" formatted="false">Выделить все</string>
+    <string name="act_select_all" formatted="false">Виділити все</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_unselect_all" formatted="false">Снять выделение</string>
+    <string name="act_unselect_all" formatted="false">Зняти виділення</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_delete_selected" formatted="false">Удалить выделенные</string>
+    <string name="act_delete_selected" formatted="false">Видалити виділені</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_edit_selected" formatted="false">Изменить выделенные</string>
+    <string name="act_edit_selected" formatted="false">Змінити виділені</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_filter_on_selected" formatted="false">Добавить фильтр...</string>
+    <string name="act_filter_on_selected" formatted="false">Додати фільтр...</string>
 
     <!-- 3. Transactions -->
     <!-- Actions -->
-    <string name="act_select_on_selected" formatted="false">Выделить...</string>
+    <string name="act_select_on_selected" formatted="false">Виділити...</string>
 
     <!-- 3. Transactions -->
     <!-- Titles -->
-    <string name="ttl_transaction_deleted" formatted="false">Транзакция удалена</string>
+    <string name="ttl_transaction_deleted" formatted="false">Транзакцію видалено</string>
 
     <!-- 3. Transactions -->
     <!-- Titles -->
-    <string name="ttl_transaction_splitted" formatted="false">Транзакция разделена</string>
+    <string name="ttl_transaction_splitted" formatted="false">Транзакцію розділено</string>
 
     <!-- 3. Transactions -->
     <!-- Titles -->
-    <string name="ttl_src_transaction_amount" formatted="false">Остаток</string>
+    <string name="ttl_src_transaction_amount" formatted="false">Залишок</string>
 
     <!-- 3. Transactions -->
     <!-- Titles -->
@@ -551,159 +551,159 @@
 
     <!-- 3. Transactions -->
     <!-- Titles -->
-    <string name="ttl_selection" formatted="false">Выделение</string>
+    <string name="ttl_selection" formatted="false">Виділення</string>
 
     <!-- 3. Transactions -->
     <!-- Titles -->
-    <string name="ttl_selected" formatted="false">выделено</string>
+    <string name="ttl_selected" formatted="false">виділено</string>
 
     <!-- 3. Transactions -->
     <!-- Titles -->
-    <string name="ttl_change_selected_param" formatted="false">Изменить</string>
+    <string name="ttl_change_selected_param" formatted="false">Змінити параметр</string>
 
     <!-- 3. Transactions -->
     <!-- Messages -->
-    <string name="msg_select_marker_text_before" formatted="false">Сначала выделите текст маркера в теле сообщения</string>
+    <string name="msg_select_marker_text_before" formatted="false">Спочатку виділіть текст маркера в тексті повідомлення</string>
 
     <!-- 3. Transactions -->
     <!-- Messages -->
-    <string name="msg_confirm_create_correcting_transaction" formatted="false">Баланс счета отличается от указанного в смс на %s. Создать корректирующую транзакцию?</string>
+    <string name="msg_confirm_create_correcting_transaction" formatted="false">Баланс рахунку відрізняється від указаного в SMS на %s. Створити коригувальну транзакцію?</string>
 
     <!-- 3. Transactions -->
     <!-- Messages -->
-    <string name="msg_confirm_delete_transaction" formatted="false">Удалить транзакцию?</string>
+    <string name="msg_confirm_delete_transaction" formatted="false">Видалити транзакцію?</string>
 
     <!-- 3. Transactions -->
     <!-- Messages -->
-    <string name="msg_confirm_delete_selected_transactions" formatted="false">Удалить выделенные транзакции?</string>
+    <string name="msg_confirm_delete_selected_transactions" formatted="false">Видалити виділені транзакції?</string>
 
     <!-- 3. Transactions -->
     <!-- Messages -->
-    <string name="msg_confirm_delete_all_transaction" formatted="false">Удалить все транзакции?</string>
+    <string name="msg_confirm_delete_all_transaction" formatted="false">Видалити всі транзакції?</string>
 
     <!-- 3. Transactions -->
     <!-- Notifications -->
-    <string name="notif_ticker_transaction_auto_created" formatted="false">Транзакция создана</string>
+    <string name="notif_ticker_transaction_auto_created" formatted="false">Транзакцію створено</string>
 
     <!-- 3. Transactions -->
     <!-- Notifications -->
-    <string name="notif_count_of_new_transactions" formatted="false">Новых транзакций:</string>
+    <string name="notif_count_of_new_transactions" formatted="false">Нових транзакцій:</string>
 
     <!-- 3. Transactions -->
     <!-- Notifications -->
-    <string name="notif_create_correcting_transaction_caption" formatted="false">Баланс отличается от указанного в смс.</string>
+    <string name="notif_create_correcting_transaction_caption" formatted="false">Баланс рахунку відрізняється від указаного в SMS</string>
 
     <!-- 3. Transactions -->
     <!-- Notifications -->
-    <string name="notif_create_correcting_transaction" formatted="false">Баланс счета %s отличается от указанного в смс на %s. Нажмите для корректировки.</string>
+    <string name="notif_create_correcting_transaction" formatted="false">Баланс рахунку %s відрізняється від указаного в SMS на %s. Натисніть для коригування.</string>
 
     <!-- 3. Transactions -->
     <!-- Errors -->
-    <string name="err_specify_account" formatted="false">Укажите счет списания</string>
+    <string name="err_specify_account" formatted="false">Вкажіть рахунок списання</string>
 
     <!-- 3. Transactions -->
     <!-- Errors -->
-    <string name="err_exrate_zero" formatted="false">Обменный курс не может быть равен нулю.</string>
+    <string name="err_exrate_zero" formatted="false">Курс обміну не може дорівнювати нулю</string>
 
     <!-- 3. Transactions -->
     <!-- Errors -->
-    <string name="err_exrate_one" formatted="false">Обменный курс равен единице. Вы уверены?</string>
+    <string name="err_exrate_one" formatted="false">Курс обміну дорівнює одиниці. Ви впевнені?</string>
 
     <!-- 4. Payees -->
     <!-- Entities -->
-    <string name="ent_payee" formatted="false">Получатель</string>
+    <string name="ent_payee" formatted="false">Одержувач</string>
 
     <!-- 4. Payees -->
     <!-- Entities -->
-    <string name="ent_payer" formatted="false">Плательщик</string>
+    <string name="ent_payer" formatted="false">Платник</string>
 
     <!-- 4. Payees -->
     <!-- Entities -->
-    <string name="ent_payee_or_payer" formatted="false">Получатель/Плательщик</string>
+    <string name="ent_payee_or_payer" formatted="false">Одержувач/Платник</string>
 
     <!-- 4. Payees -->
     <!-- Entities -->
-    <string name="ent_payees" formatted="false">Получатели/Плательщики</string>
+    <string name="ent_payees" formatted="false">Одержувачі/Платники</string>
 
     <!-- 4. Payees -->
     <!-- Titles -->
-    <string name="ttl_delete_payee_confirmation" formatted="false">Удалить получателя/плательщика?</string>
+    <string name="ttl_delete_payee_confirmation" formatted="false">Видалити одержувача/платника?</string>
 
     <!-- 4. Payees -->
     <!-- Titles -->
-    <string name="ttl_select_payee" formatted="false">Выберите получателя/плательщика</string>
+    <string name="ttl_select_payee" formatted="false">Виберіть одержувача/платника</string>
 
     <!-- 4. Payees -->
     <!-- Titles -->
-    <string name="ttl_new_payee" formatted="false">Новый получатель/плательщик</string>
+    <string name="ttl_new_payee" formatted="false">Новий одержувач/платник</string>
 
     <!-- 4. Payees -->
     <!-- Titles -->
-    <string name="ttl_edit_payee" formatted="false">Изменение получателя/плательщика</string>
+    <string name="ttl_edit_payee" formatted="false">Редагування одержувача/платника</string>
 
     <!-- 4. Payees -->
     <!-- Titles -->
-    <string name="ttl_create_new_payee_from_marker" formatted="false">Создать нового получателя/плательщика %s или выбрать имеющегося?</string>
+    <string name="ttl_create_new_payee_from_marker" formatted="false">Створити нового одержувача/платника %s чи вибрати наявного?</string>
 
     <!-- 5. Categories -->
     <!-- Entities -->
-    <string name="ent_category" formatted="false">Категория</string>
+    <string name="ent_category" formatted="false">Категорія</string>
 
     <!-- 5. Categories -->
     <!-- Entities -->
-    <string name="ent_category_nested" formatted="false">Вложенная категория</string>
+    <string name="ent_category_nested" formatted="false">Вкладена категорія</string>
 
     <!-- 5. Categories -->
     <!-- Entities -->
-    <string name="ent_categories" formatted="false">Категории</string>
+    <string name="ent_categories" formatted="false">Категорії</string>
 
     <!-- 5. Categories -->
     <!-- Actions -->
-    <string name="act_add_child" formatted="false">Добавить вложенный элемент</string>
+    <string name="act_add_child" formatted="false">Додати вкладену</string>
 
     <!-- 5. Categories -->
     <!-- Actions -->
-    <string name="act_convert_to_child" formatted="false">Переместить в...</string>
+    <string name="act_convert_to_child" formatted="false">Перетворити на вкладену</string>
 
     <!-- 5. Categories -->
     <!-- Actions -->
-    <string name="act_convert_to_parent" formatted="false">Сделать родительской</string>
+    <string name="act_convert_to_parent" formatted="false">Перетворити на батьківську</string>
 
     <!-- 5. Categories -->
     <!-- Actions -->
-    <string name="act_select_color" formatted="false">Выбрать цвет</string>
+    <string name="act_select_color" formatted="false">Вибрати колір</string>
 
     <!-- 5. Categories -->
     <!-- Titles -->
-    <string name="ttl_delete_children_category" formatted="false">Удалить вложенные категории</string>
+    <string name="ttl_delete_children_category" formatted="false">Видалити вкладені категорії</string>
 
     <!-- 5. Categories -->
     <!-- Titles -->
-    <string name="ttl_delete_category_confirmation" formatted="false">Удалить категорию?</string>
+    <string name="ttl_delete_category_confirmation" formatted="false">Видалити категорію?</string>
 
     <!-- 5. Categories -->
     <!-- Titles -->
-    <string name="ttl_select_parent_item" formatted="false">Выберите родительский элемент</string>
+    <string name="ttl_select_parent_item" formatted="false">Виберіть батьківський елемент</string>
 
     <!-- 5. Categories -->
     <!-- Titles -->
-    <string name="ttl_select_color" formatted="false">Выбор цвета</string>
+    <string name="ttl_select_color" formatted="false">Вибір кольору</string>
 
     <!-- 5. Categories -->
     <!-- Titles -->
-    <string name="ttl_sort_items_confirmation" formatted="false">Отсортировать список по алфавиту?</string>
+    <string name="ttl_sort_items_confirmation" formatted="false">Відсортувати список за алфавітом?</string>
 
     <!-- 5. Categories -->
     <!-- Errors -->
-    <string name="err_category_already_child" formatted="false">Категория уже имет родителя</string>
+    <string name="err_category_already_child" formatted="false">Категорія вже має батьківську</string>
 
     <!-- 5. Categories -->
     <!-- Errors -->
-    <string name="err_category_already_parent" formatted="false">Категория уже является родителем</string>
+    <string name="err_category_already_parent" formatted="false">Категорія вже є батьківською</string>
 
     <!-- 5. Categories -->
     <!-- Errors -->
-    <string name="err_category_has_children" formatted="false">Категория имеет подкатегории</string>
+    <string name="err_category_has_children" formatted="false">Категорія має вкладені категорії</string>
 
     <!-- 6. Currencies -->
     <!-- Entities -->
@@ -711,7 +711,7 @@
 
     <!-- 6. Currencies -->
     <!-- Entities -->
-    <string name="ent_currencies" formatted="false">Валюты</string>
+    <string name="ent_currencies" formatted="false">Валюти</string>
 
     <!-- 6. Currencies -->
     <!-- Entities -->
@@ -719,95 +719,95 @@
 
     <!-- 6. Currencies -->
     <!-- Entities -->
-    <string name="ent_currency_symbol" formatted="false">Символы для отображения</string>
+    <string name="ent_currency_symbol" formatted="false">Символи для відображення</string>
 
     <!-- 6. Currencies -->
     <!-- Entities -->
-    <string name="ent_currency_scale" formatted="false">Количество знаков после запятой</string>
+    <string name="ent_currency_scale" formatted="false">Кількість знаків після коми</string>
 
     <!-- 6. Currencies -->
     <!-- Titles -->
-    <string name="ttl_delete_cabbage_confirmation" formatted="false">Удалить валюту?</string>
+    <string name="ttl_delete_cabbage_confirmation" formatted="false">Видалити валюту?</string>
 
     <!-- 6. Currencies -->
     <!-- Titles -->
-    <string name="ttl_new_currency" formatted="false">Новая валюта</string>
+    <string name="ttl_new_currency" formatted="false">Нова валюта</string>
 
     <!-- 6. Currencies -->
     <!-- Titles -->
-    <string name="ttl_edit_currency" formatted="false">Редактирование валюты</string>
+    <string name="ttl_edit_currency" formatted="false">Редагування валюти</string>
 
     <!-- 6. Currencies -->
     <!-- Titles -->
-    <string name="ttl_select_system_currency" formatted="false">Валюты по умолчанию</string>
+    <string name="ttl_select_system_currency" formatted="false">Системні валюти</string>
 
     <!-- 6. Currencies -->
     <!-- Titles -->
-    <string name="ttl_available_system_currencies" formatted="false">Доступные системные валюты</string>
+    <string name="ttl_available_system_currencies" formatted="false">Доступні системні валюти</string>
 
     <!-- 7. Projects -->
     <!-- Entities -->
-    <string name="ent_project" formatted="false">Проект</string>
+    <string name="ent_project" formatted="false">Проєкт</string>
 
     <!-- 7. Projects -->
     <!-- Entities -->
-    <string name="ent_projects" formatted="false">Проекты</string>
+    <string name="ent_projects" formatted="false">Проєкти</string>
 
     <!-- 7. Projects -->
     <!-- Entities -->
-    <string name="ent_new_project" formatted="false">Новый проект</string>
+    <string name="ent_new_project" formatted="false">Новий проєкт</string>
 
     <!-- 7. Projects -->
     <!-- Entities -->
-    <string name="ent_edit_project" formatted="false">Редактирование проекта</string>
-
-    <!-- 7. Projects -->
-    <!-- Titles -->
-    <string name="ttl_delete_project_confirmation" formatted="false">Удалить проект?</string>
+    <string name="ent_edit_project" formatted="false">Редагування проєкту</string>
 
     <!-- 7. Projects -->
     <!-- Titles -->
-    <string name="title_select_project" formatted="false">Выберите проект</string>
+    <string name="ttl_delete_project_confirmation" formatted="false">Видалити проєкт?</string>
+
+    <!-- 7. Projects -->
+    <!-- Titles -->
+    <string name="title_select_project" formatted="false">Виберіть проєкт</string>
 
     <!-- 8. Locations -->
     <!-- Entities -->
-    <string name="ent_location" formatted="false">Местоположение</string>
+    <string name="ent_location" formatted="false">Локація</string>
 
     <!-- 8. Locations -->
     <!-- Entities -->
-    <string name="ent_locations" formatted="false">Местоположения</string>
+    <string name="ent_locations" formatted="false">Локації</string>
 
     <!-- 8. Locations -->
     <!-- Entities -->
-    <string name="ent_current_location" formatted="false">Текущее местоположение</string>
+    <string name="ent_current_location" formatted="false">Поточна локація</string>
 
     <!-- 8. Locations -->
     <!-- Entities -->
-    <string name="new_new_location" formatted="false">Новое местоположение</string>
+    <string name="new_new_location" formatted="false">Нова локація</string>
 
     <!-- 8. Locations -->
     <!-- Entities -->
-    <string name="ent_edit_location" formatted="false">Редактирование местоположения</string>
+    <string name="ent_edit_location" formatted="false">Редагування локації</string>
 
     <!-- 8. Locations -->
     <!-- Titles -->
-    <string name="title_select_location" formatted="false">Выберите местоположение</string>
+    <string name="title_select_location" formatted="false">Виберіть локацію</string>
 
     <!-- 8. Locations -->
     <!-- Messages -->
-    <string name="ttl_delete_location_confirmation" formatted="false">Удалить местоположение?</string>
+    <string name="ttl_delete_location_confirmation" formatted="false">Видалити локацію?</string>
 
     <!-- 8. Locations -->
     <!-- Messages -->
-    <string name="msg_permission_location_rationale" formatted="false">Для определения координат необходимо разрешение. Нажмите Далее и разрешите доступ к данным о местоположении устройтсва.</string>
+    <string name="msg_permission_location_rationale" formatted="false">Для отримання координат транзакції потрібен дозвіл на доступ до геолокації. Натисніть «Далі» та надайте доступ до даних про місцезнаходження.</string>
 
     <!-- 8. Locations -->
     <!-- Messages -->
-    <string name="msg_permission_location_denied" formatted="false">Координаты не определены, так как разрешение не было получено.</string>
+    <string name="msg_permission_location_denied" formatted="false">Дозвіл на геолокацію відхилено</string>
 
     <!-- 8. Locations -->
     <!-- Messages -->
-    <string name="msg_permission_location_never_askagain" formatted="false">Координаты не определены, так как разрешение не было получено.</string>
+    <string name="msg_permission_location_never_askagain" formatted="false">Дозвіл на геолокацію відхилено</string>
 
     <!-- 9. Templates -->
     <!-- Entities -->
@@ -815,31 +815,31 @@
 
     <!-- 9. Templates -->
     <!-- Entities -->
-    <string name="ent_templates" formatted="false">Шаблоны</string>
+    <string name="ent_templates" formatted="false">Шаблони</string>
 
     <!-- 9. Templates -->
     <!-- Entities -->
-    <string name="ent_edit_template" formatted="false">Редактирование шаблона</string>
+    <string name="ent_edit_template" formatted="false">Редагування шаблону</string>
 
     <!-- 9. Templates -->
     <!-- Actions -->
-    <string name="act_create_template" formatted="false">Создать шаблон</string>
+    <string name="act_create_template" formatted="false">Новий шаблон</string>
 
     <!-- 9. Templates -->
     <!-- Titles -->
-    <string name="ttl_delete_template_confirmation" formatted="false">Удалить шаблон?</string>
+    <string name="ttl_delete_template_confirmation" formatted="false">Видалити шаблон?</string>
 
     <!-- 9. Templates -->
     <!-- Titles -->
-    <string name="ttl_select_template" formatted="false">Выберите шаблон</string>
+    <string name="ttl_select_template" formatted="false">Виберіть шаблон</string>
 
     <!-- 9. Templates -->
     <!-- Titles -->
-    <string name="ttl_template_name" formatted="false">Название шаблона</string>
+    <string name="ttl_template_name" formatted="false">Назва шаблону</string>
 
     <!-- 10. SMS Markers -->
     <!-- Entities -->
-    <string name="ent_sms_markers" formatted="false">Маркеры смс</string>
+    <string name="ent_sms_markers" formatted="false">Маркери SMS</string>
 
     <!-- 10. SMS Markers -->
     <!-- Entities -->
@@ -847,39 +847,39 @@
 
     <!-- 10. SMS Markers -->
     <!-- Entities -->
-    <string name="ent_sms_parser_object" formatted="false">Объект</string>
+    <string name="ent_sms_parser_object" formatted="false">Об\'єкт</string>
 
     <!-- 10. SMS Markers -->
     <!-- Entities -->
-    <string name="ent_sms_parser_value" formatted="false">Значение</string>
+    <string name="ent_sms_parser_value" formatted="false">Значення</string>
 
     <!-- 10. SMS Markers -->
     <!-- Entities -->
-    <string name="ent_skip" formatted="false">Игнор.</string>
+    <string name="ent_skip" formatted="false">Пропустити</string>
 
     <!-- 10. SMS Markers -->
     <!-- Actions -->
-    <string name="act_set_marker" formatted="false">Установить маркер</string>
+    <string name="act_set_marker" formatted="false">Встановити маркер</string>
 
     <!-- 10. SMS Markers -->
     <!-- Actions -->
-    <string name="act_create_marker" formatted="false">Новый маркер</string>
+    <string name="act_create_marker" formatted="false">Новий маркер</string>
 
     <!-- 10. SMS Markers -->
     <!-- Titles -->
-    <string name="ttl_edit_sms_parser_marker" formatted="false">Редактирование маркера</string>
+    <string name="ttl_edit_sms_parser_marker" formatted="false">Редагування маркера</string>
 
     <!-- 10. SMS Markers -->
     <!-- Titles -->
-    <string name="ttl_select_text_to_add_marker" formatted="false">Выделите текст для добавления маркера</string>
+    <string name="ttl_select_text_to_add_marker" formatted="false">Виділіть текст, щоб додати маркер</string>
 
     <!-- 10. SMS Markers -->
     <!-- Messages -->
-    <string name="msg_delete_sms_marker_confirmation" formatted="false">Удалить маркер?</string>
+    <string name="msg_delete_sms_marker_confirmation" formatted="false">Видалити маркер?</string>
 
     <!-- 10. SMS Markers -->
     <!-- Messages -->
-    <string name="msg_select_marker_type" formatted="false">Выберите тип маркера</string>
+    <string name="msg_select_marker_type" formatted="false">Виберіть тип маркера</string>
 
     <!-- 11. Credits -->
     <!-- Entities -->
@@ -887,203 +887,203 @@
 
     <!-- 11. Credits -->
     <!-- Entities -->
-    <string name="ent_credits" formatted="false">Кредиты</string>
+    <string name="ent_credits" formatted="false">Кредити</string>
 
     <!-- 11. Credits -->
     <!-- Entities -->
-    <string name="ent_new_credit" formatted="false">Новый кредит</string>
+    <string name="ent_new_credit" formatted="false">Новий кредит</string>
 
     <!-- 11. Credits -->
     <!-- Entities -->
-    <string name="ent_edit_credit" formatted="false">Редактирование кредита</string>
+    <string name="ent_edit_credit" formatted="false">Редагування кредиту</string>
 
     <!-- 11. Credits -->
     <!-- Titles -->
-    <string name="ttl_delete_credit_confirmation" formatted="false">Удалить кредит?</string>
+    <string name="ttl_delete_credit_confirmation" formatted="false">Видалити кредит?</string>
 
     <!-- 11. Credits -->
     <!-- Messages -->
-    <string name="msg_confirmation_create_credit_percent_transaction" formatted="false">Создать транзакцию с оплатой процентов по кредиту?</string>
+    <string name="msg_confirmation_create_credit_percent_transaction" formatted="false">Створити транзакцію зі сплатою відсотків за кредитом?</string>
 
     <!-- 11. Debts -->
     <!-- Entities -->
-    <string name="ent_init_amount_short" formatted="false">нач.</string>
+    <string name="ent_init_amount_short" formatted="false">поч.</string>
 
     <!-- 11. Debts -->
     <!-- Entities -->
-    <string name="ent_debt" formatted="false">Долг</string>
+    <string name="ent_debt" formatted="false">Борг</string>
 
     <!-- 11. Debts -->
     <!-- Entities -->
-    <string name="ent_debts" formatted="false">Долги</string>
+    <string name="ent_debts" formatted="false">Борги</string>
 
     <!-- 11. Debts -->
     <!-- Entities -->
-    <string name="ent_debt_start_amount" formatted="false">Начальная сумма долга</string>
+    <string name="ent_debt_start_amount" formatted="false">Початкова сума боргу</string>
 
     <!-- 11. Debts -->
     <!-- Entities -->
-    <string name="ent_new_debt" formatted="false">Новый долг</string>
+    <string name="ent_new_debt" formatted="false">Новий борг</string>
 
     <!-- 11. Debts -->
     <!-- Entities -->
-    <string name="ent_edit_debt" formatted="false">Редактирование долга</string>
+    <string name="ent_edit_debt" formatted="false">Редагування боргу</string>
 
     <!-- 11. Debts -->
     <!-- Actions -->
-    <string name="act_borrow" formatted="false">Взять в долг</string>
+    <string name="act_borrow" formatted="false">Взяти в борг</string>
 
     <!-- 11. Debts -->
     <!-- Actions -->
-    <string name="act_repay" formatted="false">Оплатить долг</string>
+    <string name="act_repay" formatted="false">Повернути борг</string>
 
     <!-- 11. Debts -->
     <!-- Actions -->
-    <string name="act_grant_a_loan_to" formatted="false">Дать в долг</string>
+    <string name="act_grant_a_loan_to" formatted="false">Дати в борг</string>
 
     <!-- 11. Debts -->
     <!-- Actions -->
-    <string name="act_take_in_payment" formatted="false">Принять оплату долга</string>
+    <string name="act_take_in_payment" formatted="false">Прийняти повернення боргу</string>
 
     <!-- 11. Debts -->
     <!-- Titles -->
-    <string name="ttl_delete_debt_confirmation" formatted="false">Удалить долг?</string>
+    <string name="ttl_delete_debt_confirmation" formatted="false">Видалити борг?</string>
 
     <!-- 11. Debts -->
     <!-- Titles -->
-    <string name="ttl_loan_closed" formatted="false">Долг закрыт</string>
+    <string name="ttl_loan_closed" formatted="false">Борг закрито</string>
 
     <!-- 11. Debts -->
     <!-- Titles -->
-    <string name="ttl_i_lent" formatted="false">Дано в долг:</string>
+    <string name="ttl_i_lent" formatted="false">Дано в борг:</string>
 
     <!-- 11. Debts -->
     <!-- Titles -->
-    <string name="ttl_i_borrewed" formatted="false">Взято в долг:</string>
+    <string name="ttl_i_borrewed" formatted="false">Взято в борг:</string>
 
     <!-- 11. Debts -->
     <!-- Titles -->
-    <string name="ttl_total_owe_me" formatted="false">Итого мне должны:</string>
+    <string name="ttl_total_owe_me" formatted="false">Разом мені винні:</string>
 
     <!-- 11. Debts -->
     <!-- Titles -->
-    <string name="ttl_total_I_owe" formatted="false">Итого я должен:</string>
+    <string name="ttl_total_I_owe" formatted="false">Разом я винен:</string>
 
     <!-- 11. Debts -->
     <!-- Errors -->
-    <string name="err_specify_currency" formatted="false">Укажите валюту</string>
+    <string name="err_specify_currency" formatted="false">Вкажіть валюту</string>
 
     <!-- 12. SMS -->
     <!-- Entities -->
-    <string name="ent_incoming" formatted="false">Входящие</string>
+    <string name="ent_incoming" formatted="false">Вхідні</string>
 
     <!-- 12. SMS -->
     <!-- Entities -->
-    <string name="ent_import_sms" formatted="false">Импорт смс</string>
+    <string name="ent_import_sms" formatted="false">Імпорт SMS</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl_delete_sms_confirmation" formatted="false">Удалить сообщение?</string>
+    <string name="ttl_delete_sms_confirmation" formatted="false">Видалити SMS?</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl_delete_all_sms_confirmation" formatted="false">Удалить все сообщения?</string>
+    <string name="ttl_delete_all_sms_confirmation" formatted="false">Видалити всі SMS?</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl__allow_auto_create_transactions" formatted="false">Автоматически создавать транзакции</string>
+    <string name="ttl__allow_auto_create_transactions" formatted="false">Автоматично створювати транзакції</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl_do_not_create_duplicates" formatted="false">Не создавать повторяющиеся транзакции</string>
+    <string name="ttl_do_not_create_duplicates" formatted="false">Не створювати дублікати транзакцій</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl_total_sms_found" formatted="false">Найдено смс</string>
+    <string name="ttl_total_sms_found" formatted="false">Знайдено SMS</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl_transactions_created" formatted="false">Создано транзакций</string>
+    <string name="ttl_transactions_created" formatted="false">Транзакцій створено</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl_transactions_skipped" formatted="false">Пропущено транзакций</string>
+    <string name="ttl_transactions_skipped" formatted="false">Транзакцій пропущено</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl_sms_created" formatted="false">Создано входящих смс</string>
+    <string name="ttl_sms_created" formatted="false">Додано до вхідних</string>
 
     <!-- 12. SMS -->
     <!-- Titles -->
-    <string name="ttl_sms_skipped" formatted="false">Пропущено входящих смс</string>
+    <string name="ttl_sms_skipped" formatted="false">Пропущено</string>
 
     <!-- 12. SMS -->
     <!-- Messages -->
-    <string name="msg_permission_read_sms_rationale" formatted="false">Для импорта сообщений неоходимо разрешение. Нажмите Далее и разрешите работу с сообщениями.</string>
+    <string name="msg_permission_read_sms_rationale" formatted="false">Для імпорту SMS потрібен дозвіл «Читання SMS». Натисніть «Далі» та надайте доступ до повідомлень.</string>
 
     <!-- 12. SMS -->
     <!-- Messages -->
-    <string name="msg_permission_read_sms_denied" formatted="false">Импорт отменен, так как разрешение на чтение сообщений не было получено.</string>
+    <string name="msg_permission_read_sms_denied" formatted="false">Дозвіл на доступ до повідомлень відхилено</string>
 
     <!-- 12. SMS -->
     <!-- Messages -->
-    <string name="msg_permission_read_sms_never_askagain" formatted="false">Импорт отменен, так как разрешение не было получено.</string>
+    <string name="msg_permission_read_sms_never_askagain" formatted="false">Дозвіл на доступ до повідомлень відхилено</string>
 
     <!-- 12. SMS -->
     <!-- Messages -->
-    <string name="msg_permission_recieve_sms_rationale" formatted="false">В программе созданы маркеры или отправители смс, но разрешения на получение сообщений нет. Нажмите Далее и разрешите работу с сообщениями.</string>
+    <string name="msg_permission_recieve_sms_rationale" formatted="false">Створено маркери або відправників SMS, але отримання повідомлень не дозволено. Натисніть «Далі» та дозвольте роботу з повідомленнями.</string>
 
     <!-- 12. SMS -->
     <!-- Errors -->
-    <string name="err_empty_sender" formatted="false">Укажите номер отправителя</string>
+    <string name="err_empty_sender" formatted="false">Вкажіть номер телефону відправника</string>
 
     <!-- 12. SMS -->
     <!-- Errors -->
-    <string name="err_parse_clipboard" formatted="false">Ошибка разбора сообщения из буфера обмена</string>
+    <string name="err_parse_clipboard" formatted="false">Помилка розбору буфера обміну</string>
 
     <!-- 13. Filters -->
     <!-- Entities -->
-    <string name="ent_filters" formatted="false">Фильтры</string>
+    <string name="ent_filters" formatted="false">Фільтри</string>
 
     <!-- 13. Filters -->
     <!-- Actions -->
-    <string name="act_add_filter" formatted="false">Добавить фильтр</string>
+    <string name="act_add_filter" formatted="false">Додати фільтр</string>
 
     <!-- 13. Filters -->
     <!-- Actions -->
-    <string name="act_clear_filters" formatted="false">Удалить все фильтры</string>
+    <string name="act_clear_filters" formatted="false">Очистити фільтри</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_new_filter" formatted="false">Новый фильтр</string>
+    <string name="ttl_new_filter" formatted="false">Новий фільтр</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_select_accounts" formatted="false">Выберите счета</string>
+    <string name="ttl_select_accounts" formatted="false">Виберіть рахунки</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_select_payees" formatted="false">Выберите получателей/плательщиков</string>
+    <string name="ttl_select_payees" formatted="false">Виберіть одержувачів/платників</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_select_projects" formatted="false">Выберите проекты</string>
+    <string name="ttl_select_projects" formatted="false">Виберіть проєкти</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_select_simpledebts" formatted="false">Выберите долги</string>
+    <string name="ttl_select_simpledebts" formatted="false">Виберіть борги</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_select_departments" formatted="false">Выберите подразделения</string>
+    <string name="ttl_select_departments" formatted="false">Виберіть підрозділи</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_select_locations" formatted="false">Выберите местоположения</string>
+    <string name="ttl_select_locations" formatted="false">Виберіть локації</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_select_category" formatted="false">Выберите категории</string>
+    <string name="ttl_select_category" formatted="false">Виберіть категорії</string>
 
     <!-- 13. Filters -->
     <!-- Titles -->
@@ -1091,15 +1091,15 @@
 
     <!-- 13. Filters -->
     <!-- Titles -->
-    <string name="ttl_on" formatted="false">ВКЛ</string>
+    <string name="ttl_on" formatted="false">УВІМК</string>
 
     <!-- 14. Splits -->
     <!-- Actions -->
-    <string name="act_split" formatted="false">Разделить</string>
+    <string name="act_split" formatted="false">Розділити</string>
 
     <!-- 14. Splits -->
     <!-- Errors -->
-    <string name="err_split_of_transfers_not_supported" formatted="false">Разбиение переводов не поддерживается</string>
+    <string name="err_split_of_transfers_not_supported" formatted="false">Розділення переказів не підтримується</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
@@ -1111,35 +1111,35 @@
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_budget_total_start" formatted="false">Итого на начало месяца</string>
+    <string name="ent_budget_total_start" formatted="false">Разом на початок місяця</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_budget_total_end" formatted="false">Итого на конец месяца</string>
+    <string name="ent_budget_total_end" formatted="false">Разом на кінець місяця</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_budget_total_income" formatted="false">Заработано</string>
+    <string name="ent_budget_total_income" formatted="false">Дохід</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_budget_total_outcome" formatted="false">Потрачено</string>
+    <string name="ent_budget_total_outcome" formatted="false">Витрата</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_budget_total_io_for_month" formatted="false">Итого за месяц</string>
+    <string name="ent_budget_total_io_for_month" formatted="false">Разом за місяць</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_budget_total_borrow" formatted="false">Взято в долг</string>
+    <string name="ent_budget_total_borrow" formatted="false">Усього взято в борг</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_budget_total_repay" formatted="false">Возвращено долга</string>
+    <string name="ent_budget_total_repay" formatted="false">Усього повернуто</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_budget_total_credits" formatted="false">Итого по кредитам</string>
+    <string name="ent_budget_total_credits" formatted="false">Разом за кредитами</string>
 
     <!-- 15. Budget -->
     <!-- Entities -->
@@ -1151,180 +1151,180 @@
 
     <!-- 15. Budget -->
     <!-- Entities -->
-    <string name="ent_difference" formatted="false">Разница</string>
+    <string name="ent_difference" formatted="false">Різниця</string>
 
     <!-- 15. Budget -->
     <!-- Actions -->
-    <string name="act_add_category" formatted="false">Добавить категорию</string>
+    <string name="act_add_category" formatted="false">Додати категорію</string>
 
     <!-- 15. Budget -->
     <!-- Actions -->
-    <string name="act_add_credit" formatted="false">Добавить кредит</string>
+    <string name="act_add_credit" formatted="false">Додати кредит</string>
 
     <!-- 15. Budget -->
     <!-- Actions -->
-    <string name="act_copy_budget" formatted="false">Скопировать план с ...</string>
+    <string name="act_copy_budget" formatted="false">Скопіювати план із…</string>
 
     <!-- 15. Budget -->
     <!-- Actions -->
-    <string name="act_create_from_fact" formatted="false">Создать из факта</string>
+    <string name="act_create_from_fact" formatted="false">Створити з факту</string>
 
     <!-- 15. Budget -->
     <!-- Actions -->
-    <string name="act_clear_budget" formatted="false">Очистить бюджет</string>
+    <string name="act_clear_budget" formatted="false">Очистити бюджет</string>
 
     <!-- 15. Budget -->
     <!-- Titles -->
-    <string name="ttl_replace_exists" formatted="false">Заменять имеющиеся</string>
+    <string name="ttl_replace_exists" formatted="false">Змінити наявні</string>
 
     <!-- 15. Budget -->
     <!-- Messages -->
-    <string name="msg_dialog_clear_budget" formatted="false">Удалить бюджет на текущий месяц?</string>
+    <string name="msg_dialog_clear_budget" formatted="false">Очистити план на поточний місяць?</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Entities -->
-    <string name="ent_backup_data" formatted="false">Резервное копирование и востановление</string>
+    <string name="ent_backup_data" formatted="false">Резервне копіювання та відновлення</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Actions -->
-    <string name="act_backup" formatted="false">Сохранить БД</string>
+    <string name="act_backup" formatted="false">Зберегти БД</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Actions -->
-    <string name="act_restore" formatted="false">Восстановить БД</string>
+    <string name="act_restore" formatted="false">Відновити БД</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Actions -->
-    <string name="act_restore_from_dropbox" formatted="false">Восстановить БД из Dropbox</string>
+    <string name="act_restore_from_dropbox" formatted="false">Відновити БД із Dropbox</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Actions -->
-    <string name="act_logout_from_dropbox" formatted="false">Выйти из Dropbox</string>
+    <string name="act_logout_from_dropbox" formatted="false">Вийти з Dropbox</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_select_db_file" formatted="false">Выберите файл</string>
+    <string name="ttl_select_db_file" formatted="false">Виберіть файл</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_enable_auto_backup" formatted="false">Включить ежедневное автоматическое резервное копирование</string>
+    <string name="ttl_enable_auto_backup" formatted="false">Увімкнути щоденне автоматичне резервне копіювання</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_enable_backup_password_protection" formatted="false">Защищать резервные копии паролем</string>
+    <string name="ttl_enable_backup_password_protection" formatted="false">Захищати файли резервних копій паролем</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_enable_backup_to_dropbox" formatted="false">Загружать резервные копии в Dropbox</string>
+    <string name="ttl_enable_backup_to_dropbox" formatted="false">Завантажувати резервні копії до Dropbox</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_dropbox_account" formatted="false">Учетная запись Dropbox</string>
+    <string name="ttl_dropbox_account" formatted="false">Обліковий запис Dropbox</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_enter_password" formatted="false">Введите пароль</string>
+    <string name="ttl_enter_password" formatted="false">Введіть пароль</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_last_backup_to_dropbox" formatted="false">Последнее сохранение в Dropbox:</string>
+    <string name="ttl_last_backup_to_dropbox" formatted="false">Остання резервна копія в Dropbox:</string>
     <string name="msg_dropbox_upload_failed" formatted="false">Не вдалося завантажити в Dropbox: %s</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Titles -->
-    <string name="ttl_auto_backup_info" formatted="false">Резервные копии создаются автоматически и сохраняются в выбранной папке</string>
+    <string name="ttl_auto_backup_info" formatted="false">Резервні копії створюються автоматично та зберігаються у вибраній папці</string>
 
-    <string name="ttl_backup_folder" formatted="false">Папка резервных копий: %s</string>
+    <string name="ttl_backup_folder" formatted="false">Папка резервних копій: %s</string>
 
-    <string name="ttl_backup_folder_not_selected" formatted="false">Папка резервных копий не выбрана</string>
+    <string name="ttl_backup_folder_not_selected" formatted="false">Папку резервних копій не вибрано</string>
 
-    <string name="act_select_backup_folder" formatted="false">Выбрать папку</string>
+    <string name="act_select_backup_folder" formatted="false">Вибрати папку</string>
 
-    <string name="act_restore_other_file" formatted="false">Другой файл…</string>
+    <string name="act_restore_other_file" formatted="false">Інший файл…</string>
 
-    <string name="msg_backup_saved" formatted="false">Резервная копия сохранена в выбранную папку</string>
+    <string name="msg_backup_saved" formatted="false">Резервну копію збережено у вибрану папку</string>
 
-    <string name="msg_backup_folder_unavailable" formatted="false">Папка резервных копий недоступна. Выберите папку заново.</string>
+    <string name="msg_backup_folder_unavailable" formatted="false">Папка резервних копій недоступна. Виберіть папку ще раз.</string>
 
-    <string name="msg_backup_folder_selection_failed" formatted="false">Не удалось получить доступ к выбранной папке</string>
+    <string name="msg_backup_folder_selection_failed" formatted="false">Не вдалося отримати доступ до вибраної папки</string>
 
-    <string name="msg_backup_folder_warning" formatted="false">Локальные резервные копии не создаются: папка не выбрана или доступ к ней потерян. Автокопия в Dropbox работает как обычно. Выберите папку в разделе «Резервное копирование».</string>
-    <string name="msg_backup_password_required" formatted="false">Сначала введите пароль резервной копии, затем включите защиту</string>
-    <string name="msg_backup_password_warning" formatted="false">Резервные копии не создаются: пароль резервной копии не удалось прочитать на этом устройстве. Введите пароль заново в разделе «Резервное копирование».</string>
-    <string name="msg_backup_folder_do_not_remind" formatted="false">Не напоминать</string>
-    <string name="msg_pin_reset_notice" formatted="false">PIN-защита сброшена после обновления приложения. Включите её заново в настройках.</string>
-
-    <!-- 16. Backup & Restore -->
-    <!-- Messages -->
-    <string name="msg_confirm_restore_db" formatted="false">Восстановить БД из файла? Программа будет перезапущена.</string>
+    <string name="msg_backup_folder_warning" formatted="false">Локальні резервні копії не створюються: папку не вибрано або доступ до неї втрачено. Автоматичне копіювання до Dropbox працює як зазвичай. Виберіть папку на екрані «Резервне копіювання та відновлення».</string>
+    <string name="msg_backup_password_required" formatted="false">Спочатку введіть пароль резервної копії, потім увімкніть захист</string>
+    <string name="msg_backup_password_warning" formatted="false">Резервні копії не створюються: пароль резервної копії неможливо прочитати на цьому пристрої. Введіть пароль знову на екрані «Резервне копіювання та відновлення».</string>
+    <string name="msg_backup_folder_do_not_remind" formatted="false">Не нагадувати</string>
+    <string name="msg_pin_reset_notice" formatted="false">PIN-захист скинуто після оновлення застосунку. Увімкніть його знову в налаштуваннях.</string>
 
     <!-- 16. Backup & Restore -->
     <!-- Messages -->
-    <string name="msg_permission_rw_external_storage_denied" formatted="false">Операция не выполнена, так как разрешение не было получено.</string>
+    <string name="msg_confirm_restore_db" formatted="false">Відновити базу даних із файлу? Програму буде перезапущено.</string>
+
+    <!-- 16. Backup & Restore -->
+    <!-- Messages -->
+    <string name="msg_permission_rw_external_storage_denied" formatted="false">Дозвіл на доступ до зовнішнього сховища відхилено</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_import_data" formatted="false">Импорт данных</string>
+    <string name="ent_import_data" formatted="false">Імпорт даних</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_export_data" formatted="false">Экспорт данных</string>
+    <string name="ent_export_data" formatted="false">Експорт даних</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_export" formatted="false">Экспорт</string>
+    <string name="ent_export" formatted="false">Експорт</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_export_selected" formatted="false">Экспорт выделенных в CSV</string>
+    <string name="ent_export_selected" formatted="false">Експорт виділених у CSV</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_path_to_file" formatted="false">Путь к файлу</string>
+    <string name="ent_path_to_file" formatted="false">Шлях до файлу</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_path_to_dir_or_file" formatted="false">Путь к каталогу или файлу</string>
+    <string name="ent_path_to_dir_or_file" formatted="false">Шлях до каталогу або файлу</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_file_name" formatted="false">Имя файла</string>
+    <string name="ent_file_name" formatted="false">Ім\'я файлу</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_import_csv_fingen" formatted="false">Импорт CSV Fingen</string>
+    <string name="ent_import_csv_fingen" formatted="false">Імпорт CSV Fingen</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_import_csv_financisto" formatted="false">Импорт CSV Financisto</string>
+    <string name="ent_import_csv_financisto" formatted="false">Імпорт CSV Financisto</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_import_csv_advanced" formatted="false">Импорт CSV (настраиваемый)</string>
+    <string name="ent_import_csv_advanced" formatted="false">Імпорт CSV (розширений)</string>
 
     <!-- 17. Import & Export -->
     <!-- Entities -->
-    <string name="ent_export_sheet" formatted="false">Экспорт Google sheet</string>
+    <string name="ent_export_sheet" formatted="false">Експорт до Google Sheets</string>
 
     <!-- 17. Import & Export -->
     <!-- Actions -->
-    <string name="act_import" formatted="false">Импортировать</string>
+    <string name="act_import" formatted="false">Імпортувати</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_import_complete" formatted="false">Импорт завершен</string>
+    <string name="ttl_import_complete" formatted="false">Імпорт завершено</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_skip_lines" formatted="false">Пропустить строк</string>
+    <string name="ttl_skip_lines" formatted="false">Пропустити рядки</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_set_fields_links" formatted="false">Укажите соответствие сущностей полям в файле</string>
+    <string name="ttl_set_fields_links" formatted="false">Зіставте поля файлу із сутностями Fingen</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_skip_duplicates" formatted="false">Пропускать дубликаты</string>
+    <string name="ttl_skip_duplicates" formatted="false">Пропускати дублікати</string>
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
@@ -1334,567 +1334,567 @@
 
     <!-- 17. Import & Export -->
     <!-- Titles -->
-    <string name="ttl_export_products" formatted="false">Выгружать товары</string>
+    <string name="ttl_export_products" formatted="false">Експортувати товари</string>
 
     <!-- 17. Import & Export -->
     <!-- Errors -->
-    <string name="err_set_dir" formatted="false">Пожалуйста выберите файл или каталог</string>
+    <string name="err_set_dir" formatted="false">Виберіть файл або каталог</string>
 
     <!-- 17. Import & Export -->
     <!-- Errors -->
-    <string name="err_set_file_name" formatted="false">Пожалуйста введите имя файла</string>
+    <string name="err_set_file_name" formatted="false">Введіть ім\'я файлу</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_permission_write_external_storage_rationale" formatted="false">Для записи файла необходимо разрешение. Нажмите Далее и разрешите доступ к файлам.</string>
+    <string name="msg_permission_write_external_storage_rationale" formatted="false">Для імпорту/експорту даних потрібен дозвіл на доступ до зовнішнього сховища. Натисніть «Далі» та надайте доступ до зовнішнього сховища.</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_permission_write_external_storage_denied" formatted="false">Файл не сохранен, так как разрешение не было получено.</string>
+    <string name="msg_permission_write_external_storage_denied" formatted="false">Дозвіл на доступ до зовнішнього сховища відхилено</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_permission_write_external_storage_never_askagain" formatted="false">Файл не сохранен, так как разрешение не было получено.</string>
+    <string name="msg_permission_write_external_storage_never_askagain" formatted="false">Дозвіл на доступ до зовнішнього сховища відхилено</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_permission_read_external_storage_rationale" formatted="false">Для загрузки файла необходимо разрешение. Нажмите Далее и разрешите доступ к файлам.</string>
+    <string name="msg_permission_read_external_storage_rationale" formatted="false">Для імпорту/експорту даних потрібен дозвіл на доступ до зовнішнього сховища. Натисніть «Далі» та надайте доступ до зовнішнього сховища.</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_permission_read_external_storage_denied" formatted="false">Файл не загружен, так как разрешение не было получено.</string>
+    <string name="msg_permission_read_external_storage_denied" formatted="false">Дозвіл на доступ до зовнішнього сховища відхилено</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_permission_read_external_storage_never_askagain" formatted="false">Файл не загружен, так как разрешение не было получено.</string>
+    <string name="msg_permission_read_external_storage_never_askagain" formatted="false">Дозвіл на доступ до зовнішнього сховища відхилено</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_file_not_exist" formatted="false">Файл не существует</string>
+    <string name="msg_file_not_exist" formatted="false">Файл не існує</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_path_is_empty" formatted="false">Укажите путь к файлу</string>
+    <string name="msg_path_is_empty" formatted="false">Вкажіть шлях до файлу</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_import_complete_ok" formatted="false">Импорт завершён</string>
+    <string name="msg_import_complete_ok" formatted="false">Імпорт завершено</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_export_complete_ok" formatted="false">Экспорт завершён</string>
+    <string name="msg_export_complete_ok" formatted="false">Експорт завершено</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_import_complete_error_1" formatted="false">В процессе импорта произошла ошибка</string>
+    <string name="msg_import_complete_error_1" formatted="false">Під час імпорту сталася помилка</string>
 
     <!-- 17. Import & Export -->
     <!-- Messages -->
-    <string name="msg_export_complete_error_1" formatted="false">В процессе экспорта произошла ошибка</string>
+    <string name="msg_export_complete_error_1" formatted="false">Під час експорту сталася помилка</string>
 
     <!-- 18. Pin lock -->
     <!-- Titles -->
-    <string name="pin_code_forgot_text" formatted="false">Забыли?</string>
+    <string name="pin_code_forgot_text" formatted="false">Забули PIN-код?</string>
 
     <!-- 18. Pin lock -->
     <!-- Titles -->
-    <string name="pin_code_step_disable" formatted="false">Отключение защиты\nВведите текущий пин-код</string>
+    <string name="pin_code_step_disable" formatted="false">Вимкнення захисту\nВведіть поточний PIN-код</string>
 
     <!-- 18. Pin lock -->
     <!-- Titles -->
-    <string name="pin_code_step_create" formatted="false">Создайте код из %d цифр</string>
+    <string name="pin_code_step_create" formatted="false">Створіть PIN-код із %d цифр</string>
 
     <!-- 18. Pin lock -->
     <!-- Titles -->
-    <string name="pin_code_step_change" formatted="false">Введите текущий пин-код</string>
+    <string name="pin_code_step_change" formatted="false">Введіть поточний PIN-код</string>
 
     <!-- 18. Pin lock -->
     <!-- Titles -->
-    <string name="pin_code_step_unlock" formatted="false">Введите Ваш пин-код</string>
+    <string name="pin_code_step_unlock" formatted="false">Введіть PIN-код</string>
 
     <!-- 18. Pin lock -->
     <!-- Titles -->
-    <string name="pin_code_step_enable_confirm" formatted="false">Подтвердите пин-код</string>
+    <string name="pin_code_step_enable_confirm" formatted="false">Підтвердьте PIN-код</string>
 
     <!-- 18. Pin lock -->
     <!-- Titles -->
-    <string name="pin_code_fingerprint_text" formatted="false">Отпечаток пальца</string>
+    <string name="pin_code_fingerprint_text" formatted="false">Відбиток пальця</string>
 
     <!-- 18. Pin lock -->
     <!-- Messages -->
-    <string name="pin_code_fingerprint_success" formatted="false">Отпечаток пальца распознан</string>
+    <string name="pin_code_fingerprint_success" formatted="false">Відбиток пальця розпізнано</string>
 
     <!-- 18. Pin lock -->
     <!-- Messages -->
-    <string name="pin_code_fingerprint_not_recognized" formatted="false">Отпечаток пальца не распознан. Попробуйте еще раз.</string>
+    <string name="pin_code_fingerprint_not_recognized" formatted="false">Відбиток пальця не розпізнано. Спробуйте ще раз</string>
 
     <!-- 19. About -->
     <!-- Settings -->
-    <string name="ent_about" formatted="false">О программе</string>
+    <string name="ent_about" formatted="false">Про застосунок</string>
 
     <!-- 19. About -->
     <!-- Titles -->
-    <string name="ttl_app_name_full" formatted="false">Fingen Учет расходов</string>
+    <string name="ttl_app_name_full" formatted="false">Fingen Облік витрат</string>
 
     <!-- 19. About -->
     <!-- Titles -->
-    <string name="ttl_app_version" formatted="false">Версия</string>
+    <string name="ttl_app_version" formatted="false">Версія</string>
 
     <!-- 19. About -->
     <!-- Titles -->
-    <string name="ttl_changelog" formatted="false">Список изменений</string>
+    <string name="ttl_changelog" formatted="false">Список змін</string>
 
     <!-- 19. About -->
     <!-- Titles -->
-    <string name="ttl_third_party_license" formatted="false">Сторонние лицензии</string>
+    <string name="ttl_third_party_license" formatted="false">Ліцензії відкритого коду</string>
 
     <!-- 19. About -->
     <!-- Titles -->
-    <string name="ttl_sqlite_version" formatted="false">Версия SQLite: </string>
+    <string name="ttl_sqlite_version" formatted="false">Версія SQLite:</string>
 
     <!-- 19. About -->
     <!-- Titles -->
-    <string name="ttl_rebuild_db" formatted="false">Перестроить БД</string>
-
-    <!-- 19. About -->
-    <!-- Messages -->
-    <string name="msg_db_rebuild_error" formatted="false">При перестроении базы данных произошла ошибка</string>
+    <string name="ttl_rebuild_db" formatted="false">Перебудувати БД</string>
 
     <!-- 19. About -->
     <!-- Messages -->
-    <string name="msg_db_rebuild_success" formatted="false">Перестроение базы данных прошло успешно</string>
+    <string name="msg_db_rebuild_error" formatted="false">Помилка під час перебудови бази даних</string>
 
     <!-- 19. About -->
     <!-- Messages -->
-    <string name="msg_db_upgrade" formatted="false">Обновление БД...</string>
+    <string name="msg_db_rebuild_success" formatted="false">Успішно</string>
+
+    <!-- 19. About -->
+    <!-- Messages -->
+    <string name="msg_db_upgrade" formatted="false">Оновлення бази даних...</string>
 
     <!-- 20. Settings -->
     <!-- Entities -->
-    <string name="ent_settings" formatted="false">Настройки</string>
+    <string name="ent_settings" formatted="false">Налаштування</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_header_general" formatted="false">Общие настройки</string>
+    <string name="pref_header_general" formatted="false">Загальні</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_title_start_tab" formatted="false">Стартовая вкладка</string>
+    <string name="pref_title_start_tab" formatted="false">Початкова вкладка</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_summary_start_tab" formatted="false">Вкладка, которая будет открыта при запуске приложения</string>
+    <string name="pref_summary_start_tab" formatted="false">Вкладка, яка відкриватиметься під час запуску застосунку</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_title_theme" formatted="false">Тема оформления</string>
+    <string name="pref_title_theme" formatted="false">Тема</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_title_theme_light" formatted="false">Светлая</string>
+    <string name="pref_title_theme_light" formatted="false">Світла</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_title_theme_dark" formatted="false">Темная</string>
+    <string name="pref_title_theme_dark" formatted="false">Темна</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_tab_order" formatted="false">Порядок вкладок на главном экране</string>
+    <string name="pref_tab_order" formatted="false">Порядок вкладок головного екрана</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_expand_lists" formatted="false">Разворачивать вложенные списки</string>
+    <string name="pref_expand_lists" formatted="false">Розгортати вкладені списки</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_hide_sums_panel" formatted="false">Скрывать панель с суммами</string>
+    <string name="pref_hide_sums_panel" formatted="false">Приховувати панель із сумами</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_enable_scan_qr" formatted="false">Вкл. сканер чеков</string>
+    <string name="pref_enable_scan_qr" formatted="false">Увімкнути сканування QR</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_first_day_of_week" formatted="false">Первый день недели</string>
+    <string name="pref_first_day_of_week" formatted="false">Перший день тижня</string>
 
     <!-- 20. Settings -->
     <!-- General -->
-    <string name="pref_fts_credentials" formatted="false">Учетные данные ФНС</string>
+    <string name="pref_fts_credentials" formatted="false">Облікові дані FTS</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_header_accounts_list" formatted="false">Список счетов</string>
+    <string name="pref_header_accounts_list" formatted="false">Рахунки</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_title_accounts_show_income_expense_for_accounts" formatted="false">Показывать приход и расход для счетов</string>
+    <string name="pref_title_accounts_show_income_expense_for_accounts" formatted="false">Показувати доходи/витрати для рахунків</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_title_accounts_list_show_closed" formatted="false">Показывать закрытые счета</string>
+    <string name="pref_title_accounts_list_show_closed" formatted="false">Показувати закриті рахунки</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_title_accounts_list_show_credits" formatted="false">Показывать кредитные счета</string>
+    <string name="pref_title_accounts_list_show_credits" formatted="false">Показувати кредитні рахунки</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_title_account_click_action" formatted="false">Действие, при нажатии на счет</string>
+    <string name="pref_title_account_click_action" formatted="false">Дія після дотику до рахунку</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_title_account_click_action_list" formatted="false">Показать транзакции</string>
+    <string name="pref_title_account_click_action_list" formatted="false">Список транзакцій</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_title_account_click_action_new" formatted="false">Новая транзакция</string>
+    <string name="pref_title_account_click_action_new" formatted="false">Нова транзакція</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_title_detect_locations" formatted="false">Автоматич. определять местоположение</string>
+    <string name="pref_title_detect_locations" formatted="false">Автоматично визначати локацію</string>
 
     <!-- 20. Settings -->
     <!-- Account list -->
-    <string name="pref_title_remember_last_account" formatted="false">Запоминать последний счет</string>
+    <string name="pref_title_remember_last_account" formatted="false">Запам\'ятовувати останній рахунок</string>
 
     <!-- 20. Settings -->
     <!-- Work with SMS -->
-    <string name="pref_header_sms" formatted="false">Работа с SMS</string>
+    <string name="pref_header_sms" formatted="false">SMS</string>
 
     <!-- 20. Settings -->
     <!-- Work with SMS -->
-    <string name="pref_title_auto_create_transaction_on_full_set_of_patterns" formatted="false">Автоматически создавать транзакции</string>
+    <string name="pref_title_auto_create_transaction_on_full_set_of_patterns" formatted="false">Автоматично створювати транзакції</string>
 
     <!-- 20. Settings -->
     <!-- Work with SMS -->
-    <string name="pref_title_auto_create_prerequisites" formatted="false">Условия для автоматического создания</string>
+    <string name="pref_title_auto_create_prerequisites" formatted="false">Умови автоматичного створення</string>
 
     <!-- 20. Settings -->
     <!-- Work with SMS -->
-    <string name="pref_summary_auto_create_transaction_on_full_set_of_patterns" formatted="false">При наличии в смс маркеров, указанных в условиях автоматического создания</string>
+    <string name="pref_summary_auto_create_transaction_on_full_set_of_patterns" formatted="false">Якщо в SMS знайдено всі маркери, указані в розділі «Умови автоматичного створення»</string>
 
     <!-- 20. Settings -->
     <!-- Work with SMS -->
-    <string name="pref_title_check_actual_balance_in_sms" formatted="false">Сравнивать баланс счета с балансом в смс</string>
+    <string name="pref_title_check_actual_balance_in_sms" formatted="false">Порівнювати баланс рахунку з балансом в SMS</string>
 
     <!-- 20. Settings -->
     <!-- Work with SMS -->
-    <string name="pref_title_balance_compare_error" formatted="false">Мин. разница балансов</string>
+    <string name="pref_title_balance_compare_error" formatted="false">Мін. різниця балансів</string>
 
     <!-- 20. Settings -->
     <!-- Security -->
-    <string name="pref_header_security" formatted="false">Безопасность</string>
+    <string name="pref_header_security" formatted="false">Безпека</string>
 
     <!-- 20. Settings -->
     <!-- Security -->
-    <string name="pref_title_enable_pin_lock" formatted="false">Включить защиту пин-кодом</string>
+    <string name="pref_title_enable_pin_lock" formatted="false">Увімкнути захист PIN-кодом</string>
 
     <!-- 20. Settings -->
     <!-- Security -->
-    <string name="pref_title_change_pin" formatted="false">Сменить пин-код</string>
+    <string name="pref_title_change_pin" formatted="false">Змінити PIN-код</string>
 
     <!-- 20. Settings -->
     <!-- Security -->
-    <string name="toast_pin_enabled" formatted="false">Защита пин-кодом включена</string>
+    <string name="toast_pin_enabled" formatted="false">Захист PIN-кодом увімкнено</string>
 
     <!-- 20. Settings -->
     <!-- Security -->
-    <string name="toast_pin_disabled" formatted="false">Защита пин-кодом выключена</string>
+    <string name="toast_pin_disabled" formatted="false">Захист PIN-кодом вимкнено</string>
 
     <!-- 20. Settings -->
     <!-- Security -->
-    <string name="pref_title_pin_length" formatted="false">Длина пин-кода</string>
+    <string name="pref_title_pin_length" formatted="false">Довжина PIN-коду</string>
 
     <!-- 20. Settings -->
     <!-- Security -->
-    <string name="pref_pin_lock_timeout" formatted="false">Таймаут блокировки, сек.</string>
+    <string name="pref_pin_lock_timeout" formatted="false">Тайм-аут блокування PIN-кодом, секунд</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_header_transactions" formatted="false">Транзакции</string>
+    <string name="pref_header_transactions" formatted="false">Транзакції</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_title_compact_view_mode" formatted="false">Компактный режим просмотра списков</string>
+    <string name="pref_title_compact_view_mode" formatted="false">Компактний режим перегляду</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_summary_compact_view_mode" formatted="false">Необходим перезапуск приложения</string>
+    <string name="pref_summary_compact_view_mode" formatted="false">Потрібен перезапуск застосунку</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_title_select_payee_style" formatted="false">Стиль выбора получателя/плательщика</string>
+    <string name="pref_title_select_payee_style" formatted="false">Стиль вибору одержувача/платника</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_title_payee_autocomplete" formatted="false">Выпадающий список</string>
+    <string name="pref_title_payee_autocomplete" formatted="false">Список автодоповнення</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_title_payee_window" formatted="false">Список в отдельном окне</string>
+    <string name="pref_title_payee_window" formatted="false">Окреме вікно</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_title_show_transaction_type_titles" formatted="false">Отобр. назв. типов транзакций</string>
+    <string name="pref_title_show_transaction_type_titles" formatted="false">Показувати назви типів транзакцій</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_title_colored_tags" formatted="false">Цветные метки категорий и проектов</string>
+    <string name="pref_title_colored_tags" formatted="false">Кольорові теги категорій і проєктів</string>
 
     <!-- 20. Settings -->
     <!-- Transaction editor -->
-    <string name="pref_title_tredit_layout_constructor" formatted="false">Настройка редактора транзакций</string>
+    <string name="pref_title_tredit_layout_constructor" formatted="false">Налаштування редактора транзакцій</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_intro" formatted="false">На этом экране изменяются свойства транзакции. Транзакция, это любое перемещение Ваших денежных средств (приход, расход или перевод)</string>
+    <string name="hlp_tr_editor_intro" formatted="false">На цьому екрані можна змінити властивості транзакції. Транзакція — це будь-який рух ваших коштів (дохід, витрата або переказ)</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_date" formatted="false">Нажмите, чтобы изменить дату транзакции</string>
+    <string name="hlp_tr_editor_date" formatted="false">Натисніть, щоб змінити дату транзакції</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_time" formatted="false">Нажмите, чтобы изменить время транзакции</string>
+    <string name="hlp_tr_editor_time" formatted="false">Натисніть, щоб змінити час транзакції</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_account_income" formatted="false">Выберите из списка счет, на который поступают средства</string>
+    <string name="hlp_tr_editor_account_income" formatted="false">Виберіть рахунок, на який надходять кошти</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_account_outcome_or_transfer" formatted="false">Выберите из списка счет, с которого списываются средства</string>
+    <string name="hlp_tr_editor_account_outcome_or_transfer" formatted="false">Виберіть рахунок, з якого списуються кошти</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_account_transfer" formatted="false">Выберите из списка счет, на который поступают средства</string>
+    <string name="hlp_tr_editor_account_transfer" formatted="false">Виберіть рахунок, на який надходять кошти</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_payee_outcome" formatted="false">Введите получателя средств. Проведите влево для перехода в режим перевода между своими счетами</string>
+    <string name="hlp_tr_editor_payee_outcome" formatted="false">Введіть назву одержувача. Проведіть пальцем ліворуч, щоб перейти в режим переказу</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_payee_income" formatted="false">Введите плательщика средств. Проведите влево для перехода в режим перевода между своими счетами</string>
+    <string name="hlp_tr_editor_payee_income" formatted="false">Введіть назву платника. Проведіть пальцем ліворуч, щоб перейти в режим переказу</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_dest_account" formatted="false">Выберите из списка счет для зачисления средств. Проведите вправо для перехода в режим Приход/Расход</string>
+    <string name="hlp_tr_editor_dest_account" formatted="false">Виберіть рахунок для зарахування коштів. Проведіть пальцем праворуч, щоб перейти в режим доходу/витрати</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_category" formatted="false">Выберите из списка категорию транзакции</string>
+    <string name="hlp_tr_editor_category" formatted="false">Виберіть категорію транзакції зі списку</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_amount" formatted="false">Укажите сумму транзакции</string>
+    <string name="hlp_tr_editor_amount" formatted="false">Введіть суму транзакції</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_amount_sign" formatted="false">Меняйте тип транзакции - Приход/Расход</string>
+    <string name="hlp_tr_editor_amount_sign" formatted="false">Змініть тип транзакції — дохід/витрата</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_amount_dest_account" formatted="false">При переводе средств между счетами в разной валюте, здесь отображается сумма в валюте счета назначения. При ее редактировании автоматически меняется курс обмена валют</string>
+    <string name="hlp_tr_editor_amount_dest_account" formatted="false">Під час переказу коштів між рахунками в різних валютах це поле містить суму у валюті рахунку призначення. Її редагування автоматично змінить курс обміну.</string>
 
     <!-- 21. Help -->
     <!-- Edit transaction -->
-    <string name="hlp_tr_editor_exchange_rate" formatted="false">При изменении курса обмена валют, автоматически изменится сумма в валюте счета назначения</string>
+    <string name="hlp_tr_editor_exchange_rate" formatted="false">Зміна курсу обміну валют автоматично змінить суму у валюті рахунку призначення</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_intro" formatted="false">На этом экране изменяются свойства счета</string>
+    <string name="hlp_account_editor_intro" formatted="false">Цей екран призначено для редагування властивостей рахунку</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_name" formatted="false">Введите уникальное название счета</string>
+    <string name="hlp_account_editor_name" formatted="false">Введіть унікальну назву рахунку</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_type" formatted="false">Выберите из списка тип счета</string>
+    <string name="hlp_account_editor_type" formatted="false">Виберіть тип рахунку</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_currency" formatted="false">Нажмите для вызова диалога выбора валюты. В этом же диалоге можно создать новую валюту</string>
+    <string name="hlp_account_editor_currency" formatted="false">Натисніть, щоб вибрати валюту. У цьому ж діалозі можна створити нову валюту</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_emitent" formatted="false">Введите название банка (необязательно)</string>
+    <string name="hlp_account_editor_emitent" formatted="false">Введіть назву банку (необов\'язково)</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_last4digits" formatted="false">Введите последние 4 цифры номера карты (необязательно)</string>
+    <string name="hlp_account_editor_last4digits" formatted="false">Введіть останні 4 цифри номера картки (необов\'язково)</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_comment" formatted="false">Укажите комментарий (необязательно)</string>
+    <string name="hlp_account_editor_comment" formatted="false">Введіть коментар (необов\'язково)</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_start_balance" formatted="false">Введите начальный баланс</string>
+    <string name="hlp_account_editor_start_balance" formatted="false">Введіть початковий баланс</string>
 
     <!-- 21. Help -->
     <!-- Edit account -->
-    <string name="hlp_account_editor_closed" formatted="false">Отметьте, если хотите скрыть счет из списка. Так же нужно отключить опцию Показывать закрытые счета в настройках программы</string>
+    <string name="hlp_account_editor_closed" formatted="false">Поставте позначку, якщо хочете приховати рахунок зі списку. Також потрібно зняти позначку з опції «Показувати закриті рахунки» в налаштуваннях</string>
 
     <!-- 22. Departments -->
     <!-- Entities -->
-    <string name="ent_department" formatted="false">Подразделение</string>
+    <string name="ent_department" formatted="false">Підрозділ</string>
 
     <!-- 22. Departments -->
     <!-- Entities -->
-    <string name="ent_departments" formatted="false">Подразделения</string>
+    <string name="ent_departments" formatted="false">Підрозділи</string>
 
     <!-- 22. Departments -->
     <!-- Entities -->
-    <string name="ent_default_department" formatted="false">Подразделение по умолчанию</string>
+    <string name="ent_default_department" formatted="false">Підрозділ за замовчуванням</string>
 
     <!-- 22. Departments -->
     <!-- Entities -->
-    <string name="ent_new_department" formatted="false">Новое подразделение</string>
+    <string name="ent_new_department" formatted="false">Новий підрозділ</string>
 
     <!-- 22. Departments -->
     <!-- Entities -->
-    <string name="ent_edit_department" formatted="false">Редактирование подразделения</string>
+    <string name="ent_edit_department" formatted="false">Редагування підрозділу</string>
 
     <!-- 22. Departments -->
     <!-- Titles -->
-    <string name="ttl_delete_department_confirmation" formatted="false">Удалить подразделение?</string>
+    <string name="ttl_delete_department_confirmation" formatted="false">Видалити підрозділ?</string>
 
     <!-- 22. Departments -->
     <!-- Titles -->
-    <string name="title_select_department" formatted="false">Выберите подразделение</string>
+    <string name="title_select_department" formatted="false">Виберіть підрозділ</string>
 
     <!-- 22. Departments -->
     <!-- Actions -->
-    <string name="title_reset_default_department" formatted="false">Сбросить подразделение по умолчанию</string>
+    <string name="title_reset_default_department" formatted="false">Скинути підрозділ за замовчуванням</string>
 
     <!-- 23. Reports -->
     <!-- Entities -->
-    <string name="ent_report" formatted="false">Отчет</string>
+    <string name="ent_report" formatted="false">Звіт</string>
 
     <!-- 23. Reports -->
     <!-- Entities -->
-    <string name="ent_reports" formatted="false">Отчеты</string>
+    <string name="ent_reports" formatted="false">Звіти</string>
 
     <!-- 23. Reports -->
     <!-- Entities -->
-    <string name="ent_data" formatted="false">Данные</string>
+    <string name="ent_data" formatted="false">Дані</string>
 
     <!-- 23. Reports -->
     <!-- Entities -->
-    <string name="ent_show" formatted="false">Показать</string>
+    <string name="ent_show" formatted="false">Показати</string>
 
     <!-- 23. Reports -->
     <!-- Entities -->
-    <string name="ent_pie_chart" formatted="false">Круг</string>
+    <string name="ent_pie_chart" formatted="false">Кругова діаграма</string>
 
     <!-- 23. Reports -->
     <!-- Entities -->
-    <string name="ent_bar_chart" formatted="false">График</string>
-
-    <!-- 23. Reports -->
-    <!-- Actions -->
-    <string name="act_show_report" formatted="false">Показать отчет</string>
+    <string name="ent_bar_chart" formatted="false">Стовпчаста діаграма</string>
 
     <!-- 23. Reports -->
     <!-- Actions -->
-    <string name="act_toggle_percents" formatted="false">Проценты/Суммы</string>
+    <string name="act_show_report" formatted="false">Показати звіт</string>
 
     <!-- 23. Reports -->
     <!-- Actions -->
-    <string name="act_toggle_lines" formatted="false">Вкл/Выкл линии</string>
+    <string name="act_toggle_percents" formatted="false">Відсотки/Суми</string>
 
     <!-- 23. Reports -->
     <!-- Actions -->
-    <string name="act_toggle_shrink_labels" formatted="false">Вкл/Выкл сокращение значений</string>
+    <string name="act_toggle_lines" formatted="false">Лінії: увімк./вимк.</string>
+
+    <!-- 23. Reports -->
+    <!-- Actions -->
+    <string name="act_toggle_shrink_labels" formatted="false">Скорочення підписів: увімк./вимк.</string>
 
     <!-- 23. Reports -->
     <!-- Titles -->
-    <string name="ttl_no_chart_data" formatted="false">Нет данных</string>
+    <string name="ttl_no_chart_data" formatted="false">Немає даних для діаграми</string>
 
     <!-- 24. Senders -->
     <!-- Entities -->
-    <string name="ent_sender" formatted="false">Отправитель смс</string>
+    <string name="ent_sender" formatted="false">Відправник SMS</string>
 
     <!-- 24. Senders -->
     <!-- Entities -->
-    <string name="ent_senders" formatted="false">Отправители смс</string>
+    <string name="ent_senders" formatted="false">Відправники SMS</string>
 
     <!-- 24. Senders -->
     <!-- Entities -->
-    <string name="ent_new_sender" formatted="false">Новый отправитель смс</string>
+    <string name="ent_new_sender" formatted="false">Новий відправник SMS</string>
 
     <!-- 24. Senders -->
     <!-- Entities -->
-    <string name="ent_edit_sender" formatted="false">Редактирование отправителя смс</string>
+    <string name="ent_edit_sender" formatted="false">Редагування відправника SMS</string>
 
     <!-- 24. Senders -->
     <!-- Entities -->
-    <string name="ent_phoneno" formatted="false">Номер телефона</string>
+    <string name="ent_phoneno" formatted="false">Номер телефону</string>
 
     <!-- 24. Senders -->
     <!-- Entities -->
-    <string name="ent_amount_pos" formatted="false">Позиция суммы</string>
+    <string name="ent_amount_pos" formatted="false">Позиція суми</string>
 
     <!-- 24. Senders -->
     <!-- Entities -->
-    <string name="ent_balance_pos" formatted="false">Позиция баланса</string>
-
-    <!-- 24. Senders -->
-    <!-- Titles -->
-    <string name="ttl_delete_sender_confirmation" formatted="false">Удалить отправителя смс?</string>
+    <string name="ent_balance_pos" formatted="false">Позиція балансу</string>
 
     <!-- 24. Senders -->
     <!-- Titles -->
-    <string name="title_select_sender" formatted="false">Выберите отправителя смс</string>
+    <string name="ttl_delete_sender_confirmation" formatted="false">Видалити відправника SMS?</string>
 
     <!-- 24. Senders -->
     <!-- Titles -->
-    <string name="title_senders_phone_no" formatted="false">Номера телефонов отправителей</string>
+    <string name="title_select_sender" formatted="false">Виберіть відправника SMS</string>
 
     <!-- 24. Senders -->
     <!-- Titles -->
-    <string name="title_senders_add_credit_limit_to_balance" formatted="false">Добавлять кредитный лимит в баланс</string>
+    <string name="title_senders_phone_no" formatted="false">Номери телефонів відправників</string>
+
+    <!-- 24. Senders -->
+    <!-- Titles -->
+    <string name="title_senders_add_credit_limit_to_balance" formatted="false">Додавати кредитний ліміт до балансу</string>
 
     <!-- 25. Sync -->
     <!-- Entities -->
-    <string name="ent_sync" formatted="false">Синхронизация</string>
+    <string name="ent_sync" formatted="false">Синхронізація</string>
 
     <!-- 25. Sync -->
     <!-- Entities -->
-    <string name="ent_user" formatted="false">Пользователь</string>
+    <string name="ent_user" formatted="false">Користувач</string>
 
     <!-- 25. Sync -->
     <!-- Entities -->
-    <string name="ent_read" formatted="false">Чтение</string>
+    <string name="ent_read" formatted="false">Читання</string>
 
     <!-- 25. Sync -->
     <!-- Entities -->
-    <string name="ent_write" formatted="false">Запись</string>
+    <string name="ent_write" formatted="false">Запис</string>
 
     <!-- 25. Sync -->
     <!-- Actions -->
-    <string name="act_signin_with_google_account" formatted="false">Войти с аккаунтом Google</string>
+    <string name="act_signin_with_google_account" formatted="false">Увійти через обліковий запис Google</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->
-    <string name="ttl_manage_permissions" formatted="false">Управление правами доступа</string>
+    <string name="ttl_manage_permissions" formatted="false">Керування дозволами</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->
-    <string name="ttl_enter_email" formatted="false">Введите email пользователя (Google)</string>
+    <string name="ttl_enter_email" formatted="false">Введіть електронну адресу користувача (Google)</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->
-    <string name="ttl_delete_user" formatted="false">Удалить пользователя?</string>
+    <string name="ttl_delete_user" formatted="false">Видалити користувача?</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->
-    <string name="ttl_sync_iap_title" formatted="false">Синхронизация данных между устройствами</string>
+    <string name="ttl_sync_iap_title" formatted="false">Синхронізація даних між пристроями</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->
-    <string name="ttl_sync_iap_summary" formatted="false">Позволяет вести учет на разных устройствах</string>
+    <string name="ttl_sync_iap_summary" formatted="false">Дає змогу вести облік на різних пристроях</string>
 
     <!-- 25. Sync -->
     <!-- Titles -->
@@ -1906,71 +1906,71 @@
 
     <!-- 25. Sync -->
     <!-- Titles -->
-    <string name="ttl_min_price" formatted="false">От %s/месяц</string>
+    <string name="ttl_min_price" formatted="false">Від %s/місяць</string>
 
     <!-- 25. Sync -->
     <!-- Messages -->
-    <string name="msg_select_subscription_type" formatted="false">Выберите тип подписки</string>
+    <string name="msg_select_subscription_type" formatted="false">Виберіть тип підписки</string>
 
     <!-- 26. Summary -->
     <!-- Entities -->
-    <string name="ent_today" formatted="false">Сегодня</string>
+    <string name="ent_today" formatted="false">Сьогодні</string>
 
     <!-- 26. Summary -->
     <!-- Entities -->
-    <string name="ent_this_week" formatted="false">Текущая неделя</string>
+    <string name="ent_this_week" formatted="false">Цього тижня</string>
 
     <!-- 26. Summary -->
     <!-- Entities -->
-    <string name="ent_this_month" formatted="false">Текущий месяц</string>
+    <string name="ent_this_month" formatted="false">Цього місяця</string>
 
     <!-- 26. Summary -->
     <!-- Entities -->
-    <string name="ent_this_year" formatted="false">Текущий год</string>
+    <string name="ent_this_year" formatted="false">Цього року</string>
 
     <!-- 26. Summary -->
     <!-- Entities -->
-    <string name="ent_yesterday" formatted="false">Вчера</string>
+    <string name="ent_yesterday" formatted="false">Учора</string>
 
     <!-- 26. Summary -->
     <!-- Entities -->
-    <string name="ent_last_week" formatted="false">Предыдущая неделя</string>
+    <string name="ent_last_week" formatted="false">Минулого тижня</string>
 
     <!-- 26. Summary -->
     <!-- Entities -->
-    <string name="ent_last_month" formatted="false">Предыдущий месяц</string>
+    <string name="ent_last_month" formatted="false">Минулого місяця</string>
 
     <!-- 26. Summary -->
     <!-- Entities -->
-    <string name="ent_last_year" formatted="false">Предыдущий год</string>
+    <string name="ent_last_year" formatted="false">Минулого року</string>
 
     <!-- 26. Summary -->
     <!-- Titles -->
-    <string name="ttl_summary_items" formatted="false">Элементы списка "Сводка"</string>
+    <string name="ttl_summary_items" formatted="false">Елементи вкладки «Зведення»</string>
 
     <!-- 26. ScanQR -->
     <!-- Titles -->
-    <string name="ttl_scan_qr" formatted="false">Скан чека</string>
+    <string name="ttl_scan_qr" formatted="false">Сканувати QR</string>
 
     <!-- 26. ScanQR -->
     <!-- Titles -->
-    <string name="ttl_attach_receipt_to" formatted="false">Прикрепить чек к транзакции:</string>
+    <string name="ttl_attach_receipt_to" formatted="false">Прикріпити чек до транзакції:</string>
 
     <!-- 26. ScanQR -->
     <!-- Messages -->
-    <string name="msg_camera_permission_was_granted" formatted="false">Доступ к камере предоставлен</string>
+    <string name="msg_camera_permission_was_granted" formatted="false">Дозвіл на використання камери надано</string>
 
     <!-- 26. ScanQR -->
     <!-- Messages -->
-    <string name="msg_camera_permission_request_was_denied" formatted="false">Доступ к камере запрещен</string>
+    <string name="msg_camera_permission_request_was_denied" formatted="false">Запит на дозвіл використання камери відхилено</string>
 
     <!-- 26. ScanQR -->
     <!-- Messages -->
-    <string name="msg_camera_access_is_required" formatted="false">Доступ к камере необходим для считывания QR-кода с чека</string>
+    <string name="msg_camera_access_is_required" formatted="false">Для показу зображення з камери потрібен доступ до камери</string>
 
     <!-- 26. ScanQR -->
     <!-- Messages -->
-    <string name="msg_permission_is_not_available" formatted="false">Пожалуйста, дайте разрешение на использование камеры</string>
+    <string name="msg_permission_is_not_available" formatted="false">Дозвіл недоступний. Запит дозволу на використання камери</string>
 
     <!-- 26. ScanQR -->
     <!-- Entities -->
@@ -1986,7 +1986,7 @@
 
     <!-- 26. ScanQR -->
     <!-- Actions -->
-    <string name="act_create_new" formatted="false">Создать новую</string>
+    <string name="act_create_new" formatted="false">Створити нову</string>
 
     <!-- 27. Products -->
     <!-- Entities -->
@@ -1994,111 +1994,111 @@
 
     <!-- 27. Products -->
     <!-- Entities -->
-    <string name="ent_products" formatted="false">Товары</string>
+    <string name="ent_products" formatted="false">Товари</string>
 
     <!-- 27. Products -->
     <!-- Entities -->
-    <string name="ent_product_list" formatted="false">Список товаров</string>
+    <string name="ent_product_list" formatted="false">Список товарів</string>
 
     <!-- 27. Products -->
     <!-- Entities -->
-    <string name="ent_split_category" formatted="false">Сплит кат.</string>
+    <string name="ent_split_category" formatted="false">Розд. кат.</string>
 
     <!-- 27. Products -->
     <!-- Entities -->
-    <string name="ent_split_project" formatted="false">Сплит пр.</string>
+    <string name="ent_split_project" formatted="false">Розд. пр.</string>
 
     <!-- 27. Products -->
     <!-- Entities -->
-    <string name="ent_quantity" formatted="false">Количество</string>
+    <string name="ent_quantity" formatted="false">Кількість</string>
 
     <!-- 27. Products -->
     <!-- Entities -->
-    <string name="ent_price" formatted="false">Цена</string>
+    <string name="ent_price" formatted="false">Ціна</string>
 
     <!-- 27. Products -->
     <!-- Entities -->
-    <string name="ent_code_from_sms" formatted="false">Код из смс</string>
+    <string name="ent_code_from_sms" formatted="false">Код із SMS</string>
 
     <!-- 27. Products -->
     <!-- Entities -->
-    <string name="ent_unknown_product" formatted="false">Неизвестный товар</string>
+    <string name="ent_unknown_product" formatted="false">Невідомий товар</string>
 
     <!-- 27. Products -->
     <!-- Actions -->
-    <string name="act_add_product" formatted="false">Добавить товар...</string>
+    <string name="act_add_product" formatted="false">Додати товар...</string>
 
     <!-- 27. Products -->
     <!-- Actions -->
-    <string name="act_change_category" formatted="false">Сменить категорию</string>
+    <string name="act_change_category" formatted="false">Змінити категорію</string>
 
     <!-- 27. Products -->
     <!-- Actions -->
-    <string name="act_change_project" formatted="false">Сменить проект</string>
+    <string name="act_change_project" formatted="false">Змінити проєкт</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_loading_products" formatted="false">Загрузка товаров...</string>
+    <string name="ttl_loading_products" formatted="false">Завантаження товарів...</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_add_product" formatted="false">Добавление товара</string>
+    <string name="ttl_add_product" formatted="false">Додавання товару</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_new_product" formatted="false">Новый товар</string>
+    <string name="ttl_new_product" formatted="false">Новий товар</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_edit_product" formatted="false">Редактирование товара</string>
+    <string name="ttl_edit_product" formatted="false">Редагування товару</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_split_unknown" formatted="false">Не распределено</string>
+    <string name="ttl_split_unknown" formatted="false">Невідомо</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_connection_params" formatted="false">Параметры подключения</string>
+    <string name="ttl_connection_params" formatted="false">Параметри підключення</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_not_now" formatted="false">Не сейчас</string>
+    <string name="ttl_not_now" formatted="false">Не зараз</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_do_not_show_again" formatted="false">Больше не показывать</string>
+    <string name="ttl_do_not_show_again" formatted="false">Більше не показувати</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_you_can_edit_later" formatted="false">Параметры можно изменить позже в настройках</string>
+    <string name="ttl_you_can_edit_later" formatted="false">Облікові дані можна змінити пізніше в налаштуваннях</string>
 
     <!-- 27. Products -->
     <!-- Titles -->
-    <string name="ttl_move_residue" formatted="false">Добавить %s к сумме транзакции</string>
+    <string name="ttl_move_residue" formatted="false">Додати %s до суми транзакції</string>
 
     <!-- 27. Products -->
     <!-- Messages -->
-    <string name="msg_delete_product_confirmation" formatted="false">Удалить товар?</string>
+    <string name="msg_delete_product_confirmation" formatted="false">Видалити товар?</string>
 
     <!-- 27. Products -->
     <!-- Errors -->
-    <string name="err_loading_products" formatted="false">Не удалось загрузить товары</string>
+    <string name="err_loading_products" formatted="false">Помилка завантаження товарів</string>
 
     <!-- 27. Products -->
     <!-- Errors -->
-    <string name="err_set_product" formatted="false">Нужно указать товар</string>
+    <string name="err_set_product" formatted="false">Потрібно вказати товар</string>
 
     <!-- 27. Products -->
     <!-- Messages -->
-    <string name="msg_fts_login_html" formatted="false"><![CDATA[<p>Для получения возможности скачивания списка товаров из чека:</p><p>&nbsp;&nbsp;&nbsp; 1. Установите приложение "<strong>Проверка касcового чека</strong>" (автор <strong>АО ГНИВЦ</strong>).</p><p>&nbsp;&nbsp;&nbsp; 2. Зарегистрируйтесь в нем при помощи номера мобильного телефона и получите код по смс.</p><p>&nbsp;&nbsp;&nbsp; 3. Введите номер телефона и код в форму ниже.</p><p>&nbsp;&nbsp;&nbsp; 4. Нажмите "<strong>Сохранить</strong>".</p>]]></string>
+    <string name="msg_fts_login_html" formatted="false"><![CDATA[<p>Щоб завантажувати список товарів із чеків:</p><p>&nbsp;&nbsp;&nbsp; 1. Установіть застосунок "<strong>Проверка касcового чека</strong>" (автор <strong>АО ГНИВЦ</strong>).</p><p>&nbsp;&nbsp;&nbsp; 2. Зареєструйтеся в ньому за номером мобільного телефону й отримайте код в SMS.</p><p>&nbsp;&nbsp;&nbsp; 3. Введіть номер телефону та код у форму нижче.</p><p>&nbsp;&nbsp;&nbsp; 4. Натисніть "<strong>Зберегти</strong>".</p>]]></string>
 
     <!-- 28. EditorConstructor -->
     <!-- Entities -->
-    <string name="ent_editor_constructor" formatted="false">Настройка редактора транзакций</string>
+    <string name="ent_editor_constructor" formatted="false">Конструктор редактора транзакцій</string>
 
     <!-- 28. EditorConstructor -->
     <!-- Actions -->
-    <string name="act_tune_editor" formatted="false">Настроить редактор</string>
+    <string name="act_tune_editor" formatted="false">Налаштувати редактор</string>
     <string name="pin_code_wrong" formatted="false">Невірний PIN</string>
     <string name="pin_code_mismatch" formatted="false">PIN-коди не збігаються</string>
     <string name="msg_backup_password_lost" formatted="false">Пароль резервної копії неможливо прочитати на цьому пристрої. Введіть пароль резервної копії знову, до того часу резервне копіювання призупинено</string>
