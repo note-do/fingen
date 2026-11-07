@@ -19,7 +19,9 @@
 
     <View
         android:id="@+id/fabBGLayout"
-        style="@style/FabMenuBackground" />
+        style="@style/FabMenuBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/fabAddModelLayout"
