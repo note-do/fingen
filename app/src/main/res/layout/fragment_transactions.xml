@@ -221,6 +221,7 @@
         app:behavior_fitToContents="false"
         app:behavior_halfExpandedRatio="0.5"
         app:behavior_hideable="false"
+        app:gestureInsetBottomIgnored="true"
         app:behavior_peekHeight="48dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
