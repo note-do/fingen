@@ -5,6 +5,7 @@ import android.os.Parcel;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 /**
@@ -138,9 +139,9 @@ public class Credit extends BaseModel implements IAbstractModel {
     public ContentValues getCV() {
         ContentValues values = super.getCV();
 
-        values.put(DBHelper.C_REF_DEBTS_ACCOUNT, getAccountID());
-        values.put(DBHelper.C_REF_DEBTS_PAYEE, getPayeeID());
-        values.put(DBHelper.C_REF_DEBTS_CATEGORY, getCategoryID());
+        DbRefs.putRef(values, DBHelper.C_REF_DEBTS_ACCOUNT, getAccountID());
+        DbRefs.putRef(values, DBHelper.C_REF_DEBTS_PAYEE, getPayeeID());
+        DbRefs.putRef(values, DBHelper.C_REF_DEBTS_CATEGORY, getCategoryID());
         values.put(DBHelper.C_REF_DEBTS_CLOSED, isClosed());
         values.put(DBHelper.C_REF_DEBTS_COMMENT, getComment());
         return values;

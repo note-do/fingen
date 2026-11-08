@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.widget.RemoteViews;
 
+import com.yoshione.fingen.db.DbUpgradeGate;
 import com.yoshione.fingen.model.Transaction;
 import com.yoshione.fingen.utils.PrefUtils;
 
@@ -18,6 +19,10 @@ public class WidgetExpense extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        // DB upgrade pending: leave the widget as is (a click would open the upgrade screen via the editor)
+        if (DbUpgradeGate.needsUpgrade(context)) {
+            return;
+        }
         // There may be multiple widgets active, so update all of them
 
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_expense);

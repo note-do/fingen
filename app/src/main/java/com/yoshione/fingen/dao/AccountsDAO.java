@@ -6,7 +6,9 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.Cabbage;
@@ -46,6 +48,35 @@ public class AccountsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         return sInstance;
     }
 
+    /**
+     * Есть ли у счета данные, привязанные к его знакам валюты: транзакции (как источник или получатель),
+     * шаблоны и долги. Если есть, валюту назначать нельзя (суммы хранятся в минорных единицах).
+     */
+    public boolean hasLinkedData(long accountId) {
+        if (accountId < 0) return false;
+        String id = String.valueOf(accountId);
+        Cursor cursor = mDatabase.rawQuery("SELECT "
+                + "EXISTS(SELECT 1 FROM log_Transactions WHERE SrcAccountId = ?1 OR DestAccountId = ?1) OR "
+                + "EXISTS(SELECT 1 FROM log_Templates WHERE SrcAccountId = ?1 OR DestAccountId = ?1) OR "
+                + "EXISTS(SELECT 1 FROM ref_Debts WHERE AccountId = ?1)", new String[]{id});
+        try {
+            return cursor.moveToFirst() && cursor.getInt(0) != 0;
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /** Валюта счета в БД (-1, если не задана). */
+    public long getStoredCurrencyId(long accountId) {
+        if (accountId < 0) return -1;
+        Cursor cursor = mDatabase.rawQuery("SELECT CurrencyId FROM ref_Accounts WHERE _id = ?", new String[]{String.valueOf(accountId)});
+        try {
+            return cursor.moveToFirst() && !cursor.isNull(0) ? cursor.getLong(0) : -1;
+        } finally {
+            cursor.close();
+        }
+    }
+
     @Override
     public IAbstractModel cursorToModel(Cursor cursor) {
         return cursorToAccount(cursor);
@@ -58,20 +89,21 @@ public class AccountsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         Account.AccountType accountType = Account.AccountType.values()[cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_TYPE))];
         account.setAccountType(accountType);
         account.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_NAME)));
-        account.setCabbageId(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_CURRENCY)));
+        long currencyId = DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_CURRENCY));
+        account.setCabbageId(currencyId);
+        int digits = CurrencyScale.forCurrency(mDatabase, currencyId);
         account.setEmitent(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_EMITENT)));
         account.setLast4Digits(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_LAST4DIGITS)));
         account.setComment(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_COMMENT)));
-        account.setStartBalance(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_STARTBALANCE))));
-        account.setIncome(new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("Income"))));
-        account.setExpense(new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("Expense"))));
+        account.setStartBalance(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_STARTBALANCE)), digits));
+        account.setIncome(CurrencyScale.fromMinor(cursor.getLong(cursor.getColumnIndexOrThrow("Income")), digits));
+        account.setExpense(CurrencyScale.fromMinor(cursor.getLong(cursor.getColumnIndexOrThrow("Expense")), digits));
 
         account.setIsClosed(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_ISCLOSED)) == 1);
         account.setOrder(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_ORDER)));
 
-        account.setCreditLimit(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_CREDITLIMIT))));
+        account.setCreditLimit(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_CREDITLIMIT)), digits));
 
-        account = (Account) DBHelper.getSyncDataFromCursor(account, cursor, mColumnIndexes);
 
         return account;
     }
@@ -185,7 +217,7 @@ public class AccountsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
             try {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
-                        cabbage = cursor.getLong(1);
+                        cabbage = DbRefs.getRef(cursor, 1);
                         ids = array.get(cabbage);
                         if (ids == null) {
                             ids = new HashSet<>();

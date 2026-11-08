@@ -6,7 +6,9 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.Category;
@@ -66,7 +68,8 @@ public class TemplatesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor 
             template.setCategoryID(-1);
         };
         if (!cursor.isNull(mColumnIndexes.get(DBHelper.C_LOG_TEMPLATES_AMOUNT))) {
-            template.setAmount(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_TEMPLATES_AMOUNT))));
+            template.setAmount(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TEMPLATES_AMOUNT)),
+                    CurrencyScale.forAccount(mDatabase, template.getAccountID())));
         } else {
             template.setAmount(BigDecimal.ZERO);
         };
@@ -93,7 +96,7 @@ public class TemplatesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor 
             template.setComment("");
         }
 
-        template.setDestAccountID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TEMPLATES_DESTACCOUNT)));
+        template.setDestAccountID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_TEMPLATES_DESTACCOUNT)));
 
         if (!cursor.isNull(mColumnIndexes.get(DBHelper.C_LOG_TEMPLATES_TYPE))) {
             int type = cursor.getInt(mColumnIndexes.get(DBHelper.C_LOG_TEMPLATES_TYPE));
@@ -106,7 +109,6 @@ public class TemplatesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor 
             template.setTrType(Transaction.TRANSACTION_TYPE_EXPENSE);
         }
 
-        template = (Template) DBHelper.getSyncDataFromCursor(template, cursor, mColumnIndexes);
 
         return template;
     }

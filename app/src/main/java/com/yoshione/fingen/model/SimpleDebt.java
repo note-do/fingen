@@ -5,6 +5,7 @@ import android.os.Parcel;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 import java.math.BigDecimal;
@@ -128,7 +129,7 @@ public class SimpleDebt extends BaseModel implements IAbstractModel {
         values.put(DBHelper.C_REF_SIMPLEDEBTS_NAME, mName);
         values.put(DBHelper.C_REF_SIMPLEDEBTS_ISACTIVE, mIsActive ? 1 : 0);
         values.put(DBHelper.C_REF_SIMPLEDEBTS_START_AMOUNT, mStartAmount.doubleValue());
-        values.put(DBHelper.C_REF_SIMPLEDEBTS_CABBAGE, mCabbageID);
+        DbRefs.putRef(values, DBHelper.C_REF_SIMPLEDEBTS_CABBAGE, mCabbageID);
         return values;
     }
 

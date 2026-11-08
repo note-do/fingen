@@ -22,6 +22,7 @@ import androidx.test.uiautomator.UiObject2;
 import com.google.android.material.navigation.NavigationView;
 import com.yoshione.fingen.ActivityMain;
 import com.yoshione.fingen.ActivitySmsList;
+import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.DbSnapshot;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.ScreenTestUtils;
@@ -67,18 +68,26 @@ public class SmsSupportTest {
     private Context mContext;
     private DbSnapshot mSnapshot;
     private Activity mActivity;
+    private long mSmsId;
 
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getTargetContext();
         mSnapshot = DbSnapshot.take(mContext);
         mActivity = null;
+        mSmsId = 0;
     }
 
     @After
     public void tearDown() {
         SmsSupport.setOverrideForTesting(null);
         ScreenTestUtils.finish(mActivity);
+        if (mSmsId != 0) {
+            // log_Incoming_SMS references ref_Senders: delete the SMS first, otherwise the snapshot
+            // cannot delete the sender (FK trigger) and the rest of the rollback is skipped
+            DBHelper.getInstance(mContext).getWritableDatabase()
+                    .delete("log_Incoming_SMS", "_id = ?", new String[]{String.valueOf(mSmsId)});
+        }
         mSnapshot.restore(mContext);
     }
 
@@ -159,19 +168,21 @@ public class SmsSupportTest {
                         != PackageManager.PERMISSION_GRANTED);
     }
 
-    private void insertSender() throws Exception {
+    private Sender insertSender() throws Exception {
         Sender sender = new Sender();
         sender.setName("SmsSupportTest " + System.nanoTime());
         sender.setPhoneNo("SmsSupportTest");
-        SendersDAO.getInstance(mContext).createModel(sender);
+        return (Sender) SendersDAO.getInstance(mContext).createModel(sender);
     }
 
     private void insertSmsRecord() throws Exception {
+        // log_Incoming_SMS.SenderId references ref_Senders: create a real sender first
+        Sender sender = insertSender();
         Sms sms = new Sms();
         sms.setmDateTime(new Date());
-        sms.setSenderId(0);
+        sms.setSenderId(sender.getID());
         sms.setmBody("SmsSupportTest " + System.nanoTime());
-        SmsDAO.getInstance(mContext).createModel(sms);
+        mSmsId = ((Sms) SmsDAO.getInstance(mContext).createModel(sms)).getID();
     }
 
     /** The SMS permission dialog of the system permission controller must not appear within the wait. */

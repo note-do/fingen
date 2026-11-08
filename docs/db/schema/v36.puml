@@ -1,0 +1,429 @@
+@startuml fingen_schema_v36
+' Fingen local database (SQLite, fingen.db, DATABASE_VERSION = 36)
+' Source: SchemaV36 (DDL and indexes of the final state); migration 35 -> 36 (Migration36) rebuilds every table
+' Branch: chore/db-schema-v36
+
+title Fingen local database schema (fingen.db, version 36)
+
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam entity {
+  BackgroundColor #FEFEFE
+  BorderColor #444444
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #C9A227
+}
+hide circle
+
+legend right
+  |= Marker |= Meaning |
+  | * | NOT NULL column |
+  | PK | PRIMARY KEY |
+  | FK | REFERENCES (ON DELETE action in brackets; every declared FK also has ON UPDATE CASCADE; foreign_keys is ON, set in onOpen) |
+  | UQ | UNIQUE constraint |
+  | UIX | unique index WHERE Deleted = 0 (soft-deleted rows do not take part) |
+  | IX | index |
+  | ~ sync | common columns of every ref_/log_ table except log_Running_Balance: Deleted (soft delete, NOT NULL DEFAULT 0) |
+  | ~ search | SearchString (denormalized search text) |
+  | minor | integer in minor currency units of the account (money columns) |
+endlegend
+
+' =====================================================================
+package "Accounts" {
+
+entity "ref_Currencies" as ref_Currencies {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Code : TEXT
+  * Symbol : TEXT
+  * Name : TEXT
+  * DecimalCount : INTEGER <<CHECK BETWEEN 0 AND 8>>
+  OrderNumber : INTEGER
+  --
+  UIX idx_ref_Currencies_Code (Code)
+}
+
+entity "ref_Accounts" as ref_Accounts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Type : INTEGER
+  * Name : TEXT
+  CurrencyId : INTEGER <<FK ref_Currencies [SET NULL]>>
+  Emitent : TEXT
+  Last4Digits : INTEGER
+  Comment : TEXT
+  * StartBalance : INTEGER <<minor>>
+  * IsClosed : INTEGER <<DEFAULT 0>>
+  OrderNumber : INTEGER
+  CreditLimit : INTEGER <<minor>>
+  ~ search
+  --
+  UIX idx_ref_Accounts_Name (Name)
+  IX idx_ref_Accounts_CurrencyId (CurrencyId)
+  --
+  .. computed in queries, not stored: Income, Expense (from log_Running_Balance) ..
+}
+
+entity "ref_Accounts_Sets" as ref_Accounts_Sets {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  --
+  UIX idx_ref_Accounts_Sets_Name (Name)
+}
+
+entity "log_Accounts_Sets" as log_Accounts_Sets {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * SetId : INTEGER <<FK ref_Accounts_Sets [CASCADE]>>
+  * AccountId : INTEGER <<FK ref_Accounts [CASCADE]>>
+  --
+  UQ (SetId, AccountId, Deleted) <<ON CONFLICT ABORT>>
+  IX idx_log_Accounts_Sets_AccountId (AccountId)
+}
+
+}
+
+' =====================================================================
+package "Classifiers (hierarchical references)" {
+
+entity "ref_Categories" as ref_Categories {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  Color : TEXT
+  ParentId : INTEGER <<FK ref_Categories (self) [SET NULL]>>
+  * OrderNumber : INTEGER
+  FullName : TEXT
+  ~ search
+  --
+  UIX idx_ref_Categories_Name_ParentId (Name, IFNULL(ParentId, 0))
+  IX idx_ref_Categories_ParentId (ParentId)
+}
+
+entity "ref_Payees" as ref_Payees {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  DefaultCategoryId : INTEGER <<FK ref_Categories [SET NULL]>>
+  ParentId : INTEGER <<FK ref_Payees (self) [SET NULL]>>
+  OrderNumber : INTEGER
+  FullName : TEXT
+  ~ search
+  --
+  UIX idx_ref_Payees_Name_ParentId (Name, IFNULL(ParentId, 0))
+  IX idx_ref_Payees_ParentId (ParentId)
+  IX idx_ref_Payees_DefaultCategoryId (DefaultCategoryId)
+}
+
+entity "ref_Projects" as ref_Projects {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  Color : TEXT <<DEFAULT '#ffffff'>>
+  * IsActive : INTEGER <<DEFAULT 1>>
+  ParentId : INTEGER <<FK ref_Projects (self) [SET NULL]>>
+  OrderNumber : INTEGER
+  FullName : TEXT
+  ~ search
+  --
+  UIX idx_ref_Projects_Name_ParentId (Name, IFNULL(ParentId, 0))
+  IX idx_ref_Projects_ParentId (ParentId)
+}
+
+entity "ref_Locations" as ref_Locations {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * Lon : REAL
+  * Lat : REAL
+  Address : TEXT
+  ParentId : INTEGER <<FK ref_Locations (self) [SET NULL]>>
+  OrderNumber : INTEGER
+  FullName : TEXT
+  ~ search
+  --
+  UIX idx_ref_Locations_Name_ParentId (Name, IFNULL(ParentId, 0))
+  IX idx_ref_Locations_ParentId (ParentId)
+}
+
+entity "ref_Departments" as ref_Departments {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * IsActive : INTEGER <<DEFAULT 1>>
+  ParentId : INTEGER <<FK ref_Departments (self) [SET NULL]>>
+  OrderNumber : INTEGER
+  FullName : TEXT
+  ~ search
+  --
+  UIX idx_ref_Departments_Name_ParentId (Name, IFNULL(ParentId, 0))
+  IX idx_ref_Departments_ParentId (ParentId)
+}
+
+entity "ref_SimpleDebts" as ref_SimpleDebts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * IsActive : INTEGER <<DEFAULT 1>>
+  * StartAmount : INTEGER <<DEFAULT 0, minor>>
+  CurrencyId : INTEGER <<FK ref_Currencies [SET NULL]>>
+  ~ search
+  --
+  UIX idx_ref_SimpleDebts_Name (Name)
+  IX idx_ref_SimpleDebts_CurrencyId (CurrencyId)
+}
+
+entity "ref_Products" as ref_Products {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT <<DEFAULT ''>>
+  * SearchString : TEXT <<DEFAULT ''>>
+  --
+  UIX idx_ref_Products_Name (Name)
+}
+
+entity "ref_Senders" as ref_Senders {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * PhoneNo : TEXT
+  AmountPos : INTEGER
+  BalancePos : INTEGER
+  LeadingCurrencySymbol : INTEGER
+  DateFormat : TEXT
+  * IsActive : INTEGER <<DEFAULT 1>>
+  * AddCreditLimitToBalance : INTEGER <<DEFAULT 0>>
+  --
+  UIX idx_ref_Senders_Name (Name)
+  UIX idx_ref_Senders_PhoneNo (PhoneNo)
+}
+
+}
+
+' =====================================================================
+package "Transactions" {
+
+entity "log_Transactions" as log_Transactions {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * DateTime : INTEGER
+  * SrcAccountId : INTEGER <<FK ref_Accounts [CASCADE]>>
+  DestAccountId : INTEGER <<FK ref_Accounts [CASCADE], NULL = not a transfer>>
+  PayeeId : INTEGER <<FK ref_Payees [SET NULL]>>
+  CategoryId : INTEGER <<FK ref_Categories [SET NULL]>>
+  ProjectId : INTEGER <<FK ref_Projects [SET NULL]>>
+  SimpleDebtId : INTEGER <<FK ref_SimpleDebts [SET NULL]>>
+  DepartmentId : INTEGER <<FK ref_Departments [SET NULL]>>
+  LocationId : INTEGER <<FK ref_Locations [SET NULL]>>
+  * Amount : INTEGER <<minor, currency of SrcAccountId>>
+  * ExchangeRate : INTEGER <<DEFAULT 1000000000000 = 1.0, rate x 10^12>>
+  * IsAutoCreated : INTEGER <<DEFAULT 0>>
+  Comment : TEXT
+  File : TEXT
+  Lon : REAL
+  Lat : REAL
+  Accuracy : INTEGER
+  * FN : INTEGER <<DEFAULT 0>>
+  * FD : INTEGER <<DEFAULT 0>>
+  * FP : INTEGER <<DEFAULT 0>>
+  * IsSplit : INTEGER <<DEFAULT 0, 1 = has products>>
+  ~ search
+  --
+  IX idx_log_Transactions_Deleted_DateTime (Deleted, DateTime)
+  IX idx_log_Transactions_SrcAccountId_DateTime (SrcAccountId, DateTime)
+  IX idx_log_Transactions_DestAccountId (DestAccountId)
+  IX idx_log_Transactions_PayeeId (PayeeId)
+  IX idx_log_Transactions_CategoryId (CategoryId)
+  IX idx_log_Transactions_ProjectId (ProjectId)
+  IX idx_log_Transactions_SimpleDebtId (SimpleDebtId)
+  IX idx_log_Transactions_DepartmentId (DepartmentId)
+  IX idx_log_Transactions_LocationId (LocationId)
+}
+
+entity "log_Products" as log_Products {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * TransactionId : INTEGER <<FK log_Transactions [CASCADE]>>
+  * ProductId : INTEGER <<FK ref_Products [RESTRICT], DEFAULT 0>>
+  CategoryId : INTEGER <<FK ref_Categories [SET NULL], DEFAULT NULL>>
+  ProjectId : INTEGER <<FK ref_Projects [SET NULL], DEFAULT NULL>>
+  * Price : INTEGER <<DEFAULT 0, minor>>
+  * Quantity : INTEGER <<DEFAULT 1000 = 1.0, quantity x 10^3, CHECK >= 0>>
+  --
+  IX idx_log_Products_TransactionId_Deleted (TransactionId, Deleted)
+  IX idx_log_Products_ProductId (ProductId)
+  IX idx_log_Products_CategoryId (CategoryId)
+  IX idx_log_Products_ProjectId (ProjectId)
+}
+
+entity "log_Running_Balance" as log_Running_Balance {
+  * AccountId : INTEGER <<PK, FK ref_Accounts [CASCADE]>>
+  * TransactionId : INTEGER <<PK, FK log_Transactions [CASCADE]>>
+  * DateTime : INTEGER
+  * Income : INTEGER <<DEFAULT 0, minor>>
+  * Expense : INTEGER <<DEFAULT 0, minor>>
+  --
+  PK (AccountId, TransactionId)
+  IX idx_log_Running_Balance_AccountId_DateTime (AccountId, DateTime)
+  IX idx_log_Running_Balance_TransactionId (TransactionId)
+}
+
+}
+
+' =====================================================================
+package "Templates, SMS import" {
+
+entity "log_Templates" as log_Templates {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * Type : INTEGER
+  * SrcAccountId : INTEGER <<FK ref_Accounts [CASCADE]>>
+  DestAccountId : INTEGER <<FK ref_Accounts [CASCADE]>>
+  PayeeId : INTEGER <<FK ref_Payees [SET NULL]>>
+  CategoryId : INTEGER <<FK ref_Categories [SET NULL]>>
+  ProjectId : INTEGER <<FK ref_Projects [SET NULL]>>
+  DepartmentId : INTEGER <<FK ref_Departments [SET NULL]>>
+  LocationId : INTEGER <<FK ref_Locations [SET NULL]>>
+  Amount : INTEGER <<minor>>
+  ExchangeRate : INTEGER <<DEFAULT 1000000000000, rate x 10^12>>
+  Comment : TEXT
+  ~ search
+  --
+  IX idx_log_Templates_SrcAccountId (SrcAccountId)
+  IX idx_log_Templates_DestAccountId (DestAccountId)
+  IX idx_log_Templates_PayeeId (PayeeId)
+  IX idx_log_Templates_CategoryId (CategoryId)
+  IX idx_log_Templates_ProjectId (ProjectId)
+  IX idx_log_Templates_DepartmentId (DepartmentId)
+  IX idx_log_Templates_LocationId (LocationId)
+}
+
+entity "log_Incoming_SMS" as log_Incoming_SMS {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * DateTime : INTEGER
+  * SenderId : INTEGER <<FK ref_Senders [RESTRICT]>>
+  * Body : TEXT
+  --
+  IX idx_log_Incoming_SMS_DateTime (DateTime)
+  IX idx_log_Incoming_SMS_SenderId (SenderId)
+}
+
+entity "ref_Sms_Parser_Patterns" as ref_Sms_Parser_Patterns {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Type : INTEGER
+  * Object : TEXT
+  * Pattern : TEXT
+  --
+  UQ (Type, Pattern, Deleted) <<ON CONFLICT REPLACE>>
+}
+
+}
+
+' =====================================================================
+package "Debts and budget" {
+
+entity "ref_Debts" as ref_Debts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * AccountId : INTEGER <<FK ref_Accounts [CASCADE]>>
+  PayeeId : INTEGER <<FK ref_Payees [SET NULL]>>
+  CategoryId : INTEGER <<FK ref_Categories [SET NULL]>>
+  * IsClosed : INTEGER <<DEFAULT 0>>
+  Comment : TEXT
+  --
+  UIX idx_ref_Debts_AccountId (AccountId)
+  IX idx_ref_Debts_PayeeId (PayeeId)
+  IX idx_ref_Debts_CategoryId (CategoryId)
+}
+
+entity "ref_budget" as ref_budget {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Year : INTEGER
+  * Month : INTEGER
+  * CategoryId : INTEGER <<FK ref_Categories [CASCADE]>>
+  * Amount : INTEGER <<minor>>
+  * CurrencyId : INTEGER <<FK ref_Currencies [CASCADE]>>
+  --
+  UQ (Deleted, Year, Month, CategoryId, CurrencyId) <<ON CONFLICT REPLACE>>
+  IX idx_ref_budget_CategoryId (CategoryId)
+  IX idx_ref_budget_CurrencyId (CurrencyId)
+}
+
+entity "ref_budget_debts" as ref_budget_debts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Year : INTEGER
+  * Month : INTEGER
+  * DebtId : INTEGER <<FK ref_Debts [CASCADE]>>
+  * Amount : INTEGER <<DEFAULT 0, minor>>
+  --
+  UQ (Deleted, Year, Month, DebtId) <<ON CONFLICT REPLACE>>
+  IX idx_ref_budget_debts_DebtId (DebtId)
+}
+
+}
+
+' =====================================================================
+' Relations (all edges are declared FK in the DDL)
+
+ref_Currencies ||--o{ ref_Accounts : "CurrencyId"
+ref_Accounts_Sets ||--o{ log_Accounts_Sets : "SetId"
+ref_Accounts ||--o{ log_Accounts_Sets : "AccountId"
+ref_Categories ||--o{ ref_Categories : "ParentId"
+ref_Categories ||--o{ ref_Payees : "DefaultCategoryId"
+ref_Payees ||--o{ ref_Payees : "ParentId"
+ref_Projects ||--o{ ref_Projects : "ParentId"
+ref_Locations ||--o{ ref_Locations : "ParentId"
+ref_Departments ||--o{ ref_Departments : "ParentId"
+ref_Currencies ||--o{ ref_SimpleDebts : "CurrencyId"
+ref_Accounts ||--o{ log_Transactions : "SrcAccountId"
+ref_Accounts |o--o{ log_Transactions : "DestAccountId"
+ref_Payees |o--o{ log_Transactions : "PayeeId"
+ref_Categories |o--o{ log_Transactions : "CategoryId"
+ref_Projects |o--o{ log_Transactions : "ProjectId"
+ref_SimpleDebts |o--o{ log_Transactions : "SimpleDebtId"
+ref_Departments |o--o{ log_Transactions : "DepartmentId"
+ref_Locations |o--o{ log_Transactions : "LocationId"
+log_Transactions ||--o{ log_Products : "TransactionId"
+ref_Products ||--o{ log_Products : "ProductId"
+ref_Categories |o--o{ log_Products : "CategoryId"
+ref_Projects |o--o{ log_Products : "ProjectId"
+ref_Accounts ||--o{ log_Running_Balance : "AccountId"
+log_Transactions ||--o{ log_Running_Balance : "TransactionId"
+ref_Accounts ||--o{ log_Templates : "SrcAccountId"
+ref_Accounts |o--o{ log_Templates : "DestAccountId"
+ref_Payees |o--o{ log_Templates : "PayeeId"
+ref_Categories |o--o{ log_Templates : "CategoryId"
+ref_Projects |o--o{ log_Templates : "ProjectId"
+ref_Departments |o--o{ log_Templates : "DepartmentId"
+ref_Locations |o--o{ log_Templates : "LocationId"
+ref_Senders ||--o{ log_Incoming_SMS : "SenderId"
+ref_Accounts ||--o{ ref_Debts : "AccountId"
+ref_Payees |o--o{ ref_Debts : "PayeeId"
+ref_Categories |o--o{ ref_Debts : "CategoryId"
+ref_Categories ||--o{ ref_budget : "CategoryId"
+ref_Currencies ||--o{ ref_budget : "CurrencyId"
+ref_Debts ||--o{ ref_budget_debts : "DebtId"
+
+' Changes relative to the previous version (v35 -> v36, Migration36 rebuilds all 21 tables):
+' - Foreign keys are enforced: PRAGMA foreign_keys = ON is set in onOpen.
+' - Empty references are NULL (were -1 or 0): PayeeId, CategoryId, ProjectId, SimpleDebtId, DepartmentId, LocationId, DestAccountId, ParentId, DefaultCategoryId, CurrencyId.
+' - ref_Currencies.DecimalCount is limited to 0..8 (CHECK).
+' - Money is INTEGER in minor units of the account currency: Amount, StartBalance, CreditLimit, StartAmount, Price, budget Amount, Income, Expense (were REAL).
+' - ExchangeRate is INTEGER, rate x 10^12 (1.0 = 1000000000000); Quantity is INTEGER, quantity x 10^3 (1.0 = 1000).
+' - Removed: FBID, TS, Dirty, LastEdited from every table; ref_Debts.SrcAccount; ref_Locations.Radius; ref_Categories.Sign. Common columns are only _id and Deleted.
+' - Kept: log_Transactions.FN, FD, FP.
+' - Renamed: *ID -> *Id (SetId, AccountId, ParentId, TransactionId, ProductId, CategoryId, ProjectId); Currency -> CurrencyId; Payee/Category/Project/Department/Location/SimpleDebt -> *Id;
+'   SrcAccount/DestAccount -> SrcAccountId/DestAccountId; Account (ref_Debts) -> AccountId; Debt -> DebtId; Category (ref_budget) -> CategoryId; DefCategory -> DefaultCategoryId;
+'   CustomOrder -> OrderNumber; COLOR -> Color; AutoCreated -> IsAutoCreated; Split -> IsSplit; Closed -> IsClosed; DateTimeRB -> DateTime; Sender (log_Incoming_SMS) -> SenderId.
+' - New or changed FK: log_Running_Balance (AccountId, TransactionId) and log_Incoming_SMS.SenderId now declared; log_Products.TransactionId is CASCADE (was SET NULL); ref_Debts.PayeeId is nullable (SET NULL).
+' - UNIQUE (..., Deleted) on references is replaced by unique indexes WHERE Deleted = 0; indexes get a uniform name idx_<table>_<columns>; indexes added on every FK column.
+@enduml

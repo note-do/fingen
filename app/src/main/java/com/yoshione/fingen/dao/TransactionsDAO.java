@@ -12,6 +12,7 @@ import android.util.Pair;
 
 import com.yoshione.fingen.BuildConfig;
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.classes.ListSumsByCabbage;
 import com.yoshione.fingen.classes.SumsByCabbage;
 import com.yoshione.fingen.filters.AbstractFilter;
@@ -19,6 +20,7 @@ import com.yoshione.fingen.filters.DateRangeFilter;
 import com.yoshione.fingen.filters.FilterListHelper;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.managers.FilterManager;
 import com.yoshione.fingen.managers.TransferManager;
 import com.yoshione.fingen.model.DateEntry;
@@ -55,6 +57,19 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
     private static TransactionsDAO sInstance;
     private ProductEntrysDAO mProductEntrysDAO;
 
+    // Категория и проект строки товара (если заданы) заменяют категорию и проект транзакции
+    private static final String CAT_EXPR = "CASE WHEN prod.CategoryId IS NULL THEN t.CategoryId ELSE prod.CategoryId END";
+    private static final String PRJ_EXPR = "CASE WHEN prod.ProjectId IS NULL THEN t.ProjectId ELSE prod.ProjectId END";
+
+    /**
+     * В запросах с log_Products имена CategoryId и ProjectId из фильтров становятся выражениями с учетом товара.
+     */
+    private static String replaceProductFields(String filter) {
+        return filter
+                .replaceAll("\\bCategoryId\\b", CAT_EXPR)
+                .replaceAll("\\bProjectId\\b", PRJ_EXPR);
+    }
+
     private TransactionsDAO(Context context) {
         super(context, T_LOG_TRANSACTIONS, IAbstractModel.MODEL_TYPE_TRANSACTION, DBHelper.T_LOG_TRANSACTIONS_ALL_COLUMNS);
         super.setDaoInheritor(this);
@@ -78,22 +93,24 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
 
         transaction.setID(cursor.getLong(mColumnIndexes.get(C_ID)));
         transaction.setDateTime(new Date(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_DATETIME))));
-        transaction.setAccountID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT)));
-        transaction.setPayeeID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_PAYEE)));
-        transaction.setCategoryID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_CATEGORY)));
-        transaction.setAmount(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_AMOUNT))), Transaction.TRANSACTION_TYPE_UNDEFINED);
-        transaction.setProjectID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_PROJECT)));
-        transaction.setDepartmentID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_DEPARTMENT)));
-        transaction.setLocationID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_LOCATION)));
+        long srcAccountID = cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT));
+        int digits = CurrencyScale.forAccount(mDatabase, srcAccountID);
+        transaction.setAccountID(srcAccountID);
+        transaction.setPayeeID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_PAYEE)));
+        transaction.setCategoryID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_CATEGORY)));
+        transaction.setAmount(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_AMOUNT)), digits), Transaction.TRANSACTION_TYPE_UNDEFINED);
+        transaction.setProjectID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_PROJECT)));
+        transaction.setDepartmentID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_DEPARTMENT)));
+        transaction.setLocationID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_LOCATION)));
         transaction.setComment(cursor.getString(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_COMMENT)));
         transaction.setFile(cursor.getString(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_FILE)));
-        transaction.setDestAccountID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT)));
-        transaction.setExchangeRate(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_EXCHANGERATE))));
+        transaction.setDestAccountID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT)));
+        transaction.setExchangeRate(CurrencyScale.fromRate(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_EXCHANGERATE))));
         transaction.setAutoCreated(cursor.getInt(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_AUTOCREATED)) == 1);
         transaction.setLat(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_LAT)));
         transaction.setLon(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_LON)));
         transaction.setAccuracy(cursor.getInt(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_ACCURACY)));
-        transaction.setSimpleDebtID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_SIMPLEDEBT)));
+        transaction.setSimpleDebtID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_SIMPLEDEBT)));
         transaction.setFN(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_FN)));
         transaction.setFD(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_FD)));
         transaction.setFP(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_TRANSACTIONS_FP)));
@@ -106,84 +123,93 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
             transaction.setProductEntries(entries);
         }
 
-        if (cursor.getColumnCount() > mColumnIndexes.size()) {
-            transaction.setFromAccountBalance(new BigDecimal(cursor.getDouble(mColumnIndexes.size())));
-            transaction.setToAccountBalance(new BigDecimal(cursor.getDouble(mColumnIndexes.size() + 1)));
+        int fromBalanceIndex = cursor.getColumnIndex("FromBalance");
+        int toBalanceIndex = cursor.getColumnIndex("ToBalance");
+        if (fromBalanceIndex >= 0 && toBalanceIndex >= 0) {
+            transaction.setFromAccountBalance(CurrencyScale.fromMinor(cursor.getLong(fromBalanceIndex), digits));
+            transaction.setToAccountBalance(CurrencyScale.fromMinor(cursor.getLong(toBalanceIndex),
+                    CurrencyScale.forAccount(mDatabase, transaction.getDestAccountID())));
         }
 
         if (transaction.getDestAccountID() >= 0) {
             transaction.setTransactionType(Transaction.TRANSACTION_TYPE_TRANSFER);
         }
 
-        transaction = (Transaction) DBHelper.getSyncDataFromCursor(transaction, cursor, mColumnIndexes);
 
         return transaction;
     }
 
     private void updateBalanceForTransaction(Transaction t, int mult, boolean revert) {
-        updateBalance(revert, t.getAmount().doubleValue(), mult, t.getAccountID(), t.getID(), t.getDateTime().getTime());
+        updateBalance(revert, CurrencyScale.toMinor(t.getAmount(), CurrencyScale.forAccount(mDatabase, t.getAccountID())),
+                mult, t.getAccountID(), t.getID(), t.getDateTime().getTime());
         if (t.getDestAccountID() >= 0) {
-            updateBalance(revert, TransferManager.getDestAmount(t).doubleValue(), mult, t.getDestAccountID(), t.getID(), t.getDateTime().getTime());
+            updateBalance(revert, CurrencyScale.toMinor(TransferManager.getDestAmount(t), CurrencyScale.forAccount(mDatabase, t.getDestAccountID())),
+                    mult, t.getDestAccountID(), t.getID(), t.getDateTime().getTime());
         }
     }
 
     @Override
     public IAbstractModel createModel(IAbstractModel model) throws Exception {
         mDatabase.beginTransaction();
-        Transaction transaction = (Transaction) model;
+        Transaction transaction;
+        try {
+            transaction = (Transaction) model;
 
-        //если это перевод, то удаляем все его покупки (вдруг это раньше был расход со сплитом)
-        if (transaction.getTransactionType() == Transaction.TRANSACTION_TYPE_TRANSFER) {
-            transaction.getProductEntries().clear();
-        }
+            //если это перевод, то удаляем все его покупки (вдруг это раньше был расход со сплитом)
+            if (transaction.getTransactionType() == Transaction.TRANSACTION_TYPE_TRANSFER) {
+                transaction.getProductEntries().clear();
+            }
 
-        List<IAbstractModel> oldEntries = mProductEntrysDAO.getAllEntriesOfTransaction(transaction.getID(), true);
-        ProductEntry defaultEntry = new ProductEntry();
-        List<ProductEntry> newEntries = transaction.getProductEntries();
+            List<IAbstractModel> oldEntries = mProductEntrysDAO.getAllEntriesOfTransaction(transaction.getID(), true);
+            ProductEntry defaultEntry = new ProductEntry();
+            List<ProductEntry> newEntries = transaction.getProductEntries();
 
-        transaction = (Transaction) super.createModel(model);
+            transaction = (Transaction) super.createModel(model);
 
 //        if (newEntries.isEmpty()) {
 //            newEntries.add(new ProductEntry(-1, 0, BigDecimal.ONE, BigDecimal.ZERO, -1, -1, transaction.getID()));
 //        }
 
-        List<IAbstractModel> entriesToDelete = new ArrayList<>();
-        List<ProductEntry> entriesCreated = new ArrayList<>();
+            List<IAbstractModel> entriesToDelete = new ArrayList<>();
+            List<ProductEntry> entriesCreated = new ArrayList<>();
 
-        boolean entryExist;
-        for (IAbstractModel oldEntry : oldEntries) {
-            if (((ProductEntry) oldEntry).getProductID() == 0) {
-                defaultEntry = (ProductEntry) oldEntry;
-            } else {
-                entryExist = false;
-                for (ProductEntry newEntry : newEntries) {
-                    entryExist = oldEntry.getID() == newEntry.getID();
-                    if (entryExist) break;
-                }
-                if (!entryExist) {
-                    entriesToDelete.add(oldEntry);
+            boolean entryExist;
+            for (IAbstractModel oldEntry : oldEntries) {
+                if (((ProductEntry) oldEntry).getProductID() == 0) {
+                    defaultEntry = (ProductEntry) oldEntry;
+                } else {
+                    entryExist = false;
+                    for (ProductEntry newEntry : newEntries) {
+                        entryExist = oldEntry.getID() == newEntry.getID();
+                        if (entryExist) break;
+                    }
+                    if (!entryExist) {
+                        entriesToDelete.add(oldEntry);
+                    }
                 }
             }
+
+            mProductEntrysDAO.bulkDeleteModel(entriesToDelete, true);
+
+            int digits = CurrencyScale.forAccount(mDatabase, transaction.getAccountID());
+            defaultEntry.setPrice(transaction.getAmount().setScale(digits, RoundingMode.HALF_EVEN));
+            defaultEntry.setTransactionID(transaction.getID());
+            defaultEntry.setProductID(0);
+
+            for (ProductEntry newEntry : newEntries) {
+                newEntry.setTransactionID(transaction.getID());
+                entriesCreated.add((ProductEntry) mProductEntrysDAO.createModel(newEntry));
+                defaultEntry.setPrice(defaultEntry.getPrice().subtract(newEntry.getPrice().multiply(newEntry.getQuantity())).setScale(digits, RoundingMode.HALF_EVEN));
+            }
+
+            mProductEntrysDAO.createModel(defaultEntry);
+
+            transaction.setProductEntries(entriesCreated);
+
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
         }
-
-        mProductEntrysDAO.bulkDeleteModel(entriesToDelete, true);
-
-        defaultEntry.setPrice(transaction.getAmount().setScale(2, RoundingMode.HALF_EVEN));
-        defaultEntry.setTransactionID(transaction.getID());
-        defaultEntry.setProductID(0);
-
-        for (ProductEntry newEntry : newEntries) {
-            newEntry.setTransactionID(transaction.getID());
-            entriesCreated.add((ProductEntry) mProductEntrysDAO.createModel(newEntry));
-            defaultEntry.setPrice(defaultEntry.getPrice().subtract(newEntry.getPrice().multiply(newEntry.getQuantity())).setScale(2,RoundingMode.HALF_EVEN));
-        }
-
-        mProductEntrysDAO.createModel(defaultEntry);
-
-        transaction.setProductEntries(entriesCreated);
-
-        mDatabase.setTransactionSuccessful();
-        mDatabase.endTransaction();
         return transaction;
     }
 
@@ -295,14 +321,15 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                 where = "";
             }
 
+            // Колонки RB выбираются без DateTime: фильтры используют DateTime без префикса
             String sql = "SELECT DISTINCT lt.*, (frb.Income + frb.Expense + sa.StartBalance) as FromBalance, (trb.Income + trb.Expense + da.StartBalance) as ToBalance\n" +
                     "FROM " + tableName + " as lt\n" +
-                    "LEFT OUTER JOIN ref_Accounts sa ON sa._id = SrcAccount\n" +
-                    "LEFT OUTER JOIN ref_Accounts da ON da._id = DestAccount\n" +
-                    "LEFT OUTER JOIN log_Running_Balance AS frb ON frb.TransactionID = lt._id AND frb.AccountID = lt.SrcAccount\n" +
-                    "LEFT OUTER JOIN log_Running_Balance AS trb ON trb.TransactionID = lt._id AND trb.AccountID = lt.DestAccount\n" +
+                    "LEFT OUTER JOIN ref_Accounts sa ON sa._id = lt.SrcAccountId\n" +
+                    "LEFT OUTER JOIN ref_Accounts da ON da._id = lt.DestAccountId\n" +
+                    "LEFT OUTER JOIN (SELECT AccountId, TransactionId, Income, Expense FROM log_Running_Balance) AS frb ON frb.TransactionId = lt._id AND frb.AccountId = lt.SrcAccountId\n" +
+                    "LEFT OUTER JOIN (SELECT AccountId, TransactionId, Income, Expense FROM log_Running_Balance) AS trb ON trb.TransactionId = lt._id AND trb.AccountId = lt.DestAccountId\n" +
                     "WHERE lt.Deleted = 0" + where + "\n" +
-                    "ORDER BY DateTime DESC\n" +
+                    "ORDER BY lt.DateTime DESC\n" +
                     "LIMIT " + String.valueOf(first) + ", " + String.valueOf(count);
 
             if (BuildConfig.DEBUG) {
@@ -345,11 +372,11 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
         c.set(Calendar.MILLISECOND, 999);
         Date end = c.getTime();
         String select = String.format(
-                        "ROUND(%s,2) = %s AND\n" +
+                        "%s = %s AND\n" +
                         "%s > '%s' AND \n" +
                         "%s < '%s' AND \n" +
                         "Deleted = 0",
-                DBHelper.C_LOG_TRANSACTIONS_AMOUNT, String.valueOf(transaction.getAmount().doubleValue()),
+                DBHelper.C_LOG_TRANSACTIONS_AMOUNT, String.valueOf(CurrencyScale.toMinor(transaction.getAmount(), CurrencyScale.forAccount(mDatabase, transaction.getAccountID()))),
                 DBHelper.C_LOG_TRANSACTIONS_DATETIME, String.valueOf(start.getTime()),
                 DBHelper.C_LOG_TRANSACTIONS_DATETIME, String.valueOf(end.getTime()));
 
@@ -423,53 +450,53 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
         sql = "CREATE TEMP TABLE temp_all_Transactions AS \n" +
                 "SELECT " +
                 "   t._id,\n" +
-                "   t.SrcAccount AS Account,\n" +
-                "   ROUND(IFNULL(prod.Price*prod.Quantity, t.Amount), 2) AS Amount,\n" +
-                "   DateTime,\n" +
-                "   Payee,\n" +
-                "   CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END AS Category,\n" +
-                "   CASE WHEN IFNULL(prod.ProjectID, -1) < 0 THEN t.Project  ELSE prod.ProjectID  END AS Project,\n" +
-                "   SimpleDebt,\n" +
-                "   Department,\n" +
-                "   Location,\n" +
-                "   a.Currency,\n" +
-                "   Amount > 0 AS Income,\n " +
-                "   IFNULL(a.Currency = b.Currency AND DestAccount IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer\n" +
+                "   t.SrcAccountId AS Account,\n" +
+                "   ROUND(IFNULL(prod.Price*prod.Quantity/1000.0, t.Amount) / " + CurrencyScale.divisorSql("ca.DecimalCount") + ", 8) AS Amount,\n" +
+                "   t.DateTime,\n" +
+                "   t.PayeeId,\n" +
+                "   " + CAT_EXPR + " AS CategoryId,\n" +
+                "   " + PRJ_EXPR + " AS ProjectId,\n" +
+                "   t.SimpleDebtId,\n" +
+                "   t.DepartmentId,\n" +
+                "   t.LocationId,\n" +
+                "   a.CurrencyId AS Currency,\n" +
+                "   t.Amount > 0 AS Income,\n " +
+                "   IFNULL(a.CurrencyId = b.CurrencyId AND t.DestAccountId IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer\n" +
                 "FROM log_Transactions AS t\n" +
-                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionID AND prod.Deleted = 0 \n" +
-                "   LEFT OUTER JOIN ref_Accounts AS a ON t.SrcAccount = a._id\n" +
-                "   LEFT OUTER JOIN ref_Accounts AS b ON t.DestAccount = b._id\n" +
+                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionId AND prod.Deleted = 0 \n" +
+                "   LEFT OUTER JOIN ref_Accounts AS a ON t.SrcAccountId = a._id\n" +
+                "   LEFT OUTER JOIN ref_Currencies AS ca ON a.CurrencyId = ca._id\n" +
+                "   LEFT OUTER JOIN ref_Accounts AS b ON t.DestAccountId = b._id\n" +
                 "WHERE\n" +
                 "   t.Deleted = 0\n" +
-                "   AND (SrcAccount != DestAccount) " + filterSrc
-                    .replaceAll("Category","CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END")
-                    .replaceAll("Project", "CASE WHEN IFNULL(prod.ProjectID, -1) < 0 THEN t.Project  ELSE prod.ProjectID  END")
+                "   AND (t.DestAccountId IS NULL OR t.SrcAccountId != t.DestAccountId) " + replaceProductFields(filterSrc)
                 + "\n" +
 
                 "UNION ALL\n" +
 
                 "SELECT " +
                 "   t._id,\n" +
-                "   t.DestAccount AS Account,\n" +
-                "   Amount*ExchangeRate*-1,\n" +
-                "   DateTime,\n" +
-                "   Payee,\n" +
-                "   Category,\n" +
-                "   Project,\n" +
-                "   SimpleDebt,\n" +
-                "   Department,\n" +
-                "   Location,\n" +
-                "   a.Currency,\n" +
+                "   t.DestAccountId AS Account,\n" +
+                "   ROUND(t.Amount * -1.0 / " + CurrencyScale.divisorSql("cb.DecimalCount") + " * (t.ExchangeRate / 1000000000000.0), 8),\n" +
+                "   t.DateTime,\n" +
+                "   t.PayeeId,\n" +
+                "   t.CategoryId,\n" +
+                "   t.ProjectId,\n" +
+                "   t.SimpleDebtId,\n" +
+                "   t.DepartmentId,\n" +
+                "   t.LocationId,\n" +
+                "   a.CurrencyId AS Currency,\n" +
                 "   1 AS Income,\n " +
-                "   IFNULL(a.Currency = b.Currency AND SrcAccount IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer\n" +
+                "   IFNULL(a.CurrencyId = b.CurrencyId AND t.SrcAccountId IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer\n" +
                 "FROM\n" +
                 "   log_Transactions AS t\n" +
-                "   LEFT OUTER JOIN ref_Accounts AS a ON t.DestAccount = a._id\n" +
-                "   LEFT OUTER JOIN ref_Accounts AS b ON t.SrcAccount = b._id\n" +
+                "   LEFT OUTER JOIN ref_Accounts AS a ON t.DestAccountId = a._id\n" +
+                "   LEFT OUTER JOIN ref_Accounts AS b ON t.SrcAccountId = b._id\n" +
+                "   LEFT OUTER JOIN ref_Currencies AS cb ON b.CurrencyId = cb._id\n" +
                 "WHERE " +
                 "   t.Deleted = 0\n" +
-                "   AND DestAccount >= 0\n" +
-                "   AND (SrcAccount != DestAccount) " + filterDst+";";
+                "   AND t.DestAccountId IS NOT NULL\n" +
+                "   AND (t.SrcAccountId != t.DestAccountId) " + filterDst+";";
         //</editor-fold>
 
         if (BuildConfig.DEBUG) {
@@ -505,10 +532,10 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
         sql = "CREATE TEMP TABLE temp_all_Transactions AS \n" +
 
                 "SELECT t._id,\n" +
-                "   t.SrcAccount     AS AccountID,\n" +
-                "   ROUND(IFNULL(prod.Price*prod.Quantity, t.Amount), 2) AS Amount,DateTime, a.Currency,\n" +
-                "   ROUND(IFNULL(prod.Price*prod.Quantity, t.Amount), 2) > 0       AS Income,\n" +
-                "   IFNULL(a.Currency = b.Currency AND DestAccount IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer,\n" +
+                "   t.SrcAccountId     AS AccountID,\n" +
+                "   ROUND(IFNULL(prod.Price*prod.Quantity/1000.0, t.Amount) / " + CurrencyScale.divisorSql("ca.DecimalCount") + ", 8) AS Amount, t.DateTime, a.CurrencyId AS Currency,\n" +
+                "   IFNULL(prod.Price*prod.Quantity/1000.0, t.Amount) > 0       AS Income,\n" +
+                "   IFNULL(a.CurrencyId = b.CurrencyId AND t.DestAccountId IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer,\n" +
                 "   a.Name           AS AccountName,\n" +
                 "   s.Name           AS SimpleDebtName,\n" +
                 "   a.SearchString   AS AccountName,\n" +
@@ -519,19 +546,18 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                 "   d.SearchString   AS DepartmentName,\n" +
                 "   l.SearchString   AS LocationName\n" +
                 "FROM log_Transactions AS t\n" +
-                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionID AND prod.Deleted = 0 \n" +
-                "   LEFT OUTER JOIN ref_Accounts AS a ON t.SrcAccount = a._id\n" +
-                "   LEFT OUTER JOIN ref_Accounts AS b ON t.DestAccount = b._id\n" +
-                "   LEFT OUTER JOIN ref_Categories AS c ON CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END = c._id\n" +
-                "   LEFT OUTER JOIN ref_Payees  AS p ON t.Payee = p._id\n" +
-                "   LEFT OUTER JOIN ref_Locations AS l ON t.Location = l._id\n" +
-                "   LEFT OUTER JOIN ref_Projects AS pr ON CASE WHEN IFNULL(prod.ProjectID, -1) < 0 THEN t.Project ELSE prod.ProjectID END = pr._id\n" +
-                "   LEFT OUTER JOIN ref_SimpleDebts AS s ON t.SimpleDebt = s._id\n" +
-                "   LEFT OUTER JOIN ref_Departments AS d ON t.Department = d._id\n" +
+                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionId AND prod.Deleted = 0 \n" +
+                "   LEFT OUTER JOIN ref_Accounts AS a ON t.SrcAccountId = a._id\n" +
+                "   LEFT OUTER JOIN ref_Currencies AS ca ON a.CurrencyId = ca._id\n" +
+                "   LEFT OUTER JOIN ref_Accounts AS b ON t.DestAccountId = b._id\n" +
+                "   LEFT OUTER JOIN ref_Categories AS c ON " + CAT_EXPR + " = c._id\n" +
+                "   LEFT OUTER JOIN ref_Payees  AS p ON t.PayeeId = p._id\n" +
+                "   LEFT OUTER JOIN ref_Locations AS l ON t.LocationId = l._id\n" +
+                "   LEFT OUTER JOIN ref_Projects AS pr ON " + PRJ_EXPR + " = pr._id\n" +
+                "   LEFT OUTER JOIN ref_SimpleDebts AS s ON t.SimpleDebtId = s._id\n" +
+                "   LEFT OUTER JOIN ref_Departments AS d ON t.DepartmentId = d._id\n" +
                 "WHERE t.Deleted = 0\n" +
-                "   AND (SrcAccount != DestAccount) " + filterSrc
-                    .replaceAll("Category","CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END")
-                    .replaceAll("Project", "CASE WHEN IFNULL(prod.ProjectID, -1) < 0 THEN t.Project  ELSE prod.ProjectID  END")
+                "   AND (t.DestAccountId IS NULL OR t.SrcAccountId != t.DestAccountId) " + replaceProductFields(filterSrc)
                             + "\n" +
                 "   AND (AccountName    LIKE '%" + searchString + "%'\n" +
                 "   OR SimpleDebtName   LIKE '%" + searchString + "%'\n" +
@@ -545,10 +571,10 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                 "UNION ALL\n" +
 
                 "SELECT t._id,\n" +
-                "   t.DestAccount   AS AccountID,\n" +
-                "   Amount*ExchangeRate*-1 AS Amount1,DateTime, a.Currency,\n" +
+                "   t.DestAccountId   AS AccountID,\n" +
+                "   ROUND(t.Amount * -1.0 / " + CurrencyScale.divisorSql("cb.DecimalCount") + " * (t.ExchangeRate / 1000000000000.0), 8) AS Amount1, t.DateTime, a.CurrencyId AS Currency,\n" +
                 "   1 > 0           AS Income,\n" +
-                "   IFNULL(a.Currency = b.Currency AND SrcAccount IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer,\n" +
+                "   IFNULL(a.CurrencyId = b.CurrencyId AND t.SrcAccountId IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer,\n" +
                 "   a.Name          AS AccountName,\n" +
                 "   s.Name          AS SimpleDebtName,\n" +
                 "   a.SearchString  AS AccountName,\n" +
@@ -559,17 +585,18 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                 "   d.SearchString  AS DepartmentName,\n" +
                 "   l.SearchString  AS LocationName\n" +
                 "FROM log_Transactions AS t " +
-                "   LEFT OUTER JOIN ref_Accounts    AS a  ON t.DestAccount  = a._id\n" +
-                "   LEFT OUTER JOIN ref_Accounts    AS b  ON t.SrcAccount   = b._id\n" +
-                "   LEFT OUTER JOIN ref_Categories  AS c  ON t.Category     = c._id\n" +
-                "   LEFT OUTER JOIN ref_Payees      AS p  ON t.Payee        = p._id\n" +
-                "   LEFT OUTER JOIN ref_Locations   AS l  ON t.Location     = l._id\n" +
-                "   LEFT OUTER JOIN ref_Projects    AS pr ON t.Project      = pr._id\n" +
-                "   LEFT OUTER JOIN ref_SimpleDebts AS s  ON t.SimpleDebt   = s._id\n" +
-                "   LEFT OUTER JOIN ref_Departments AS d  ON t.Department   = d._id\n" +
+                "   LEFT OUTER JOIN ref_Accounts    AS a  ON t.DestAccountId  = a._id\n" +
+                "   LEFT OUTER JOIN ref_Accounts    AS b  ON t.SrcAccountId   = b._id\n" +
+                "   LEFT OUTER JOIN ref_Currencies  AS cb ON b.CurrencyId   = cb._id\n" +
+                "   LEFT OUTER JOIN ref_Categories  AS c  ON t.CategoryId     = c._id\n" +
+                "   LEFT OUTER JOIN ref_Payees      AS p  ON t.PayeeId        = p._id\n" +
+                "   LEFT OUTER JOIN ref_Locations   AS l  ON t.LocationId     = l._id\n" +
+                "   LEFT OUTER JOIN ref_Projects    AS pr ON t.ProjectId      = pr._id\n" +
+                "   LEFT OUTER JOIN ref_SimpleDebts AS s  ON t.SimpleDebtId   = s._id\n" +
+                "   LEFT OUTER JOIN ref_Departments AS d  ON t.DepartmentId   = d._id\n" +
                 "WHERE t.Deleted = 0 " +
-                "   AND DestAccount >= 0 " +
-                "   AND (SrcAccount != DestAccount) " + filterDst + "\n" +
+                "   AND t.DestAccountId IS NOT NULL " +
+                "   AND (t.SrcAccountId != t.DestAccountId) " + filterDst + "\n" +
                 "   AND (AccountName    LIKE '%" + searchString + "%'\n" +
                 "   OR SimpleDebtName   LIKE '%" + searchString + "%'\n" +
                 "   OR PayeeName        LIKE '%" + searchString + "%'\n" +
@@ -603,16 +630,14 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
         sql = "CREATE TEMP TABLE " + DBHelper.T_SEARCH_TRANSACTIONS + " AS \n" +
                 "SELECT t.*\n" +
                 "FROM log_Transactions AS t " +
-                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionID AND prod.Deleted = 0 \n" +
-                "   LEFT OUTER JOIN ref_Accounts    AS a  ON t.SrcAccount   = a._id\n" +
-                "   LEFT OUTER JOIN ref_Categories AS c ON CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END = c._id\n" +
-//                "   LEFT OUTER JOIN ref_Categories  AS c  ON t.Category     = c._id\n" +
-                "   LEFT OUTER JOIN ref_Payees      AS p  ON t.Payee        = p._id\n" +
-                "   LEFT OUTER JOIN ref_Locations   AS l  ON t.Location     = l._id\n" +
-                "   LEFT OUTER JOIN ref_Projects AS pr ON CASE WHEN IFNULL(prod.ProjectID, -1) < 0 THEN t.Project ELSE prod.ProjectID END = pr._id\n" +
-//                "   LEFT OUTER JOIN ref_Projects    AS pr ON t.Project      = pr._id\n" +
-                "   LEFT OUTER JOIN ref_SimpleDebts AS s  ON t.SimpleDebt   = s._id\n" +
-                "   LEFT OUTER JOIN ref_Departments AS d  ON t.Department   = d._id\n" +
+                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionId AND prod.Deleted = 0 \n" +
+                "   LEFT OUTER JOIN ref_Accounts    AS a  ON t.SrcAccountId   = a._id\n" +
+                "   LEFT OUTER JOIN ref_Categories AS c ON " + CAT_EXPR + " = c._id\n" +
+                "   LEFT OUTER JOIN ref_Payees      AS p  ON t.PayeeId        = p._id\n" +
+                "   LEFT OUTER JOIN ref_Locations   AS l  ON t.LocationId     = l._id\n" +
+                "   LEFT OUTER JOIN ref_Projects AS pr ON " + PRJ_EXPR + " = pr._id\n" +
+                "   LEFT OUTER JOIN ref_SimpleDebts AS s  ON t.SimpleDebtId   = s._id\n" +
+                "   LEFT OUTER JOIN ref_Departments AS d  ON t.DepartmentId   = d._id\n" +
                 "WHERE t.Deleted = 0 \n" +
                 "    AND (lower(t.SearchString) LIKE '%" + searchString + "%'\n" +
                 "    OR lower(a.SearchString)   LIKE '%" + searchString + "%'\n" +
@@ -631,12 +656,13 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
 
     public void getSumForSimpleDebt(SimpleDebt simpleDebt) {
 
-        String sql = "SELECT TOTAL(amount) AS Sum,\n" +
-                "SUM ( CASE WHEN Amount < 0 THEN Amount ELSE 0 END) AS OweMe,\n" +
-                "SUM ( CASE WHEN Amount > 0 THEN Amount ELSE 0 END) AS IOwe\n" +
-                "FROM ref_Accounts a JOIN ref_Currencies ON ref_Currencies._id = Currency\n" +
-                "     JOIN (SELECT * FROM log_Transactions WHERE SimpleDebt = " + String.valueOf(simpleDebt.getID()) + " AND DestAccount < 0 AND Deleted = 0) t ON a._id = t.SrcAccount\n" +
-                "WHERE Currency = " + String.valueOf(simpleDebt.getCabbageID());
+        String divisor = CurrencyScale.divisorSql("c.DecimalCount");
+        String sql = "SELECT TOTAL(t.Amount) / " + divisor + " AS Sum,\n" +
+                "SUM ( CASE WHEN t.Amount < 0 THEN t.Amount ELSE 0 END) / " + divisor + " AS OweMe,\n" +
+                "SUM ( CASE WHEN t.Amount > 0 THEN t.Amount ELSE 0 END) / " + divisor + " AS IOwe\n" +
+                "FROM ref_Accounts a JOIN ref_Currencies c ON c._id = a.CurrencyId\n" +
+                "     JOIN (SELECT * FROM log_Transactions WHERE SimpleDebtId = " + String.valueOf(simpleDebt.getID()) + " AND DestAccountId IS NULL AND Deleted = 0) t ON a._id = t.SrcAccountId\n" +
+                "WHERE a.CurrencyId = " + String.valueOf(simpleDebt.getCabbageID());
 
         Cursor cursor = mDatabase.rawQuery(sql, null);
 
@@ -702,7 +728,7 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                 "c._id,\n" +
                 "IFNULL((SELECT TOTAL(CASE WHEN Income = 1 THEN Amount ELSE 0 END) FROM temp_all_Transactions" + selectedTransactionsTable + " WHERE c._id = Currency AND NOT (ExcludeTransfer = 1)), 0) AS InAmountSum,\n" +
                 "IFNULL((SELECT TOTAL(CASE WHEN Income = 0 THEN Amount ELSE 0 END) FROM temp_all_Transactions" + selectedTransactionsTable + " WHERE c._id = Currency AND NOT (ExcludeTransfer = 1)), 0) AS OutAmountSum,\n" +
-                "IFNULL((SELECT TOTAL(StartBalance) FROM ref_Accounts WHERE Currency = c._id AND _id IN (" + accIDsString + ")), 0) AS StartBalance\n" +
+                "IFNULL((SELECT TOTAL(StartBalance) FROM ref_Accounts WHERE CurrencyId = c._id AND _id IN (" + accIDsString + ")), 0) / " + CurrencyScale.divisorSql("c.DecimalCount") + " AS StartBalance\n" +
                 "FROM ref_Currencies c\n" +
                 "ORDER BY c.OrderNumber ASC";
         if (BuildConfig.DEBUG) {
@@ -925,12 +951,12 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                         "FROM %s \n" +
                         "WHERE \n" +*/
                 "    %s = %s AND\n" +
-                        "    ROUND(%s,2) = %s AND\n" +
+                        "    %s = %s AND\n" +
                         "    %s > '%s' AND \n" +
                         "    %s < '%s' AND \n" +
                         "    Deleted = 0", /*DBHelper.T_LOG_TRANSACTIONS,*/
                 DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT, String.valueOf(transaction.getAccountID()),
-                DBHelper.C_LOG_TRANSACTIONS_AMOUNT, String.valueOf(transaction.getAmount().doubleValue()),
+                DBHelper.C_LOG_TRANSACTIONS_AMOUNT, String.valueOf(CurrencyScale.toMinor(transaction.getAmount(), CurrencyScale.forAccount(mDatabase, transaction.getAccountID()))),
                 DBHelper.C_LOG_TRANSACTIONS_DATETIME, String.valueOf(transaction.getDateTime().getTime() - 60000 * 30),
                 DBHelper.C_LOG_TRANSACTIONS_DATETIME, String.valueOf(transaction.getDateTime().getTime() + 60000 * 30));
 

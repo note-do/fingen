@@ -5,6 +5,7 @@ import android.os.Parcel;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 
@@ -103,7 +104,7 @@ public class BudgetCreditSync extends BaseModel implements IAbstractModel {
 
         values.put(DBHelper.C_LOG_BUDGET_DEBTS_YEAR,mYear);
         values.put(DBHelper.C_LOG_BUDGET_DEBTS_MONTH,mMonth);
-        values.put(DBHelper.C_LOG_BUDGET_DEBTS_CREDIT, mCreditID);
+        DbRefs.putRef(values, DBHelper.C_LOG_BUDGET_DEBTS_CREDIT, mCreditID);
         values.put(DBHelper.C_LOG_BUDGET_DEBTS_AMOUNT,mAmount);
         return values;
     }

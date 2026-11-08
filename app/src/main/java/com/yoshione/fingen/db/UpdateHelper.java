@@ -3,15 +3,15 @@ package com.yoshione.fingen.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Pair;
 
-import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.classes.TableInfo;
 import com.yoshione.fingen.utils.ColorUtils;
 import com.yoshione.fingen.utils.DateTimeFormatter;
 import com.yoshione.fingen.utils.Translit;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +23,126 @@ import android.database.sqlite.SQLiteDatabase;
  */
 
 public class UpdateHelper {
+
+    //<editor-fold desc="Frozen DBHelper constants (do not change: old migrations must not depend on the current schema)" defaultstate="collapsed">
+    private static final String LEGACY_C_ID = "_id";
+    private static final String LEGACY_C_SYNC_FBID = "FBID";
+    private static final String LEGACY_C_SYNC_TS = "TS";
+    private static final String LEGACY_C_SYNC_DELETED = "Deleted";
+    private static final String LEGACY_C_SYNC_DIRTY = "Dirty";
+    private static final String LEGACY_C_SYNC_LASTEDITED = "LastEdited";
+    private static final String LEGACY_C_SEARCH_STRING = "SearchString";
+    private static final String LEGACY_C_FULL_NAME = "FullName";
+    private static final String LEGACY_COMMON_FIELDS =
+            LEGACY_C_ID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
+                    + LEGACY_C_SYNC_FBID + " TEXT,\n"
+                    + LEGACY_C_SYNC_TS + " INTEGER,\n"
+                    + LEGACY_C_SYNC_DELETED + " INTEGER,\n"
+                    + LEGACY_C_SYNC_DIRTY + " INTEGER,\n"
+                    + LEGACY_C_SYNC_LASTEDITED + " TEXT,\n";
+    private static final String LEGACY_T_REF_CATEGORIES = "ref_Categories";
+    private static final String LEGACY_T_REF_PROJECTS = "ref_Projects";
+    private static final String LEGACY_C_REF_PROJECTS_COLOR = "Color";
+    private static final String LEGACY_T_LOG_TRANSACTIONS = "log_Transactions";
+    private static final String LEGACY_C_LOG_TRANSACTIONS_COMMENT = "Comment";
+    private static final String LEGACY_C_LOG_TRANSACTIONS_FN = "FN";
+    private static final String LEGACY_C_LOG_TRANSACTIONS_FD = "FD";
+    private static final String LEGACY_C_LOG_TRANSACTIONS_FP = "FP";
+    private static final String LEGACY_C_LOG_TRANSACTIONS_SPLIT = "Split";
+    private static final String LEGACY_T_REF_SENDERS = "ref_Senders";
+    private static final String LEGACY_C_REF_SENDERS_ADD_CREDIT_LIMIT_TO_BALANCE = "AddCreditLimitToBalance";
+    private static final String LEGACY_T_REF_PRODUCTS = "ref_Products";
+    private static final String LEGACY_C_REF_PRODUCTS_NAME = "Name";
+    private static final String LEGACY_T_LOG_PRODUCTS = " log_Products";
+    private static final String LEGACY_C_LOG_PRODUCTS_TRANSACTIONID = "TransactionID";
+    private static final String LEGACY_C_LOG_PRODUCTS_PRODUCTID = "ProductID";
+    private static final String LEGACY_C_LOG_PRODUCTS_CATEGORY_ID = "CategoryID";
+    private static final String LEGACY_C_LOG_PRODUCTS_PROJECT_ID = "ProjectID";
+    private static final String LEGACY_C_LOG_PRODUCTS_PRICE = "Price";
+    private static final String LEGACY_C_LOG_PRODUCTS_QUANTITY = "Quantity";
+    private static final String LEGACY_SQL_CREATE_TABLE_REF_PRODUCTS = "CREATE TABLE " + LEGACY_T_REF_PRODUCTS + " ("
+            + LEGACY_COMMON_FIELDS
+            + LEGACY_C_REF_PRODUCTS_NAME + " TEXT NOT NULL DEFAULT '', "
+            + LEGACY_C_SEARCH_STRING + " TEXT NOT NULL DEFAULT '', "
+            + "UNIQUE (" + LEGACY_C_REF_PRODUCTS_NAME + ", " + LEGACY_C_SYNC_DELETED + ") ON CONFLICT ABORT);";
+    private static final String LEGACY_SQL_CREATE_TABLE_LOG_PRODUCTS = "CREATE TABLE " + LEGACY_T_LOG_PRODUCTS + "\n("
+            + LEGACY_COMMON_FIELDS
+            + LEGACY_C_LOG_PRODUCTS_TRANSACTIONID + " INTEGER REFERENCES [" + LEGACY_T_LOG_TRANSACTIONS + "]([" + LEGACY_C_ID + "]) ON DELETE SET NULL ON UPDATE CASCADE,\n"
+            + LEGACY_C_LOG_PRODUCTS_PRODUCTID + " INTEGER REFERENCES [" + LEGACY_T_REF_PRODUCTS + "]([" + LEGACY_C_ID + "]) ON DELETE SET NULL ON UPDATE CASCADE,\n"
+            + LEGACY_C_LOG_PRODUCTS_CATEGORY_ID + " INTEGER DEFAULT -1 REFERENCES [" + LEGACY_T_REF_CATEGORIES + "]([" + LEGACY_C_ID + "]) ON DELETE SET NULL ON UPDATE CASCADE,\n"
+            + LEGACY_C_LOG_PRODUCTS_PROJECT_ID + " INTEGER DEFAULT -1 REFERENCES [" + LEGACY_T_REF_PROJECTS + "]([" + LEGACY_C_ID + "]) ON DELETE SET NULL ON UPDATE CASCADE,\n"
+            + LEGACY_C_LOG_PRODUCTS_PRICE + " REAL NOT NULL DEFAULT 0,\n"
+            + LEGACY_C_LOG_PRODUCTS_QUANTITY + " REAL NOT NULL DEFAULT 1 CHECK (Quantity >= 0));";
+    //</editor-fold>
+
+    /**
+     * Frozen copy of DBHelper.updateRunningBalance as of schema v35 (script assets/sql/update_running_balance_v35.sql).
+     */
+    public static void legacyUpdateRunningBalance(SQLiteDatabase database, Context context) throws IOException {
+        StringBuilder buf = new StringBuilder();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(
+                context.getAssets().open("sql/update_running_balance_v35.sql"), "UTF-8"))) {
+            String str;
+            while ((str = in.readLine()) != null) {
+                buf.append(str);
+                if (!str.isEmpty()) {
+                    buf.append("\n");
+                }
+            }
+        }
+        for (String sql : buf.toString().split(";")) {
+            if (sql != null && !sql.isEmpty() && !sql.equals("\n")) {
+                android.util.Log.d("UpdateHelper", sql);
+                database.execSQL(sql);
+            }
+        }
+    }
+
+    private static String legacyGetFullNameColumn(String tableName) {
+        return "(SELECT path FROM (with recursive m(path, _id, name) AS (SELECT Name, _id, Name FROM " + tableName + " WHERE ParentId = -1 UNION ALL  SELECT path||'\\'||t.Name, t._id, t.Name FROM " + tableName + " t, m WHERE t.ParentId = m._id) SELECT * FROM m where _id = " + tableName + "._id)) AS FullName";
+    }
+
+    /**
+     * Frozen copy of DBHelper.updateFullNames as of schema v35.
+     */
+    private static void legacyUpdateFullNames(String tableName, boolean useFullName, SQLiteDatabase db) {
+        String nameColumn;
+        if (tableName.equals(LEGACY_T_LOG_TRANSACTIONS)) {
+            nameColumn = useFullName ? legacyGetFullNameColumn(tableName) : LEGACY_C_LOG_TRANSACTIONS_COMMENT;
+        } else {
+            nameColumn = useFullName ? legacyGetFullNameColumn(tableName) : "Name";
+        }
+        String fields[];
+        if (useFullName) {
+            fields = new String[]{LEGACY_C_ID, nameColumn, LEGACY_C_SEARCH_STRING, LEGACY_C_FULL_NAME};
+        } else {
+            fields = new String[]{LEGACY_C_ID, nameColumn, LEGACY_C_SEARCH_STRING};
+        }
+        Cursor cursor = db.query(tableName, fields, "Deleted = 0", null, null, null, null);
+        ContentValues cv = new ContentValues();
+        String translit;
+        try {
+            if (cursor.moveToFirst()) {
+                while (!cursor.isAfterLast()) {
+                    cv.clear();
+                    String source = cursor.getString(1) == null ? "" : cursor.getString(1);
+                    if (useFullName) {
+                        cv.put(LEGACY_C_FULL_NAME, source);
+                    }
+                    translit = Translit.toTranslit(source.toLowerCase());
+                    if (!translit.equals(cursor.getString(2))) {
+                        cv.put(LEGACY_C_SEARCH_STRING, translit);
+                    }
+                    if (cv.size() != 0) {
+                        db.update(tableName, cv, "_id = " + cursor.getString(0), null);
+                    }
+                    cursor.moveToNext();
+                }
+            }
+        } finally {
+            cursor.close();
+        }
+    }
 
     //<editor-fold desc="tableInfo17" defaultstate="collapsed">
     private static TableInfo tableInfo17[] = new TableInfo[]{
@@ -363,114 +483,6 @@ public class UpdateHelper {
     };
     //</editor-fold>
 
-    public static void update17(SQLiteDatabase db, Context context) {
-        //создаем таблицу отправителей
-        db.execSQL("CREATE TABLE ref_Senders (_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, Name TEXT UNIQUE NOT NULL, PhoneNo TEXT UNIQUE NOT NULL, AmountPos INTEGER, BalancePos INTEGER, LeadingCurrencySymbol INTEGER, DateFormat TEXT, isActive INTEGER NOT NULL);");
-
-        //Импортируем в новую таблицу все маркеры типа "Отправитель"
-        Cursor cursor = db.query("ref_Sms_Parser_Patterns", "_id, Type, Object, Pattern".split(","),
-                "Type = " + 5, null,
-                null, null, null);
-
-        List<Pair<String, Long>> senders = new ArrayList<>();
-        String phoneNo;
-
-        if (cursor != null) {
-            try {
-                if (cursor.moveToFirst()) {
-                    while (!cursor.isAfterLast()) {
-                        ContentValues values = new ContentValues();
-                        values.put("Name", cursor.getString(cursor.getColumnIndexOrThrow("Object")));
-                        phoneNo = cursor.getString(cursor.getColumnIndexOrThrow("Pattern"));
-                        values.put("PhoneNo", phoneNo);
-                        values.put("AmountPos", 0);
-                        values.put("BalancePos", 1);
-                        values.put("DateFormat", "");
-                        values.put("LeadingCurrencySymbol", false);
-                        values.put("IsActive", 1);
-
-                        //Пишем напрямую в той же транзакции миграции: SendersDAO во время апгрейда ждет конца миграции
-                        long senderId = db.insert("ref_Senders", null, values);
-                        if (senderId >= 0) {
-                            senders.add(new Pair<>(phoneNo, senderId));
-                        }
-
-                        cursor.moveToNext();
-                    }
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        //После импорта грохаем все маркеры типа "Отправитель"
-        db.delete("ref_Sms_Parser_Patterns", "Type = 5", null);
-
-        //Модифицируем таблицу смс, чтобы она хранила id отправителя вместо номера телефона
-        String tempSmsTableSQL = "CREATE TABLE tempsms (_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, DateTime TEXT NOT NULL, Sender INTEGER NOT NULL, Body TEXT NOT NULL);";
-        db.execSQL(tempSmsTableSQL);
-        cursor = db.query("log_Incoming_SMS", "_id,DateTime,Sender,Body".split(","), null, null, null, null, null);
-        if (cursor != null) {
-            try {
-                if (cursor.moveToFirst()) {
-                    while (!cursor.isAfterLast()) {
-                        String smsSender = cursor.getString(cursor.getColumnIndexOrThrow("Sender"));
-                        long senderId = 0;
-                        if (smsSender != null && !smsSender.trim().isEmpty()) {
-                            String key = smsSender.trim().toLowerCase();
-                            Long found = null;
-                            for (Pair<String, Long> sender : senders) {
-                                if (sender.first != null && sender.first.trim().toLowerCase().equals(key)) {
-                                    found = sender.second;
-                                    break;
-                                }
-                            }
-                            if (found == null) {
-                                //Отправитель без маркера: создаем запись, чтобы не терять SMS
-                                found = insertSmsSender(db, smsSender, smsSender);
-                                if (found == null) {
-                                    found = insertSmsSender(db, smsSender + " (SMS)", smsSender);
-                                }
-                                if (found != null) {
-                                    senders.add(new Pair<>(smsSender, found));
-                                }
-                            }
-                            if (found != null) {
-                                senderId = found;
-                            }
-                        }
-                        ContentValues values = new ContentValues();
-                        values.put("_id", cursor.getLong(cursor.getColumnIndexOrThrow("_id")));
-                        String dateTime = cursor.getString(cursor.getColumnIndexOrThrow("DateTime"));
-                        values.put("DateTime", dateTime == null ? "" : dateTime);
-                        values.put("Sender", senderId);
-                        String body = cursor.getString(cursor.getColumnIndexOrThrow("Body"));
-                        values.put("Body", body == null ? "" : body);
-                        db.insert("tempsms", null, values);
-                        cursor.moveToNext();
-                    }
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        db.execSQL("DROP TABLE log_Incoming_SMS");
-        db.execSQL("ALTER TABLE tempsms RENAME TO log_Incoming_SMS");
-    }
-
-    /** Inserts a sender with default parser settings, returns its id or null if Name or PhoneNo is already used. */
-    private static Long insertSmsSender(SQLiteDatabase db, String name, String phoneNo) {
-        ContentValues values = new ContentValues();
-        values.put("Name", name);
-        values.put("PhoneNo", phoneNo);
-        values.put("AmountPos", 0);
-        values.put("BalancePos", 1);
-        values.put("DateFormat", "");
-        values.put("LeadingCurrencySymbol", false);
-        values.put("isActive", 1);
-        long id = db.insert("ref_Senders", null, values);
-        return id >= 0 ? id : null;
-    }
-
     public static void update18(SQLiteDatabase db, Context context) {
         //переходим со строкового хранения дат в таблице транзакций на числовое
         //Переименовали старую версию таблицы
@@ -733,12 +745,12 @@ public class UpdateHelper {
         for (String tableName : tableNames) {
             db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN FullName TEXT;");
             db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN SearchString TEXT;");
-            DBHelper.updateFullNames(tableName, true, db);
+            legacyUpdateFullNames(tableName, true, db);
         }
         tableNames = new String[]{"ref_Accounts", "ref_SimpleDebts", "log_Templates"};
         for (String tableName : tableNames) {
             db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN SearchString TEXT;");
-            DBHelper.updateFullNames(tableName, false, db);
+            legacyUpdateFullNames(tableName, false, db);
         }
 
         //Создаем таблицу с текущим балансом и вычисляем балансы счетов после каждой транзакции
@@ -760,12 +772,12 @@ public class UpdateHelper {
     }
 
     public static void update29(SQLiteDatabase db) {
-        String tableName = DBHelper.T_LOG_TRANSACTIONS;
-        String columnName = DBHelper.C_LOG_TRANSACTIONS_COMMENT;
+        String tableName = LEGACY_T_LOG_TRANSACTIONS;
+        String columnName = LEGACY_C_LOG_TRANSACTIONS_COMMENT;
         db.execSQL("ALTER TABLE " + tableName + " ADD COLUMN SearchString TEXT;");
-        db.execSQL("ALTER TABLE " + DBHelper.T_REF_SENDERS + " ADD COLUMN "+DBHelper.C_REF_SENDERS_ADD_CREDIT_LIMIT_TO_BALANCE+" INTEGER NOT NULL DEFAULT 0;");
+        db.execSQL("ALTER TABLE " + LEGACY_T_REF_SENDERS + " ADD COLUMN "+LEGACY_C_REF_SENDERS_ADD_CREDIT_LIMIT_TO_BALANCE+" INTEGER NOT NULL DEFAULT 0;");
 
-        Cursor cursor = db.query(tableName, new String[]{DBHelper.C_ID, columnName}, "Deleted = 0", null, null, null, null);
+        Cursor cursor = db.query(tableName, new String[]{LEGACY_C_ID, columnName}, "Deleted = 0", null, null, null, null);
         ContentValues cv = new ContentValues();
         try {
             if (cursor.moveToFirst()) {
@@ -783,13 +795,13 @@ public class UpdateHelper {
     }
 
     public static void update30(SQLiteDatabase db) {
-        db.execSQL("ALTER TABLE " + DBHelper.T_LOG_TRANSACTIONS + " ADD COLUMN "+DBHelper.C_LOG_TRANSACTIONS_FN+" INTEGER DEFAULT 0;");
-        db.execSQL("ALTER TABLE " + DBHelper.T_LOG_TRANSACTIONS + " ADD COLUMN "+DBHelper.C_LOG_TRANSACTIONS_FD+" INTEGER DEFAULT 0;");
-        db.execSQL("ALTER TABLE " + DBHelper.T_LOG_TRANSACTIONS + " ADD COLUMN "+DBHelper.C_LOG_TRANSACTIONS_FP+" INTEGER DEFAULT 0;");
+        db.execSQL("ALTER TABLE " + LEGACY_T_LOG_TRANSACTIONS + " ADD COLUMN "+LEGACY_C_LOG_TRANSACTIONS_FN+" INTEGER DEFAULT 0;");
+        db.execSQL("ALTER TABLE " + LEGACY_T_LOG_TRANSACTIONS + " ADD COLUMN "+LEGACY_C_LOG_TRANSACTIONS_FD+" INTEGER DEFAULT 0;");
+        db.execSQL("ALTER TABLE " + LEGACY_T_LOG_TRANSACTIONS + " ADD COLUMN "+LEGACY_C_LOG_TRANSACTIONS_FP+" INTEGER DEFAULT 0;");
     }
 
     public static void update31(SQLiteDatabase db, Context context) {
-        db.execSQL("ALTER TABLE " + DBHelper.T_REF_PROJECTS + " ADD COLUMN "+DBHelper.C_REF_PROJECTS_COLOR+" TEXT DEFAULT '#ffffff';");
+        db.execSQL("ALTER TABLE " + LEGACY_T_REF_PROJECTS + " ADD COLUMN "+LEGACY_C_REF_PROJECTS_COLOR+" TEXT DEFAULT '#ffffff';");
 
         Cursor cursorProjects = db.rawQuery("SELECT _id FROM ref_Projects", null);
         List<Long> projectIDs = new ArrayList<>();
@@ -809,21 +821,21 @@ public class UpdateHelper {
         ContentValues cv = new ContentValues();
         for (long id : projectIDs) {
             cv.clear();
-            cv.put(DBHelper.C_REF_PROJECTS_COLOR, String.format("#%06X", (0xFFFFFF & ColorUtils.getColor(context))));
-            db.update(DBHelper.T_REF_PROJECTS, cv, String.format("_id = %s", String.valueOf(id)), null);
+            cv.put(LEGACY_C_REF_PROJECTS_COLOR, String.format("#%06X", (0xFFFFFF & ColorUtils.getColor(context))));
+            db.update(LEGACY_T_REF_PROJECTS, cv, String.format("_id = %s", String.valueOf(id)), null);
         }
     }
 
     public static void update32(SQLiteDatabase db) {
-        db.execSQL("ALTER TABLE " + DBHelper.T_LOG_TRANSACTIONS + " ADD COLUMN "+DBHelper.C_LOG_TRANSACTIONS_SPLIT+" INTEGER DEFAULT 0;");
+        db.execSQL("ALTER TABLE " + LEGACY_T_LOG_TRANSACTIONS + " ADD COLUMN "+LEGACY_C_LOG_TRANSACTIONS_SPLIT+" INTEGER DEFAULT 0;");
 
-        db.execSQL(DBHelper.SQL_CREATE_TABLE_REF_PRODUCTS);
-        db.execSQL(DBHelper.SQL_CREATE_TABLE_LOG_PRODUCTS);
+        db.execSQL(LEGACY_SQL_CREATE_TABLE_REF_PRODUCTS);
+        db.execSQL(LEGACY_SQL_CREATE_TABLE_LOG_PRODUCTS);
 
         ContentValues cv = new ContentValues();
-        cv.put(DBHelper.C_ID, 0);
-        cv.put(DBHelper.C_REF_PRODUCTS_NAME, "default_product");
-        db.insert(DBHelper.T_REF_PRODUCTS, "", cv);
+        cv.put(LEGACY_C_ID, 0);
+        cv.put(LEGACY_C_REF_PRODUCTS_NAME, "default_product");
+        db.insert(LEGACY_T_REF_PRODUCTS, "", cv);
 
         Cursor cursorTransactions = db.rawQuery("SELECT _id, Amount FROM log_Transactions WHERE Deleted = 0", null);
         if (cursorTransactions != null) {
@@ -831,18 +843,18 @@ public class UpdateHelper {
                 if (cursorTransactions.moveToFirst()) {
                     while (!cursorTransactions.isAfterLast()) {
                         cv.clear();
-                        cv.put(DBHelper.C_SYNC_FBID, "");
-                        cv.put(DBHelper.C_SYNC_TS, -1);
-                        cv.put(DBHelper.C_SYNC_DELETED, 0);
-                        cv.put(DBHelper.C_SYNC_DIRTY, 0);
-                        cv.put(DBHelper.C_SYNC_LASTEDITED, "");
-                        cv.put(DBHelper.C_LOG_PRODUCTS_TRANSACTIONID, cursorTransactions.getLong(0));
-                        cv.put(DBHelper.C_LOG_PRODUCTS_PRODUCTID, 0);
-                        cv.put(DBHelper.C_LOG_PRODUCTS_CATEGORY_ID, -1);
-                        cv.put(DBHelper.C_LOG_PRODUCTS_PROJECT_ID, -1);
-                        cv.put(DBHelper.C_LOG_PRODUCTS_PRICE, cursorTransactions.getDouble(1));
-                        cv.put(DBHelper.C_LOG_PRODUCTS_QUANTITY, 1);
-                        db.insert(DBHelper.T_LOG_PRODUCTS, null, cv);
+                        cv.put(LEGACY_C_SYNC_FBID, "");
+                        cv.put(LEGACY_C_SYNC_TS, -1);
+                        cv.put(LEGACY_C_SYNC_DELETED, 0);
+                        cv.put(LEGACY_C_SYNC_DIRTY, 0);
+                        cv.put(LEGACY_C_SYNC_LASTEDITED, "");
+                        cv.put(LEGACY_C_LOG_PRODUCTS_TRANSACTIONID, cursorTransactions.getLong(0));
+                        cv.put(LEGACY_C_LOG_PRODUCTS_PRODUCTID, 0);
+                        cv.put(LEGACY_C_LOG_PRODUCTS_CATEGORY_ID, -1);
+                        cv.put(LEGACY_C_LOG_PRODUCTS_PROJECT_ID, -1);
+                        cv.put(LEGACY_C_LOG_PRODUCTS_PRICE, cursorTransactions.getDouble(1));
+                        cv.put(LEGACY_C_LOG_PRODUCTS_QUANTITY, 1);
+                        db.insert(LEGACY_T_LOG_PRODUCTS, null, cv);
                         cursorTransactions.moveToNext();
                     }
                 }
@@ -866,18 +878,18 @@ public class UpdateHelper {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
                         cv.clear();
-                        cv.put(DBHelper.C_SYNC_FBID, "");
-                        cv.put(DBHelper.C_SYNC_TS, -1);
-                        cv.put(DBHelper.C_SYNC_DELETED, 0);
-                        cv.put(DBHelper.C_SYNC_DIRTY, 0);
-                        cv.put(DBHelper.C_SYNC_LASTEDITED, "");
-                        cv.put(DBHelper.C_LOG_PRODUCTS_TRANSACTIONID, cursor.getLong(0));
-                        cv.put(DBHelper.C_LOG_PRODUCTS_PRODUCTID, 0);
-                        cv.put(DBHelper.C_LOG_PRODUCTS_CATEGORY_ID, -1);
-                        cv.put(DBHelper.C_LOG_PRODUCTS_PROJECT_ID, -1);
-                        cv.put(DBHelper.C_LOG_PRODUCTS_PRICE, cursor.getDouble(1));
-                        cv.put(DBHelper.C_LOG_PRODUCTS_QUANTITY, 1);
-                        db.insert(DBHelper.T_LOG_PRODUCTS, null, cv);
+                        cv.put(LEGACY_C_SYNC_FBID, "");
+                        cv.put(LEGACY_C_SYNC_TS, -1);
+                        cv.put(LEGACY_C_SYNC_DELETED, 0);
+                        cv.put(LEGACY_C_SYNC_DIRTY, 0);
+                        cv.put(LEGACY_C_SYNC_LASTEDITED, "");
+                        cv.put(LEGACY_C_LOG_PRODUCTS_TRANSACTIONID, cursor.getLong(0));
+                        cv.put(LEGACY_C_LOG_PRODUCTS_PRODUCTID, 0);
+                        cv.put(LEGACY_C_LOG_PRODUCTS_CATEGORY_ID, -1);
+                        cv.put(LEGACY_C_LOG_PRODUCTS_PROJECT_ID, -1);
+                        cv.put(LEGACY_C_LOG_PRODUCTS_PRICE, cursor.getDouble(1));
+                        cv.put(LEGACY_C_LOG_PRODUCTS_QUANTITY, 1);
+                        db.insert(LEGACY_T_LOG_PRODUCTS, null, cv);
                         cursor.moveToNext();
                     }
                 }

@@ -18,6 +18,7 @@ import com.dropbox.core.v2.files.WriteMode;
 import com.yoshione.fingen.BuildConfig;
 import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.FgConst;
+import com.yoshione.fingen.db.DbUpgradeGate;
 import com.yoshione.fingen.dropbox.DropboxClient;
 import com.yoshione.fingen.utils.BackupFolder;
 
@@ -94,6 +95,13 @@ public class BackupWorker extends Worker {
     @Override
     public Result doWork() {
         Context context = getApplicationContext();
+        if (DbUpgradeGate.needsUpgrade(context)) {
+            // DB upgrade is pending: no DBHelper access; skip today's backup without spending retry attempts
+            // and keep the daily chain going (the next run is queued here, the same way as after a final outcome)
+            Log.w(TAG, "Backup skipped: DB upgrade is pending");
+            scheduleNext(context);
+            return Result.success();
+        }
         boolean retry;
         try {
             retry = doBackup(context);
@@ -133,6 +141,8 @@ public class BackupWorker extends Worker {
                                     .withMode(WriteMode.OVERWRITE) //always overwrite existing file
                                     .uploadAndFinish(inputStream);
                             prefs.edit().putLong(FgConst.PREF_SHOW_LAST_SUCCESFUL_BACKUP_TO_DROPBOX, new Date().getTime()).apply();
+                            // The first successful backup (here or to the folder) makes the pre-migration copy unnecessary
+                            DBHelper.getInstance(context).deletePre36Copy();
                         } catch (DbxException e) {
                             e.printStackTrace();
                             // getRunAttemptCount() starts at 0: MAX_ATTEMPTS runs in total

@@ -9,6 +9,8 @@ import android.util.Pair;
 import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.interfaces.IAbstractModel;
+import com.yoshione.fingen.db.RunningBalance;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.model.Cabbage;
 import com.yoshione.fingen.utils.SmsParser;
 
@@ -71,7 +73,6 @@ public class CabbagesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         cabbage.setDecimalCount(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_CURRENCIES_DECIMALCOUNT)));
         cabbage.setOrderNum(cursor.getInt(mColumnIndexes.get(DBHelper.C_ORDERNUMBER)));
 
-        cabbage = (Cabbage) DBHelper.getSyncDataFromCursor(cabbage, cursor, mColumnIndexes);
 
         return cabbage;
     }
@@ -96,6 +97,43 @@ public class CabbagesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         }
 
         return new Cabbage();
+    }
+
+    /**
+     * Суммы хранятся целыми в минорных единицах валюты, поэтому при смене числа знаков существующей валюты
+     * все суммы в этой валюте пересчитываются, а log_Running_Balance строится заново.
+     */
+    @Override
+    public IAbstractModel createModel(IAbstractModel model) throws Exception {
+        long id = model.getID();
+        int newDigits = Math.max(0, Math.min(CurrencyScale.MAX_DIGITS, ((Cabbage) model).getDecimalCount()));
+        int oldDigits = id >= 0 ? CurrencyScale.forCurrency(mDatabase, id) : newDigits;
+        if (id < 0 || oldDigits == newDigits) {
+            return super.createModel(model);
+        }
+        mDatabase.beginTransaction();
+        try {
+            String factor = String.valueOf(Math.pow(10, newDigits - oldDigits));
+            String accounts = "(SELECT _id FROM ref_Accounts WHERE CurrencyId = " + id + ")";
+            String transactions = "(SELECT _id FROM log_Transactions WHERE SrcAccountId IN " + accounts + ")";
+            String debts = "(SELECT _id FROM ref_Debts WHERE AccountId IN " + accounts + ")";
+            mDatabase.execSQL("UPDATE ref_Accounts SET StartBalance = CAST(ROUND(StartBalance * " + factor + ") AS INTEGER), "
+                    + "CreditLimit = CASE WHEN CreditLimit IS NULL THEN NULL ELSE CAST(ROUND(CreditLimit * " + factor + ") AS INTEGER) END "
+                    + "WHERE CurrencyId = " + id);
+            mDatabase.execSQL("UPDATE ref_SimpleDebts SET StartAmount = CAST(ROUND(StartAmount * " + factor + ") AS INTEGER) WHERE CurrencyId = " + id);
+            mDatabase.execSQL("UPDATE ref_budget SET Amount = CAST(ROUND(Amount * " + factor + ") AS INTEGER) WHERE CurrencyId = " + id);
+            mDatabase.execSQL("UPDATE log_Transactions SET Amount = CAST(ROUND(Amount * " + factor + ") AS INTEGER) WHERE SrcAccountId IN " + accounts);
+            mDatabase.execSQL("UPDATE log_Templates SET Amount = CAST(ROUND(Amount * " + factor + ") AS INTEGER) WHERE Amount IS NOT NULL AND SrcAccountId IN " + accounts);
+            mDatabase.execSQL("UPDATE log_Products SET Price = CAST(ROUND(Price * " + factor + ") AS INTEGER) WHERE TransactionId IN " + transactions);
+            mDatabase.execSQL("UPDATE ref_budget_debts SET Amount = CAST(ROUND(Amount * " + factor + ") AS INTEGER) WHERE DebtId IN " + debts);
+            IAbstractModel result = super.createModel(model);
+            CurrencyScale.invalidate();
+            RunningBalance.rebuild(mDatabase);
+            mDatabase.setTransactionSuccessful();
+            return result;
+        } finally {
+            mDatabase.endTransaction();
+        }
     }
 
     @Override

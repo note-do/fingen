@@ -248,6 +248,10 @@ public class ActivityEditTransaction extends ToolbarActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (isFinishing()) {
+            // Redirected to the DB upgrade screen
+            return;
+        }
 
         FGApplication.getAppComponent().inject(this);
 
@@ -721,7 +725,9 @@ public class ActivityEditTransaction extends ToolbarActivity implements
         } else {
             //Находимся в режиме редактирования шаблона
             template.extractFromTransaction(transaction);
-            if (template.isValid()) {
+            if (template.getAccountID() <= 0) {
+                textInputLayoutAccount.setError(getString(R.string.err_specify_account));
+            } else if (template.isValid()) {
                 try {
                     TemplatesDAO.getInstance(getApplicationContext()).createModel(template);
                 } catch (Exception e) {

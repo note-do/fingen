@@ -7,6 +7,7 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.model.Location;
@@ -44,13 +45,12 @@ public class LocationsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor 
         location.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
         location.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_LOCATIONS_NAME)));
         location.setFullName(cursor.getString(mColumnIndexes.get(DBHelper.C_FULL_NAME)));
-        location.setParentID(cursor.getLong(mColumnIndexes.get(DBHelper.C_PARENTID)));
+        location.setParentID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_PARENTID)));
         location.setAddress(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_LOCATIONS_ADDRESS)));
         location.setLat(cursor.getDouble(mColumnIndexes.get(DBHelper.C_REF_LOCATIONS_LAT)));
         location.setLon(cursor.getDouble(mColumnIndexes.get(DBHelper.C_REF_LOCATIONS_LON)));
         location.setOrderNum(cursor.getInt(mColumnIndexes.get(DBHelper.C_ORDERNUMBER)));
 
-        location = (Location) DBHelper.getSyncDataFromCursor(location, cursor, mColumnIndexes);
 
         return location;
     }
@@ -58,7 +58,7 @@ public class LocationsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor 
     @Override
     public void deleteModel(IAbstractModel model, boolean resetTS, Context context) {
         ContentValues values = new ContentValues();
-        values.put(DBHelper.C_LOG_TRANSACTIONS_LOCATION, -1);
+        values.putNull(DBHelper.C_LOG_TRANSACTIONS_LOCATION);
         TransactionsDAO.getInstance(context).bulkUpdateItem(DBHelper.C_LOG_TRANSACTIONS_LOCATION + " = " + model.getID(), values, resetTS);
 
         super.deleteModel(model, resetTS, context);

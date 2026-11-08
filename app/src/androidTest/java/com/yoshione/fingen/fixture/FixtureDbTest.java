@@ -196,7 +196,7 @@ public class FixtureDbTest {
     private static String signature(Context context) {
         SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
         StringBuilder sb = new StringBuilder();
-        try (Cursor cursor = db.rawQuery("SELECT DateTime, SrcAccount, Amount, Payee, Category, Comment "
+        try (Cursor cursor = db.rawQuery("SELECT DateTime, SrcAccountId, Amount, PayeeId, CategoryId, Comment "
                 + "FROM log_Transactions ORDER BY _id", null)) {
             while (cursor.moveToNext()) {
                 for (int i = 0; i < 6; i++) {

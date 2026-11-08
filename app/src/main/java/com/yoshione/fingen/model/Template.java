@@ -5,6 +5,7 @@ import android.os.Parcel;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 import java.math.BigDecimal;
@@ -181,7 +182,7 @@ public class Template extends BaseModel implements IAbstractModel {
     }
 
     public boolean isValid() {
-        return !mName.isEmpty();
+        return !mName.isEmpty() && mAccountID > 0;
 //        return mAccountID >= 0
 //                & mCategoryID >= 0
 //                & mPayeeID >= 0
@@ -193,17 +194,17 @@ public class Template extends BaseModel implements IAbstractModel {
     public ContentValues getCV() {
         ContentValues values = super.getCV();
 
-        values.put(DBHelper.C_LOG_TEMPLATES_SRCACCOUNT, getAccountID());
-        values.put(DBHelper.C_LOG_TEMPLATES_PAYEE, getPayeeID());
-        values.put(DBHelper.C_LOG_TEMPLATES_CATEGORY, getCategoryID());
-        values.put(DBHelper.C_LOG_TEMPLATES_AMOUNT, getAmount().setScale(2, RoundingMode.HALF_EVEN).doubleValue());
-        values.put(DBHelper.C_LOG_TEMPLATES_EXCHANGERATE, getExchangeRate().setScale(2, RoundingMode.HALF_EVEN).doubleValue());
-        values.put(DBHelper.C_LOG_TEMPLATES_PROJECT, getProjectID());
-        values.put(DBHelper.C_LOG_TEMPLATES_DEPARTMENT, getDepartmentID());
-        values.put(DBHelper.C_LOG_TEMPLATES_LOCATION, getLocationID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TEMPLATES_SRCACCOUNT, getAccountID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TEMPLATES_PAYEE, getPayeeID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TEMPLATES_CATEGORY, getCategoryID());
+        values.put(DBHelper.C_LOG_TEMPLATES_AMOUNT, getAmount().toPlainString());
+        values.put(DBHelper.C_LOG_TEMPLATES_EXCHANGERATE, getExchangeRate().toPlainString());
+        DbRefs.putRef(values, DBHelper.C_LOG_TEMPLATES_PROJECT, getProjectID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TEMPLATES_DEPARTMENT, getDepartmentID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TEMPLATES_LOCATION, getLocationID());
         values.put(DBHelper.C_LOG_TEMPLATES_NAME, getName());
         values.put(DBHelper.C_LOG_TEMPLATES_COMMENT, getComment());
-        values.put(DBHelper.C_LOG_TEMPLATES_DESTACCOUNT, getDestAccountID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TEMPLATES_DESTACCOUNT, getDestAccountID());
         values.put(DBHelper.C_LOG_TEMPLATES_TYPE, getTrType());
         return values;
     }

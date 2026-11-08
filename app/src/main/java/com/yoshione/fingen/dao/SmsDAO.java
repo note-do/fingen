@@ -41,7 +41,7 @@ public class SmsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         Sms sms= new Sms();
 
         sms.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
-        sms.setmDateTimeFromDbString(cursor.getString(mColumnIndexes.get(DBHelper.C_LOG_INCOMING_SMS_DATETIME)));
+        sms.setmDateTimeFromDb(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_INCOMING_SMS_DATETIME)));
         sms.setSenderId(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_INCOMING_SMS_SENDER)));
         sms.setmBody(cursor.getString(mColumnIndexes.get(DBHelper.C_LOG_INCOMING_SMS_BODY)));
 

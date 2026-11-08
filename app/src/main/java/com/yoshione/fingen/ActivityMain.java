@@ -224,6 +224,10 @@ public class ActivityMain extends ToolbarActivity {
         }
 
         super.onCreate(null);
+        if (isFinishing()) {
+            // Redirected to the DB upgrade screen
+            return;
+        }
 
         mUpdateUIHandler = new UpdateUIHandler(this);
 

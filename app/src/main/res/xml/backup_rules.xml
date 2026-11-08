@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Auto Backup rules for API 26-30: secrets stay on the device -->
+<!-- Auto Backup rules for API 26-30: secrets and migration copies stay on the device -->
 <full-backup-content>
     <exclude domain="sharedpref" path="com.yoshione.fingen.dropbox.xml"/>
     <exclude domain="sharedpref" path="com.yoshione.fingen.secure.xml"/>
+    <exclude domain="database" path="fingen.db.pre36"/>
+    <exclude domain="database" path="fingen.db.bak"/>
 </full-backup-content>

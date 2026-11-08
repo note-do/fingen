@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.yoshione.fingen.dao.CabbagesDAO;
 import com.yoshione.fingen.databinding.FragmentCabbageEditBinding;
 import com.yoshione.fingen.managers.CabbageManager;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.model.Cabbage;
 
 import java.util.Currency;
@@ -94,8 +95,7 @@ public class FragmentCabbageEdit extends DialogFragment {
     private boolean isInputValid() {
         return !editTextName.getText().toString().isEmpty() &
                 !editTextCode.getText().toString().isEmpty() &
-                !editTextSymbol.getText().toString().isEmpty() &
-                !editTextScale.getText().toString().isEmpty();
+                !editTextSymbol.getText().toString().isEmpty();
     }
 
     @Override
@@ -118,11 +118,22 @@ public class FragmentCabbageEdit extends DialogFragment {
                     cabbage.setName(editTextName.getText().toString());
                     cabbage.setCode(editTextCode.getText().toString());
                     cabbage.setSimbol(editTextSymbol.getText().toString());
-                    try {
-                        cabbage.setDecimalCount(Integer.valueOf(editTextScale.getText().toString()));
-                    } catch (Exception e) {
-                        cabbage.setDecimalCount(2);
+                    // Знаки после запятой: 0..8, пустое поле - 2 (суммы хранятся целыми в минорных единицах)
+                    int decimalCount = 2;
+                    String scaleText = editTextScale.getText().toString().trim();
+                    if (!scaleText.isEmpty()) {
+                        try {
+                            decimalCount = Integer.parseInt(scaleText);
+                        } catch (NumberFormatException e) {
+                            decimalCount = -1;
+                        }
+                        if (decimalCount < 0 || decimalCount > CurrencyScale.MAX_DIGITS) {
+                            editTextScale.setError(getString(R.string.err_currency_scale_range));
+                            Toast.makeText(getActivity(), R.string.err_currency_scale_range, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                     }
+                    cabbage.setDecimalCount(decimalCount);
                     CabbagesDAO cabbagesDAO = CabbagesDAO.getInstance(getActivity());
                     try {
                         cabbagesDAO.createModel(cabbage);

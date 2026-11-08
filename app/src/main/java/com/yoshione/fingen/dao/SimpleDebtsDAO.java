@@ -7,7 +7,9 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.model.SimpleDebt;
 
@@ -44,10 +46,10 @@ public class SimpleDebtsDAO extends BaseDAO implements AbstractDAO, IDaoInherito
         simpledebt.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
         simpledebt.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_SIMPLEDEBTS_NAME)));
         simpledebt.setIsActive(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_SIMPLEDEBTS_ISACTIVE)) == 1);
-        simpledebt.setStartAmount(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_REF_SIMPLEDEBTS_START_AMOUNT))));
-        simpledebt.setCabbageID(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_SIMPLEDEBTS_CABBAGE)));
+        simpledebt.setCabbageID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_REF_SIMPLEDEBTS_CABBAGE)));
+        simpledebt.setStartAmount(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_SIMPLEDEBTS_START_AMOUNT)),
+                CurrencyScale.forCurrency(mDatabase, simpledebt.getCabbageID())));
 
-        simpledebt = (SimpleDebt) DBHelper.getSyncDataFromCursor(simpledebt, cursor, mColumnIndexes);
 
         return simpledebt;
     }
@@ -72,7 +74,7 @@ public class SimpleDebtsDAO extends BaseDAO implements AbstractDAO, IDaoInherito
         ContentValues values = new ContentValues();
         //Обнуляем таблице транзакций
         values.clear();
-        values.put(DBHelper.C_LOG_TRANSACTIONS_SIMPLEDEBT, -1);
+        values.putNull(DBHelper.C_LOG_TRANSACTIONS_SIMPLEDEBT);
         TransactionsDAO.getInstance(context).bulkUpdateItem(DBHelper.C_LOG_TRANSACTIONS_SIMPLEDEBT + " = " + model.getID(), values, resetTS);
 
         super.deleteModel(model, resetTS, context);

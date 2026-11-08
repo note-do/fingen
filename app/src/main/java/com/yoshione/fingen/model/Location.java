@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 /**
@@ -135,7 +136,7 @@ public class Location extends BaseModel implements IAbstractModel {
         values.put(DBHelper.C_REF_LOCATIONS_ADDRESS, getAddress());
         values.put(DBHelper.C_REF_LOCATIONS_LAT, getLat());
         values.put(DBHelper.C_REF_LOCATIONS_LON, getLon());
-        values.put(DBHelper.C_PARENTID, mParentID);
+        DbRefs.putRef(values, DBHelper.C_PARENTID, mParentID);
         values.put(DBHelper.C_ORDERNUMBER, getOrderNum());
         return values;
     }
