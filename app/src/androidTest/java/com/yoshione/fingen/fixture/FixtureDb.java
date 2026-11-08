@@ -28,6 +28,7 @@ import com.yoshione.fingen.dao.SmsDAO;
 import com.yoshione.fingen.dao.SmsMarkersDAO;
 import com.yoshione.fingen.dao.TemplatesDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.filters.DateRangeFilter;
 import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.Category;
 import com.yoshione.fingen.model.Credit;
@@ -58,30 +59,46 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.TimeZone;
 
 /**
- * Test database with a configurable amount of data. Two ways to get it:
- * <ul>
- * <li>{@link #build(Context, Spec)} (recommended): resets fingen.db to a clean schema created by
- * DBHelper.onCreate and fills it through the app's own DAOs (createModel of AccountsDAO,
- * TransactionsDAO, ...), so related rows (log_Products default entry, running balance, search
- * strings, full names) are produced exactly as when a user works with the app. Then
- * {@link #verify(Context, Spec)} checks counts, foreign keys and products. The same Spec (seed)
- * always gives the same data.</li>
- * <li>{@link #copyFixture(Context)}: fast path, copies the ready asset assets/fixtures/fingen_v35_100.db
- * (built by assets/fixtures/make_seed.py with direct SQL, about 100 rows per table).</li>
- * </ul>
- * Both replace the real fingen.db of the app under test. The previous content is lost: take a
+ * Test database with a configurable amount of data. One generator: {@link #build(Context, Spec)}
+ * resets fingen.db to a clean schema created by DBHelper.onCreate and fills it through the app's
+ * own DAOs (createModel of AccountsDAO, TransactionsDAO, ...), so related rows (log_Products default
+ * entry, running balance, search strings, full names) are produced exactly as when a user works
+ * with the app. Then {@link #verify(Context, Spec)} checks counts, foreign keys and products.
+ * <p>
+ * Dates are always relative to the current date of the device (local time zone): the "anchor" is
+ * {@link Spec#anchorMillis} (default: now), transactions go back from the anchor day. The same seed
+ * and the same anchor day give the same data; compare dates against the anchor day, not a fixed date.
+ * <p>
+ * Ready databases (variants) are produced by FixtureVariantsExportTest from {@link #variantSpec} and
+ * stored in assets/fixtures/&lt;name&gt;.db; tests take them with {@link #copyFixture(Context, String)}
+ * without generating anything. Dates in a stored variant are "old" (relative to the day it was
+ * built), see CLAUDE.md, section "Тестовые фикстуры".
+ * <p>
+ * Both ways replace the real fingen.db of the app under test. The previous content is lost: take a
  * backup first if the device holds data that is needed (tests run on a test device, see CLAUDE.md).
  */
 public final class FixtureDb {
 
-    public static final String ASSET_PATH = "fixtures/fingen_v35_100.db";
+    public static final String VARIANT_SUMMARY = "summary";
+    public static final String VARIANT_DEFAULT100 = "default100";
+    public static final String VARIANT_SMALL = "small";
+    public static final String[] VARIANTS = {VARIANT_SUMMARY, VARIANT_DEFAULT100, VARIANT_SMALL};
 
-    /** Rows of log_Transactions in the fixture, including 8 with Deleted = 1. */
-    public static final int TRANSACTIONS_TOTAL = 100;
-    public static final int TRANSACTIONS_DELETED = 8;
+    /** Periods of the Summary tab (FragmentSummary): DateRangeFilter range and modifier, name. */
+    private static final int[][] SUMMARY_PERIODS = {
+            {DateRangeFilter.DATE_RANGE_DAY, DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT},
+            {DateRangeFilter.DATE_RANGE_DAY, DateRangeFilter.DATE_RANGE_MODIFIER_LAST},
+            {DateRangeFilter.DATE_RANGE_WEEK, DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT},
+            {DateRangeFilter.DATE_RANGE_WEEK, DateRangeFilter.DATE_RANGE_MODIFIER_LAST},
+            {DateRangeFilter.DATE_RANGE_MONTH, DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT},
+            {DateRangeFilter.DATE_RANGE_MONTH, DateRangeFilter.DATE_RANGE_MODIFIER_LAST},
+            {DateRangeFilter.DATE_RANGE_YEAR, DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT},
+            {DateRangeFilter.DATE_RANGE_YEAR, DateRangeFilter.DATE_RANGE_MODIFIER_LAST}
+    };
+    public static final String[] SUMMARY_PERIOD_NAMES = {"today", "yesterday", "this_week", "last_week",
+            "this_month", "last_month", "this_year", "last_year"};
 
     private static final String DB_NAME = "fingen.db";
 
@@ -141,16 +158,38 @@ public final class FixtureDb {
         /** Rows of ref_Sms_Parser_Patterns. */
         public int markers = 100;
         public long seed = 35;
-        /** "Now" of the data, default 2026-11-07 00:00 UTC. */
-        public long anchorMillis = utc(2026, Calendar.NOVEMBER, 7);
+        /**
+         * "Now" of the data: the current time of the device (local time zone). Dates of transactions,
+         * SMS and budgets go back from the day of this moment.
+         */
+        public long anchorMillis = System.currentTimeMillis();
+        /**
+         * Put 2 transactions (one income, one expense, not deleted, not transfers) into every period of
+         * the Summary tab: today, yesterday, this/last week, this/last month, this/last year (periods
+         * as in DateRangeFilter, with the first day of week from the settings, Monday by default).
+         * They take the first 16 transactions. Logically empty periods are not forced: "yesterday" is
+         * on the previous day, so with the anchor on Monday "this week" is only today, with the anchor on
+         * the 1st "this month" is only today, on January 1st "this year" is only today.
+         */
+        public boolean coverSummaryPeriods = false;
         /** Transactions are spread over this many days back from the anchor. */
         public int spanDays = 360;
 
-        /** Defaults: about 100 rows per table, as in the asset. */
+        /** Defaults: about 100 rows per table (variant default100). */
         public Spec() {
         }
 
-        /** Few rows of everything: 2 accounts, 5 transactions. */
+        /** Variant summary: 90 transactions (16 cover the Summary periods), the rest as default. */
+        public static Spec summary() {
+            Spec s = new Spec();
+            s.transactions = 90;
+            s.deletedTransactions = 6;
+            s.splitTransactions = 6;
+            s.coverSummaryPeriods = true;
+            return s;
+        }
+
+        /** Few rows of everything: 2 accounts, 5 transactions (variant small). */
         public static Spec small() {
             Spec s = new Spec();
             s.accounts = 2;
@@ -197,6 +236,10 @@ public final class FixtureDb {
             if (spanDays < 1) {
                 throw new IllegalArgumentException("Spec: spanDays < 1");
             }
+            if (coverSummaryPeriods && (transactions < COVER_COUNT + deletedTransactions || accounts - closedAccounts() < 1)) {
+                throw new IllegalArgumentException("Spec: coverSummaryPeriods needs transactions >= "
+                        + COVER_COUNT + " + deletedTransactions");
+            }
         }
 
         /** Open accounts of type 3..6 (credit, active, passive, other), all open accounts if none. */
@@ -224,11 +267,26 @@ public final class FixtureDb {
     private FixtureDb() {
     }
 
-    private static long utc(int year, int month, int day) {
-        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        c.clear();
-        c.set(year, month, day);
-        return c.getTimeInMillis();
+    /** 2 transactions (expense, income) for each of the 8 Summary periods. */
+    private static final int COVER_COUNT = 16;
+
+    /** Spec of a ready variant by name, see {@link #VARIANTS}. */
+    public static Spec variantSpec(String name) {
+        switch (name) {
+            case VARIANT_SUMMARY:
+                return Spec.summary();
+            case VARIANT_DEFAULT100:
+                return new Spec();
+            case VARIANT_SMALL:
+                return Spec.small();
+            default:
+                throw new IllegalArgumentException("Unknown fixture variant: " + name);
+        }
+    }
+
+    /** Asset path of a ready variant. */
+    public static String assetPath(String name) {
+        return "fixtures/" + name + ".db";
     }
 
     // Categories for a budget: expense categories plus up to 2 income roots.
@@ -244,13 +302,14 @@ public final class FixtureDb {
     }
 
     /**
-     * Fast path: resets the DB (see {@link #resetDb}) and copies the ready asset over fingen.db.
-     * The next DBHelper.getInstance(context) opens the fixture (version 35, no migration).
+     * Fast path: resets the DB (see {@link #resetDb}) and copies the ready variant (name from
+     * {@link #VARIANTS}) over fingen.db. The next DBHelper.getInstance(context) opens the fixture
+     * (version 35, no migration). Dates are those of the day the variant was built.
      */
-    public static void copyFixture(Context ctx) throws IOException {
+    public static void copyFixture(Context ctx, String name) throws IOException {
         File db = resetDb(ctx);
         Context testContext = InstrumentationRegistry.getInstrumentation().getContext();
-        try (InputStream in = testContext.getAssets().open(ASSET_PATH);
+        try (InputStream in = testContext.getAssets().open(assetPath(name));
              OutputStream out = new FileOutputStream(db, false)) {
             byte[] buffer = new byte[16 * 1024];
             int n;
@@ -419,9 +478,11 @@ public final class FixtureDb {
         }
 
         // ---- transactions through TransactionsDAO.createModel: it creates the default log_Products entry ----
+        // the first COVER_COUNT transactions (if covering the Summary periods) are never deleted
+        int cover = spec.coverSummaryPeriods ? COVER_COUNT : 0;
         boolean[] deleted = new boolean[spec.transactions];
         for (int k = 0; k < spec.deletedTransactions; k++) {
-            deleted[(int) ((k + 0.5) * spec.transactions / spec.deletedTransactions)] = true;
+            deleted[cover + (int) ((k + 0.5) * (spec.transactions - cover) / spec.deletedTransactions)] = true;
         }
         int splitLeft = products.isEmpty() ? 0 : spec.splitTransactions;
         int[] weights = {70, 18, 12};
@@ -435,9 +496,19 @@ public final class FixtureDb {
             if (kind == 2 && openAccounts.size() < 2) {
                 kind = 0;
             }
+            long coverMillis = -1;
+            if (i < cover) {
+                // pair i/2 is the period i/2 of the Summary tab: expense first, then income, in the middle
+                // of the first day of the period (periods as the app computes them)
+                kind = i % 2;
+                int[] period = SUMMARY_PERIODS[i / 2];
+                coverMillis = DateRangeFilter.getRangeStart(period[0], period[1], ctx).getTime()
+                        + (12 + i % 2) * 3_600_000L + rnd.nextInt(60) * 60_000L;
+            }
             long src = openAccounts.get(rnd.nextInt(openAccounts.size()));
             Transaction t = new Transaction(-1);
-            t.setDateTime(new Date(dateMillis(spec, day, 8 + rnd.nextInt(14), rnd.nextInt(60))));
+            long dateMillis = dateMillis(spec, day, 8 + rnd.nextInt(14), rnd.nextInt(60));
+            t.setDateTime(new Date(coverMillis >= 0 ? coverMillis : dateMillis));
             t.setAccountID(src);
             t.setComment(String.format("Тест %s %d", COMMENT_WORDS[rnd.nextInt(COMMENT_WORDS.length)], i + 1));
             t.setProjectID(pickOrNone(rnd, projects, 3));
@@ -566,8 +637,7 @@ public final class FixtureDb {
                 "Зачисление %.2f RUB на карту *%04d, Тест перевод %d. Баланс: %.2f RUB",
                 "Test purchase %.2f USD, card *%04d, Test shop %d. Balance: %.2f USD"};
         for (int i = 0; i < spec.incomingSms; i++) {
-            long when = spec.anchorMillis + 9 * 3600_000L - (long) (i * 3.6) * 86_400_000L
-                    - rnd.nextInt(600) * 60_000L;
+            long when = dateMillis(spec, (int) (i * 3.6), 9, 0) - rnd.nextInt(600) * 60_000L;
             String body = String.format(java.util.Locale.US, smsBodies[rnd.nextInt(smsBodies.length)],
                     rnd.nextInt(8951) + 50 + rnd.nextInt(100) / 100.0, 1000 + i * 37 % 9000, i + 1,
                     rnd.nextInt(89001) + 1000 + rnd.nextInt(100) / 100.0);
@@ -618,6 +688,28 @@ public final class FixtureDb {
         helper.updateRunningBalance(db);
 
         verify(ctx, spec);
+        if (spec.coverSummaryPeriods) {
+            verifySummaryPeriods(ctx);
+        }
+    }
+
+    /**
+     * Every period of the Summary tab has at least one income and one expense, periods counted from the
+     * current moment. Not part of {@link #verify} (it does not depend on the date): a stored variant
+     * satisfies it only on the day it was built.
+     */
+    public static void verifySummaryPeriods(Context ctx) {
+        long[][] periods = summaryPeriodCounts(ctx);
+        List<String> errors = new ArrayList<>();
+        for (int p = 0; p < periods.length; p++) {
+            if (periods[p][0] == 0 || periods[p][1] == 0) {
+                errors.add("Summary period " + SUMMARY_PERIOD_NAMES[p] + ": " + periods[p][0] + " incomes, "
+                        + periods[p][1] + " expenses, expected both > 0");
+            }
+        }
+        if (!errors.isEmpty()) {
+            throw new IllegalStateException("FixtureDb.verifySummaryPeriods failed:\n" + join(errors));
+        }
     }
 
     /**
@@ -710,6 +802,25 @@ public final class FixtureDb {
         }
     }
 
+    /**
+     * Non-deleted incomes and expenses (not transfers) in each of the 8 periods of the Summary tab
+     * (order of {@link #SUMMARY_PERIOD_NAMES}), as [period]{incomes, expenses}. Period bounds come
+     * from DateRangeFilter for the current moment, as in the app.
+     */
+    public static long[][] summaryPeriodCounts(Context ctx) {
+        SQLiteDatabase db = DBHelper.getInstance(ctx).getReadableDatabase();
+        long[][] result = new long[SUMMARY_PERIODS.length][2];
+        for (int p = 0; p < SUMMARY_PERIODS.length; p++) {
+            long start = DateRangeFilter.getRangeStart(SUMMARY_PERIODS[p][0], SUMMARY_PERIODS[p][1], ctx).getTime();
+            long end = DateRangeFilter.getRangeEnd(SUMMARY_PERIODS[p][0], SUMMARY_PERIODS[p][1], ctx).getTime();
+            String where = " FROM log_Transactions WHERE Deleted = 0 AND DestAccount < 0 AND DateTime >= " + start
+                    + " AND DateTime <= " + end;
+            result[p][0] = count(db, "SELECT COUNT(*)" + where + " AND Amount > 0");
+            result[p][1] = count(db, "SELECT COUNT(*)" + where + " AND Amount < 0");
+        }
+        return result;
+    }
+
     private static void expectCount(SQLiteDatabase db, List<String> errors, String table, String where, int expected) {
         long actual = count(db, "SELECT COUNT(*) FROM " + table + (where.isEmpty() ? "" : " WHERE " + where));
         if (actual != expected) {
@@ -761,12 +872,20 @@ public final class FixtureDb {
         return currencies.indexOf(a) < currencies.indexOf(b) ? 0.011 : 90.0;
     }
 
+    // local time: the day of the anchor minus daysBack, at hour:minute
     private static long dateMillis(Spec spec, int daysBack, int hour, int minute) {
-        return spec.anchorMillis - daysBack * 86_400_000L + hour * 3_600_000L + minute * 60_000L;
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(spec.anchorMillis);
+        c.add(Calendar.DAY_OF_MONTH, -daysBack);
+        c.set(Calendar.HOUR_OF_DAY, hour);
+        c.set(Calendar.MINUTE, minute);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        return c.getTimeInMillis();
     }
 
     private static Calendar monthsBack(Spec spec, int n) {
-        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar c = Calendar.getInstance();
         c.setTimeInMillis(spec.anchorMillis);
         c.set(Calendar.DAY_OF_MONTH, 1);
         c.add(Calendar.MONTH, -n);

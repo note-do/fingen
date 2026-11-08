@@ -8,9 +8,22 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.classes.ListSumsByCabbage;
+import com.yoshione.fingen.classes.SumsByCabbage;
+import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.filters.AbstractFilter;
+import com.yoshione.fingen.filters.DateRangeFilter;
+import com.yoshione.fingen.filters.FilterListHelper;
+import com.yoshione.fingen.model.SummaryItem;
 
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -18,21 +31,100 @@ import static org.junit.Assert.fail;
 
 /**
  * Tests of the fixture DB. Every test replaces the real fingen.db of the app under test, the data
- * is not restored afterwards.
+ * is not restored afterwards. Not part of the main run (package com.yoshione.fingen.fixture, see
+ * CLAUDE.md, "Тестовые фикстуры").
  */
 @RunWith(AndroidJUnit4.class)
 public class FixtureDbTest {
 
     @Test
-    public void copyFixture_hasExpectedTransactions() throws Exception {
+    public void copyFixture_allVariants_matchTheirSpec() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();
-        FixtureDb.copyFixture(context);
+        for (String name : FixtureDb.VARIANTS) {
+            FixtureDb.copyFixture(context, name);
+            SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
+            assertEquals(name, DBHelper.DATABASE_VERSION, db.getVersion());
+            // counts, links and products; the dates are those of the day the variant was built
+            FixtureDb.verify(context, FixtureDb.variantSpec(name));
+        }
+    }
+
+    @Test
+    public void copyFixture_summary_periodsHaveDataOnTheDayItWasBuilt() throws Exception {
+        Context context = InstrumentationRegistry.getTargetContext();
+        FixtureDb.copyFixture(context, FixtureDb.VARIANT_SUMMARY);
+        // the newest transaction of the variant is "today" of the build day
+        SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
+        long newest = count(db, "SELECT MAX(DateTime) FROM log_Transactions");
+        Calendar built = Calendar.getInstance();
+        built.setTimeInMillis(newest);
+        Calendar now = Calendar.getInstance();
+        Assume.assumeTrue("the variant was built on another day, periods are relative to the build day",
+                built.get(Calendar.YEAR) == now.get(Calendar.YEAR)
+                        && built.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR));
+        FixtureDb.verifySummaryPeriods(context);
+    }
+
+    @Test
+    public void build_summarySpec_everySummaryPeriodHasIncomeAndExpense() throws Exception {
+        Context context = InstrumentationRegistry.getTargetContext();
+        FixtureDb.Spec spec = FixtureDb.Spec.summary();
+        FixtureDb.build(context, spec); // also runs verify and verifySummaryPeriods
+
+        long[][] counts = FixtureDb.summaryPeriodCounts(context);
+        assertEquals(FixtureDb.SUMMARY_PERIOD_NAMES.length, counts.length);
+        for (int p = 0; p < counts.length; p++) {
+            assertTrue(FixtureDb.SUMMARY_PERIOD_NAMES[p] + " incomes", counts[p][0] > 0);
+            assertTrue(FixtureDb.SUMMARY_PERIOD_NAMES[p] + " expenses", counts[p][1] > 0);
+        }
+
+        // the same through the app: the sums that FragmentSummary shows
+        int[][] periods = {
+                {DateRangeFilter.DATE_RANGE_DAY, DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT},
+                {DateRangeFilter.DATE_RANGE_DAY, DateRangeFilter.DATE_RANGE_MODIFIER_LAST},
+                {DateRangeFilter.DATE_RANGE_WEEK, DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT},
+                {DateRangeFilter.DATE_RANGE_WEEK, DateRangeFilter.DATE_RANGE_MODIFIER_LAST},
+                {DateRangeFilter.DATE_RANGE_MONTH, DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT},
+                {DateRangeFilter.DATE_RANGE_MONTH, DateRangeFilter.DATE_RANGE_MODIFIER_LAST},
+                {DateRangeFilter.DATE_RANGE_YEAR, DateRangeFilter.DATE_RANGE_MODIFIER_CURRENT},
+                {DateRangeFilter.DATE_RANGE_YEAR, DateRangeFilter.DATE_RANGE_MODIFIER_LAST}};
+        List<SummaryItem> items = new ArrayList<>();
+        for (int p = 0; p < periods.length; p++) {
+            items.add(new SummaryItem(p + 1, periods[p][0], periods[p][1], new ListSumsByCabbage(),
+                    FixtureDb.SUMMARY_PERIOD_NAMES[p]));
+        }
+        TransactionsDAO.getInstance(context).getSummaryGroupedSumsRx(items,
+                new FilterListHelper(new ArrayList<AbstractFilter>(), "", context), context).blockingGet();
+        for (SummaryItem item : items) {
+            BigDecimal income = BigDecimal.ZERO;
+            BigDecimal expense = BigDecimal.ZERO;
+            for (SumsByCabbage sums : item.getListSumsByCabbage().getmList()) {
+                income = income.add(sums.getInTrSum());
+                expense = expense.add(sums.getOutTrSum());
+            }
+            assertTrue(item.getName() + " income " + income, income.signum() > 0);
+            assertTrue(item.getName() + " expense " + expense, expense.signum() < 0);
+        }
+    }
+
+    @Test
+    public void build_datesGoBackFromTheCurrentDay() throws Exception {
+        Context context = InstrumentationRegistry.getTargetContext();
+        FixtureDb.Spec spec = FixtureDb.Spec.small();
+        FixtureDb.build(context, spec);
+
+        Calendar day = Calendar.getInstance();
+        day.setTimeInMillis(spec.anchorMillis);
+        day.set(Calendar.HOUR_OF_DAY, 23);
+        day.set(Calendar.MINUTE, 59);
+        long endOfAnchorDay = day.getTimeInMillis();
+        day.add(Calendar.DAY_OF_MONTH, -spec.spanDays - 1);
+        long beforeSpan = day.getTimeInMillis();
 
         SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
-        assertEquals(DBHelper.DATABASE_VERSION, db.getVersion());
-        assertEquals(FixtureDb.TRANSACTIONS_TOTAL, count(db, "SELECT COUNT(*) FROM log_Transactions"));
-        assertEquals(FixtureDb.TRANSACTIONS_DELETED,
-                count(db, "SELECT COUNT(*) FROM log_Transactions WHERE Deleted = 1"));
+        assertEquals(0, count(db, "SELECT COUNT(*) FROM log_Transactions WHERE DateTime > " + endOfAnchorDay
+                + " OR DateTime < " + beforeSpan));
+        assertEquals(0, count(db, "SELECT COUNT(*) FROM log_Incoming_SMS WHERE DateTime > " + endOfAnchorDay));
     }
 
     @Test
