@@ -188,7 +188,7 @@ public class CategoriesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor
                         "           SELECT log_Transactions.*, ref_Accounts.Currency\n" +
                         "           FROM log_Transactions, ref_Accounts\n" +
                         "           WHERE SrcAccount = ref_Accounts._id AND log_Transactions.Deleted = 0 AND IsClosed = 0) as t\n" +
-                        "       LEFT JOIN log_Products prod ON t._id = prod.TransactionID \n" +
+                        "       LEFT JOIN log_Products prod ON t._id = prod.TransactionID AND prod.Deleted = 0 \n" +
                         "       WHERE\n" +
                         "           (ref_Categories._id = CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END)\n" +
                         "           AND (Currency = ref_Currencies._id)\n" +
