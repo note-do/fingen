@@ -153,6 +153,9 @@ public class AdapterTransactions extends RecyclerView.Adapter implements FgFastS
 
     @Override
     public long getItemId(int position) {
+        if (position < 0 || position >= transactionList.size()) {
+            return RecyclerView.NO_ID;
+        }
         return transactionList.get(position).getID();
     }
 
@@ -179,6 +182,9 @@ public class AdapterTransactions extends RecyclerView.Adapter implements FgFastS
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+        if (position < 0 || position >= transactionList.size()) {
+            return;
+        }
         Transaction transaction = transactionList.get(position);
 
         TransactionViewHolder tvh = (TransactionViewHolder) viewHolder;
