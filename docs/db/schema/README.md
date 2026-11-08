@@ -1,6 +1,6 @@
 # Схема локальной БД fingen.db по версиям
 
-Диаграммы PlantUML для каждой версии `DATABASE_VERSION` 16..35 (по одной на файл). Текущая схема v35, нарисованная вручную, лежит в `../fingen_schema.puml`; она не менялась.
+Диаграммы PlantUML для каждой версии `DATABASE_VERSION` 16..36 (по одной на файл). Текущая схема — v36 (`v36.puml`). Схема v35, нарисованная вручную, лежит в `../fingen_schema.puml`; она не обновлялась под v36.
 
 Рендеринг: `plantuml -tpng docs/db/schema/v16.puml` (картинки в репозиторий не добавлены). Синтаксис проверен `plantuml -checkonly`.
 
@@ -9,6 +9,7 @@
 - v16: фикстура `app/src/androidTest/assets/migrations/fingen_v16.sql` (сама восстановлена по `UpdateHelper.tableInfo17`, реальной БД v16 не было).
 - v17..v34: DDL миграций `UpdateHelper.update17..update33` (и `DBHelper.onUpgrade`) применён по порядку через `sqlite3` к схеме v16 (`PRAGMA legacy_alter_table=ON`, `foreign_keys=OFF`, как на Android). Данные не переносились, учтена только схема.
 - v35: DDL `DBHelper.onCreate` (свежая установка), проверено по `fixtures/small.db`.
+- v36: `SchemaV36` (DDL и индексы итогового состояния), миграция — `Migration36`.
 - Сверка с фикстурами v21, v23, v30, v34 — таблицы, колонки, типы, NOT NULL, PK, UNIQUE, FK, индексы совпали; отличия описаны ниже.
 
 ## Индекс версий
@@ -37,6 +38,7 @@
 | 33 | [v33.puml](v33.puml) | 21 | Только данные (`log_Products` для транзакций без товаров); схема как v32 | `update33` | нет |
 | 34 | [v34.puml](v34.puml) | 21 | Схема не меняется | `onUpgrade`: `update33` под условием `< 34` | `fingen_v34.sql` |
 | 35 | [v35.puml](v35.puml) | 21 | Схема не меняется; в `onUpgrade` добавлен только пересчёт баланса `if (oldVersion < 25)` | `onCreate`, `onUpgrade` | `fixtures/small.db` |
+| 36 | [v36.puml](v36.puml) | 21 | Пересборка всех таблиц: FK включаются в `onOpen`; пустые ссылки NULL; `DecimalCount` 0..8; деньги INTEGER в минорных единицах, `ExchangeRate` ×10¹², `Quantity` ×10³; удалены `FBID`, `TS`, `Dirty`, `LastEdited`, `ref_Debts.SrcAccount`, `ref_Locations.Radius`, `ref_Categories.Sign`; `FN`/`FD`/`FP` сохранены; колонки переименованы (`*Id`, `IsClosed`, `IsSplit` и др.); FK у `log_Running_Balance` и `log_Incoming_SMS`; уникальные индексы `WHERE Deleted = 0` | `SchemaV36`, `Migration36` | нет (фикстура v35 есть, ассетов v36 нет) |
 
 ## Различия «свежая установка» и «апгрейд»
 
@@ -52,3 +54,4 @@ v35 нарисована по `onCreate`, v17..v34 — по цепочке ми�
 - `update33` вызывается под `< 34`, а не `< 33`; по имени метод относится к v33, фактически это шаг 33 -> 34. Схема v32, v33, v34 и v35 одинакова.
 - Пересчёт `log_Running_Balance` при `oldVersion < 25` выполняется трижды (`update27`, блок `< 28`, финальный блок `< 25`).
 - Условие `oldVersion < 25` в конце добавлено в версии 2.4.1 (бамп 34 -> 35) и относится к пересчёту баланса, а не к `update25`.
+- v36 (`Migration36`): пересборка всех таблиц (новая таблица `X_new`, копирование с преобразованием, переименование); перед первым шагом `prepare` проверяет свободное место и копирует БД в `fingen.db.pre36`; миграция идёт на экране `ActivityDbUpgrade` (`DbUpgradeGate`, фоновый поток, этапы: подготовка, конвертация, баланс, проверка). SMS с `Sender` 0, -1 или висящей ссылкой привязываются к служебному отправителю `(unknown)`; потерянные ссылки заменяются служебными записями `(lost)`. `pre36` удаляется после первого успешного бэкапа (в папку бэкапов или Dropbox). `RunningBalance.rebuild` и `updateFullNames` для миграции — замороженные копии `Frozen36`.
