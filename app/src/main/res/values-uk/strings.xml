@@ -455,6 +455,7 @@
 
     <!-- 2. Accounts -->
     <!-- Errors -->
+    <string name="err_account_currency_locked" formatted="false">Не можна змінити валюту: у рахунку є операції, шаблони або борги</string>
     <string name="err_specify_account_currency" formatted="false">Вкажіть валюту рахунку</string>
 
     <!-- 2. Accounts -->

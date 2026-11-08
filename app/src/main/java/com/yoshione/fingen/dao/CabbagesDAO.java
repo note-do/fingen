@@ -106,7 +106,7 @@ public class CabbagesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
     @Override
     public IAbstractModel createModel(IAbstractModel model) throws Exception {
         long id = model.getID();
-        int newDigits = Math.max(0, Math.min(4, ((Cabbage) model).getDecimalCount()));
+        int newDigits = Math.max(0, Math.min(CurrencyScale.MAX_DIGITS, ((Cabbage) model).getDecimalCount()));
         int oldDigits = id >= 0 ? CurrencyScale.forCurrency(mDatabase, id) : newDigits;
         if (id < 0 || oldDigits == newDigits) {
             return super.createModel(model);

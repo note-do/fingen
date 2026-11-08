@@ -397,6 +397,7 @@ public class Migration36 implements DbMigration {
 
         // Дубли по новым уникальным индексам среди Deleted = 0
         dedupe(db, "ref_Currencies", "Code", null);
+        assignDefaultCurrency(db);
         dedupe(db, "ref_Accounts", "Name", null);
         dedupe(db, "ref_Accounts_Sets", "Name", null);
         dedupe(db, "ref_Categories", "Name", "IFNULL(ParentID, 0)");
@@ -409,6 +410,39 @@ public class Migration36 implements DbMigration {
         dedupe(db, "ref_Senders", "Name", null);
         dedupe(db, "ref_Senders", "PhoneNo", null);
         dedupeDebts(db);
+    }
+
+    /**
+     * Счета без валюты (NULL, -1 или висящая ссылка) получают валюту по умолчанию: живая RUB, иначе первая живая по _id,
+     * иначе создается RUB. Выполняется после очистки ссылок и дублей валют и до loadAccountDigits/snapshotSums, поэтому
+     * суммы переводятся в минорные единицы уже по знакам этой валюты (в v35 суммы REAL хранятся в основных единицах,
+     * пересчета значений не требуется; для RUB знаков 2, как у счета без валюты). Это UPDATE: total/active счетов не меняются.
+     */
+    private void assignDefaultCurrency(SQLiteDatabase db) {
+        String where = " WHERE Currency IS NULL OR Currency < 0 OR Currency NOT IN (SELECT _id FROM ref_Currencies)";
+        long count = queryLong(db, "SELECT COUNT(*) FROM ref_Accounts" + where);
+        if (count == 0) return;
+        long id = queryLong(db, "SELECT IFNULL(MIN(_id), 0) FROM ref_Currencies WHERE Code = 'RUB' AND IFNULL(Deleted, 0) = 0");
+        String source = "RUB";
+        if (id == 0) {
+            id = queryLong(db, "SELECT IFNULL(MIN(_id), 0) FROM ref_Currencies WHERE IFNULL(Deleted, 0) = 0");
+            source = "first live currency";
+        }
+        if (id == 0) {
+            ContentValues cv = new ContentValues();
+            cv.put("Deleted", 0);
+            cv.put("Code", "RUB");
+            cv.put("Symbol", "₽");
+            cv.put("Name", "Russian Ruble");
+            cv.put("DecimalCount", 2);
+            cv.put("OrderNumber", 0);
+            id = db.insertOrThrow("ref_Currencies", null, cv);
+            add(mCreated, "ref_Currencies", 1);
+            add(mCreatedActive, "ref_Currencies", 1);
+            source = "created RUB";
+        }
+        long assigned = update(db, "UPDATE ref_Accounts SET Currency = " + id + where);
+        log("ref_Accounts.Currency: default currency _id=" + id + " (" + source + ") assigned to " + assigned + " accounts without currency");
     }
 
     /** Шаблоны без счета-источника помечаются удаленными (orphans); имя и _id пишутся в лог для возможного восстановления. */

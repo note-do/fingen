@@ -801,13 +801,16 @@ public class DatabaseMigrationTest {
         }
     }
 
-    /** -1 becomes NULL in optional references; a valid reference (ProductId 0, CategoryId 100) is kept. */
+    /**
+     * -1 becomes NULL in optional references; a valid reference (ProductId 0, CategoryId 100) is kept. Account 102 has
+     * Currency -1: it gets the default currency (no live RUB in v35, first live by _id is AAA, _id 100), not NULL.
+     */
     @Test
     public void upgrade35To36_minusOneBecomesNull() throws Exception {
         SQLiteDatabase migrated = migrateUnblockedV35();
         try {
             assertIntegrity(migrated);
-            assertNull(queryNullableLong(migrated, "SELECT CurrencyId FROM ref_Accounts WHERE _id = 102"));
+            assertEquals(100, queryLong(migrated, "SELECT CurrencyId FROM ref_Accounts WHERE _id = 102"));
             assertNull(queryNullableLong(migrated, "SELECT CategoryId FROM log_Transactions WHERE _id = 100"));
             assertNull(queryNullableLong(migrated, "SELECT DefaultCategoryId FROM ref_Payees WHERE _id = 100"));
             assertNull(queryNullableLong(migrated, "SELECT ParentId FROM ref_Payees WHERE _id = 100"));
@@ -822,18 +825,42 @@ public class DatabaseMigrationTest {
         }
     }
 
-    /** Dangling references in optional columns become NULL (Payee 77, Currency 999, ParentID 555). */
+    /**
+     * Dangling references in optional columns become NULL (Payee 77, ParentID 555). Account 103 has Currency 999 (dangling):
+     * it gets the default currency (first live by _id, AAA, _id 100), not NULL.
+     */
     @Test
     public void upgrade35To36_danglingOptionalReferenceBecomesNull() throws Exception {
         SQLiteDatabase migrated = migrateUnblockedV35();
         try {
             assertIntegrity(migrated);
             assertNull(queryNullableLong(migrated, "SELECT PayeeId FROM log_Transactions WHERE _id = 100"));
-            assertNull(queryNullableLong(migrated, "SELECT CurrencyId FROM ref_Accounts WHERE _id = 103"));
+            assertEquals(100, queryLong(migrated, "SELECT CurrencyId FROM ref_Accounts WHERE _id = 103"));
             assertNull(queryNullableLong(migrated, "SELECT ParentId FROM ref_Categories WHERE _id = 103"));
             // valid references are kept
             assertEquals(100, queryLong(migrated, "SELECT DefaultCategoryId FROM ref_Payees WHERE _id = 102"));
             assertEquals(100, queryLong(migrated, "SELECT CurrencyId FROM ref_Accounts WHERE _id = 100"));
+        } finally {
+            migrated.close();
+        }
+    }
+
+    /**
+     * Account without currency (NULL) gets the default currency: live RUB (_id 103 comes from NO_CURRENCY_V35, the v35
+     * fixture has no RUB). StartBalance 10.5 and Amount 12.34 keep 2 digits: 1050 and 1234 minor units.
+     */
+    @Test
+    public void upgrade35To36_accountWithoutCurrencyGetsDefaultCurrency() throws Exception {
+        List<String> seeds = new ArrayList<>(Arrays.asList(LEGACY_V35));
+        seeds.addAll(Arrays.asList(UNBLOCK_V35));
+        seeds.addAll(Arrays.asList(NO_CURRENCY_V35));
+        MigrationTestHelper.createFixture(mContext, 35, seeds.toArray(new String[0]));
+        SQLiteDatabase migrated = MigrationTestHelper.openMigrated(mContext, MigrationTestHelper.dbName("35"));
+        try {
+            assertIntegrity(migrated);
+            assertEquals(103, queryLong(migrated, "SELECT CurrencyId FROM ref_Accounts WHERE _id = 200"));
+            assertEquals(1050, queryLong(migrated, "SELECT StartBalance FROM ref_Accounts WHERE _id = 200"));
+            assertEquals(1234, queryLong(migrated, "SELECT Amount FROM log_Transactions WHERE _id = 200"));
         } finally {
             migrated.close();
         }
@@ -1183,6 +1210,15 @@ public class DatabaseMigrationTest {
             "PRAGMA ignore_check_constraints = ON",
             "UPDATE log_Products SET Quantity = -1 WHERE _id = 102",
             "PRAGMA ignore_check_constraints = OFF"};
+
+    /**
+     * Account 200 with CurrencyId NULL and its transaction; RUB (_id 103) is the only live RUB, so it is the default.
+     * DestAccount is a valid account (NOT NULL in v35). Added on top of LEGACY_V35 and UNBLOCK_V35.
+     */
+    private static final String[] NO_CURRENCY_V35 = new String[]{
+            "INSERT INTO ref_Currencies (_id, Deleted, Code, Symbol, Name, DecimalCount, OrderNumber) VALUES (103, 0, 'RUB', '₽', 'Russian Ruble', 2, 3);",
+            "INSERT INTO ref_Accounts (_id, Deleted, Type, Name, Currency, StartBalance, IsClosed, SearchString) VALUES (200, 0, 0, 'Acc no currency', NULL, 10.5, 0, 'acc no currency');",
+            "INSERT INTO log_Transactions (_id, Deleted, DateTime, SrcAccount, Payee, Category, Amount, Project, SimpleDebt, Department, Location, Comment, DestAccount, ExchangeRate, AutoCreated, SearchString) VALUES (200, 0, 1704110400000, 200, NULL, NULL, 12.34, -1, -1, -1, -1, 'T200', 101, 1.0, 0, 't200');"};
 
     /**
      * Replaces the values of the v35 fixture that hit the NOT NULL defect of Migration36.cleanup (see

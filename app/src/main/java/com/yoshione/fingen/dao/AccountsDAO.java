@@ -48,6 +48,35 @@ public class AccountsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         return sInstance;
     }
 
+    /**
+     * Есть ли у счета данные, привязанные к его знакам валюты: транзакции (как источник или получатель),
+     * шаблоны и долги. Если есть, валюту назначать нельзя (суммы хранятся в минорных единицах).
+     */
+    public boolean hasLinkedData(long accountId) {
+        if (accountId < 0) return false;
+        String id = String.valueOf(accountId);
+        Cursor cursor = mDatabase.rawQuery("SELECT "
+                + "EXISTS(SELECT 1 FROM log_Transactions WHERE SrcAccountId = ?1 OR DestAccountId = ?1) OR "
+                + "EXISTS(SELECT 1 FROM log_Templates WHERE SrcAccountId = ?1 OR DestAccountId = ?1) OR "
+                + "EXISTS(SELECT 1 FROM ref_Debts WHERE AccountId = ?1)", new String[]{id});
+        try {
+            return cursor.moveToFirst() && cursor.getInt(0) != 0;
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /** Валюта счета в БД (-1, если не задана). */
+    public long getStoredCurrencyId(long accountId) {
+        if (accountId < 0) return -1;
+        Cursor cursor = mDatabase.rawQuery("SELECT CurrencyId FROM ref_Accounts WHERE _id = ?", new String[]{String.valueOf(accountId)});
+        try {
+            return cursor.moveToFirst() && !cursor.isNull(0) ? cursor.getLong(0) : -1;
+        } finally {
+            cursor.close();
+        }
+    }
+
     @Override
     public IAbstractModel cursorToModel(Cursor cursor) {
         return cursorToAccount(cursor);

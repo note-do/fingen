@@ -41,6 +41,7 @@ public class ActivityEditAccount extends ToolbarActivity {
     private static final int ERR_EMPTY_ACCOUNT_NAME = 1;
     private static final int ERR_EMPTY_ACCOUNT_CABBAGE = 2;
     private static final int ERR_NOT_UNIQUE_ACCOUNT_NAME = 3;
+    private static final int ERR_CURRENCY_CHANGE_FORBIDDEN = 4;
 
     //<editor-fold desc="View bindings">
     private ActivityEditAccountBinding mBinding;
@@ -354,6 +355,12 @@ public class ActivityEditAccount extends ToolbarActivity {
         } else if (account.getCabbageId() < 0) {
             return ERR_EMPTY_ACCOUNT_CABBAGE;
         } else {
+            if (account.getID() >= 0) {
+                AccountsDAO dao = AccountsDAO.getInstance(this);
+                if (dao.getStoredCurrencyId(account.getID()) != account.getCabbageId() && dao.hasLinkedData(account.getID())) {
+                    return ERR_CURRENCY_CHANGE_FORBIDDEN;
+                }
+            }
             try {
                 if (account.getID() < 0 & AccountsDAO.getInstance(this).getModelByName(account.getName()).getID() >= 0) {
                     return ERR_NOT_UNIQUE_ACCOUNT_NAME;
@@ -378,6 +385,10 @@ public class ActivityEditAccount extends ToolbarActivity {
             case ERR_NOT_UNIQUE_ACCOUNT_NAME:
                 mTextInputLayoutName.setErrorEnabled(true);
                 mTextInputLayoutName.setError(getString(R.string.err_account_name_must_be_unique));
+                break;
+            case ERR_CURRENCY_CHANGE_FORBIDDEN:
+                mTextInputLayoutCabbage.setErrorEnabled(true);
+                mTextInputLayoutCabbage.setError(getString(R.string.err_account_currency_locked));
                 break;
             default:
                 AccountsDAO accountsDAO = AccountsDAO.getInstance(getApplicationContext());

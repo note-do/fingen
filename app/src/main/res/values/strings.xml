@@ -455,6 +455,7 @@
 
     <!-- 2. Accounts -->
     <!-- Errors -->
+    <string name="err_account_currency_locked" formatted="false">The currency cannot be changed: the account has transactions, templates or debts</string>
     <string name="err_specify_account_currency" formatted="false">You must specify the account currency</string>
 
     <!-- 2. Accounts -->
