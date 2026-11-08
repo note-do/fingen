@@ -43,7 +43,17 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
         mHeaderCache.clear();
     }
 
+    /** Position may be stale while the adapter content is changing: the list can already be shorter. */
+    private boolean isValidPosition(int position) {
+        if (position < 0) return false;
+        if (mAdapter instanceof RecyclerView.Adapter) {
+            return position < ((RecyclerView.Adapter) mAdapter).getItemCount();
+        }
+        return true;
+    }
+
     private boolean hasHeader(int position) {
+        if (!isValidPosition(position)) return false;
         return position == 0 || mAdapter.getHeaderId(position) != mAdapter.getHeaderId(position - 1);
     }
 
@@ -89,7 +99,7 @@ public class StickyHeaderDecoration extends RecyclerView.ItemDecoration {
         for (int i = 0; i < count; i++) {
             View child = parent.getChildAt(i);
             int position = parent.getChildAdapterPosition(child);
-            if (position == RecyclerView.NO_POSITION) continue;
+            if (position == RecyclerView.NO_POSITION || !isValidPosition(position)) continue;
             if (firstChild == null) {
                 firstChild = child;
                 firstPosition = position;

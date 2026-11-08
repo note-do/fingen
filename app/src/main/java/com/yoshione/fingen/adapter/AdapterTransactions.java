@@ -153,6 +153,9 @@ public class AdapterTransactions extends RecyclerView.Adapter implements FgFastS
 
     @Override
     public long getItemId(int position) {
+        if (position < 0 || position >= transactionList.size()) {
+            return RecyclerView.NO_ID;
+        }
         return transactionList.get(position).getID();
     }
 
@@ -179,6 +182,9 @@ public class AdapterTransactions extends RecyclerView.Adapter implements FgFastS
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
+        if (position < 0 || position >= transactionList.size()) {
+            return;
+        }
         Transaction transaction = transactionList.get(position);
 
         TransactionViewHolder tvh = (TransactionViewHolder) viewHolder;
@@ -192,7 +198,9 @@ public class AdapterTransactions extends RecyclerView.Adapter implements FgFastS
 
     @Override
     public long getHeaderId(int position) {
-//        Lg.log("transactionList size == %s, position == %s", String.valueOf(transactionList.size()), String.valueOf(position));
+        if (position < 0 || position >= transactionList.size()) {
+            return RecyclerView.NO_ID;
+        }
         return transactionList.get(position).headerPosition;
     }
 
@@ -204,6 +212,9 @@ public class AdapterTransactions extends RecyclerView.Adapter implements FgFastS
 
     @Override
     public void onBindHeaderViewHolder(HeaderViewHolder viewholder, int position) {
+        if (position < 0 || position >= transactionList.size()) {
+            return;
+        }
         viewholder.bindHeader(headerList.get(transactionList.get(position).headerPosition));
     }
 

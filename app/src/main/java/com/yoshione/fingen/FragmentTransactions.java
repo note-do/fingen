@@ -942,9 +942,9 @@ public class FragmentTransactions extends BaseListFragment implements AdapterFil
         int currentItem = linearLayoutManager.findFirstVisibleItemPosition();
 
         endOfList = false;
-        adapterT.clearTransactionList();
-
         int count = Math.max(adapterT.getItemCount(), FgConst.NUMBER_ITEMS_TO_BE_LOADED);
+        adapterT.clearTransactionList();
+        adapterT.notifyDataSetChanged();
 
         Lg.d(TAG, "loadData");
         loadMore(count, () -> {

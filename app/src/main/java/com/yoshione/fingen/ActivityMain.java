@@ -191,10 +191,13 @@ public class ActivityMain extends ToolbarActivity {
         final View content = ((ViewGroup) root).getChildAt(0);
         final View appBar = root.findViewById(R.id.appbar);
         final View buttonsBar = root.findViewById(R.id.buttonsBarContainer);
+        final View statusBarScrim = root.findViewById(R.id.statusBarScrim);
         final int appBarTop = appBar.getPaddingTop();
         final int buttonsBottom = buttonsBar.getPaddingBottom();
         ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             Insets i = WindowInsetsHelper.contentInsets(insets);
+            statusBarScrim.getLayoutParams().height = i.top;
+            statusBarScrim.requestLayout();
             appBar.setPadding(appBar.getPaddingLeft(), appBarTop + i.top, appBar.getPaddingRight(), appBar.getPaddingBottom());
             buttonsBar.setPadding(buttonsBar.getPaddingLeft(), buttonsBar.getPaddingTop(), buttonsBar.getPaddingRight(), buttonsBottom + i.bottom);
             content.setPadding(i.left, 0, i.right, 0);
@@ -251,6 +254,15 @@ public class ActivityMain extends ToolbarActivity {
         }
 
         mTextViewActiveSet.setBackgroundColor(ColorUtils.getBackgroundColor(this));
+
+        // The ViewPager is measured taller by the AppBar scroll range, so its bottom (bottom sheets,
+        // hints) stays below the buttons bar until the toolbar is scrolled away: cut that part off
+        mAppBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+            int hidden = Math.max(0, appBarLayout.getTotalScrollRange() + verticalOffset);
+            if (viewPager.getPaddingBottom() != hidden) {
+                viewPager.setPadding(0, 0, 0, hidden);
+            }
+        });
 
         buildDrawer();
 
