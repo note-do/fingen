@@ -1,0 +1,297 @@
+@startuml fingen_schema_v22
+' Fingen local database (SQLite, fingen.db, DATABASE_VERSION = 22)
+' Source: UpdateHelper.update22 (oldVersion < 22)
+' Branch: master
+
+title Fingen local database schema (fingen.db, version 22)
+
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam entity {
+  BackgroundColor #FEFEFE
+  BorderColor #444444
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #C9A227
+}
+hide circle
+
+legend right
+  |= Marker |= Meaning |
+  | * | NOT NULL column |
+  | PK | PRIMARY KEY |
+  | FK | REFERENCES (ON DELETE action in brackets; every declared FK also has ON UPDATE CASCADE) |
+  | UQ | UNIQUE constraint |
+  | IX | index |
+  | ~ sync | common columns of every ref_/log_ table: FBID, TS, Deleted (soft delete), Dirty, LastEdited |
+endlegend
+
+' =====================================================================
+package "Accounts" {
+
+entity "ref_Currencies" as ref_Currencies {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Code : TEXT
+  * Symbol : TEXT
+  * Name : TEXT
+  * DecimalCount : INTEGER
+  --
+  UQ (Code, Deleted)
+}
+
+entity "ref_Accounts" as ref_Accounts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Type : INTEGER
+  * Name : TEXT
+  Currency : INTEGER <<FK ref_Currencies [SET NULL]>>
+  Emitent : TEXT
+  Last4Digits : INTEGER
+  Comment : TEXT
+  * StartBalance : REAL
+  * IsClosed : INTEGER
+  CustomOrder : INTEGER
+  CreditLimit : REAL
+  --
+  UQ (Name, Deleted)
+}
+
+}
+
+' =====================================================================
+package "Classifiers (hierarchical references)" {
+
+entity "ref_Categories" as ref_Categories {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  COLOR : TEXT
+  ParentID : INTEGER <<FK ref_Categories (self) [SET NULL]>>
+  * OrderNumber : INTEGER
+  * Sign : INTEGER
+  --
+  UQ (Name, ParentID, Deleted)
+}
+
+entity "ref_Payees" as ref_Payees {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  DefCategory : INTEGER <<FK ref_Categories [SET NULL]>>
+  ParentID : INTEGER <<FK ref_Payees (self) [SET NULL]>>
+  OrderNumber : INTEGER
+  --
+  UQ (Name, ParentID, Deleted)
+}
+
+entity "ref_Projects" as ref_Projects {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * isActive : INTEGER
+  ParentID : INTEGER <<FK ref_Projects (self) [SET NULL]>>
+  OrderNumber : INTEGER
+  --
+  UQ (Name, ParentID, Deleted)
+}
+
+entity "ref_Locations" as ref_Locations {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * Lon : REAL
+  * Lat : REAL
+  Radius : INTEGER
+  Address : TEXT
+  ParentID : INTEGER <<FK ref_Locations (self) [SET NULL]>>
+  OrderNumber : INTEGER
+  --
+  UQ (Name, ParentID, Deleted)
+}
+
+entity "ref_Departments" as ref_Departments {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * isActive : INTEGER
+  ParentID : INTEGER <<FK ref_Departments (self) [SET NULL]>>
+  OrderNumber : INTEGER
+  --
+  UQ (Name, ParentID, Deleted)
+}
+
+entity "ref_SimpleDebts" as ref_SimpleDebts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * isActive : INTEGER
+  --
+  UQ (Name, Deleted)
+}
+
+entity "ref_Senders" as ref_Senders {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Name : TEXT
+  * PhoneNo : TEXT
+  AmountPos : INTEGER
+  BalancePos : INTEGER
+  LeadingCurrencySymbol : INTEGER
+  DateFormat : TEXT
+  * isActive : INTEGER
+  --
+  UQ (Name, Deleted)
+  UQ (PhoneNo, Deleted)
+}
+
+}
+
+' =====================================================================
+package "Transactions" {
+
+entity "log_Transactions" as log_Transactions {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * DateTime : INTEGER
+  * SrcAccount : INTEGER <<FK ref_Accounts [CASCADE]>>
+  Payee : INTEGER <<FK ref_Payees [SET NULL]>>
+  Category : INTEGER <<FK ref_Categories [SET NULL]>>
+  * Amount : REAL
+  Project : INTEGER <<FK ref_Projects [SET NULL]>>
+  SimpleDebt : INTEGER <<FK ref_SimpleDebts [SET NULL]>>
+  Department : INTEGER <<FK ref_Departments [SET NULL]>>
+  Location : INTEGER <<FK ref_Locations [SET NULL]>>
+  Comment : TEXT
+  File : TEXT
+  * DestAccount : INTEGER <<FK ref_Accounts [CASCADE]>>
+  * ExchangeRate : REAL
+  * AutoCreated : INTEGER
+  Lon : REAL
+  Lat : REAL
+  Accuracy : INTEGER
+}
+
+}
+
+' =====================================================================
+package "Templates, SMS import" {
+
+entity "log_Templates" as log_Templates {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * SrcAccount : INTEGER <<FK ref_Accounts [CASCADE]>>
+  Payee : INTEGER <<FK ref_Payees [SET NULL]>>
+  Category : INTEGER <<FK ref_Categories [SET NULL]>>
+  * Amount : REAL
+  Project : INTEGER <<FK ref_Projects [SET NULL]>>
+  Department : INTEGER <<FK ref_Departments [SET NULL]>>
+  Location : INTEGER <<FK ref_Locations [SET NULL]>>
+  * Name : TEXT
+  * DestAccount : INTEGER <<FK ref_Accounts [CASCADE]>>
+  * ExchangeRate : REAL
+  * Type : INTEGER
+  Comment : TEXT
+}
+
+entity "log_Incoming_SMS" as log_Incoming_SMS {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * DateTime : TEXT
+  * Sender : INTEGER <<no FK declared -> ref_Senders>>
+  * Body : TEXT
+}
+
+entity "ref_Sms_Parser_Patterns" as ref_Sms_Parser_Patterns {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Type : INTEGER
+  * Object : TEXT
+  * Pattern : TEXT
+  --
+  UQ (Type, Pattern, Deleted) <<ON CONFLICT REPLACE>>
+}
+
+}
+
+' =====================================================================
+package "Debts and budget" {
+
+entity "ref_Debts" as ref_Debts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Account : INTEGER <<FK ref_Accounts [CASCADE]>>
+  * Payee : INTEGER <<FK ref_Payees [CASCADE]>>
+  * Category : INTEGER <<FK ref_Categories [SET NULL] - conflicts with NOT NULL>>
+  * Closed : INTEGER
+  SrcAccount : INTEGER <<no FK declared -> ref_Accounts>>
+  Comment : TEXT
+  --
+  UQ (Account, Deleted)
+}
+
+entity "ref_budget" as ref_budget {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Year : INTEGER
+  * Month : INTEGER
+  * Category : INTEGER <<FK ref_Categories [CASCADE]>>
+  * Amount : REAL
+  * Currency : INTEGER <<FK ref_Currencies [CASCADE]>>
+  --
+  UQ (Deleted, Year, Month, Category, Currency) <<ON CONFLICT REPLACE>>
+}
+
+entity "ref_budget_debts" as ref_budget_debts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  ~ sync
+  * Year : INTEGER
+  * Month : INTEGER
+  * Debt : INTEGER <<FK ref_Debts [CASCADE]>>
+  * Amount : REAL
+  --
+  UQ (Deleted, Year, Month, Debt) <<ON CONFLICT REPLACE>>
+}
+
+}
+
+' =====================================================================
+' Relations (FK edges from DDL; "no FK declared" columns are drawn as dashed links)
+
+ref_Currencies ||--o{ ref_Accounts : "Currency"
+ref_Categories ||--o{ ref_Categories : "ParentID"
+ref_Categories ||--o{ ref_Payees : "DefCategory"
+ref_Payees ||--o{ ref_Payees : "ParentID"
+ref_Projects ||--o{ ref_Projects : "ParentID"
+ref_Locations ||--o{ ref_Locations : "ParentID"
+ref_Departments ||--o{ ref_Departments : "ParentID"
+ref_Accounts ||--o{ log_Transactions : "SrcAccount"
+ref_Payees ||--o{ log_Transactions : "Payee"
+ref_Categories ||--o{ log_Transactions : "Category"
+ref_Projects ||--o{ log_Transactions : "Project"
+ref_SimpleDebts ||--o{ log_Transactions : "SimpleDebt"
+ref_Departments ||--o{ log_Transactions : "Department"
+ref_Locations ||--o{ log_Transactions : "Location"
+ref_Accounts ||--o{ log_Transactions : "DestAccount"
+ref_Accounts ||--o{ log_Templates : "SrcAccount"
+ref_Payees ||--o{ log_Templates : "Payee"
+ref_Categories ||--o{ log_Templates : "Category"
+ref_Projects ||--o{ log_Templates : "Project"
+ref_Departments ||--o{ log_Templates : "Department"
+ref_Locations ||--o{ log_Templates : "Location"
+ref_Accounts ||--o{ log_Templates : "DestAccount"
+ref_Senders ||..o{ log_Incoming_SMS : "Sender (no FK)"
+ref_Accounts ||--o{ ref_Debts : "Account"
+ref_Payees ||--o{ ref_Debts : "Payee"
+ref_Categories ||--o{ ref_Debts : "Category"
+ref_Accounts ||..o{ ref_Debts : "SrcAccount (no FK)"
+ref_Categories ||--o{ ref_budget : "Category"
+ref_Currencies ||--o{ ref_budget : "Currency"
+ref_Debts ||--o{ ref_budget_debts : "Debt"
+
+' Changes relative to the previous version:
+' update22: ref_Categories.ParentCategory renamed to ParentID (table rebuilt); + ParentID and OrderNumber in ref_Payees, ref_Projects, ref_Locations, ref_Departments;
+' UNIQUE (Name, Deleted) became UNIQUE (Name, ParentID, Deleted) in those tables; each has a self FOREIGN KEY on ParentID.
+@enduml

@@ -1,0 +1,242 @@
+@startuml fingen_schema_v17
+' Fingen local database (SQLite, fingen.db, DATABASE_VERSION = 17)
+' Source: UpdateHelper.update17 (DBHelper.onUpgrade, oldVersion < 17) applied to v16 schema
+' Branch: master
+
+title Fingen local database schema (fingen.db, version 17)
+
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+skinparam entity {
+  BackgroundColor #FEFEFE
+  BorderColor #444444
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #C9A227
+}
+hide circle
+
+legend right
+  |= Marker |= Meaning |
+  | * | NOT NULL column |
+  | PK | PRIMARY KEY |
+  | FK | REFERENCES (ON DELETE action in brackets; every declared FK also has ON UPDATE CASCADE) |
+  | UQ | UNIQUE constraint |
+  | IX | index |
+endlegend
+
+' =====================================================================
+package "Accounts" {
+
+entity "ref_Currencies" as ref_Currencies {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Code : TEXT
+  * Symbol : TEXT
+  * Name : TEXT
+  * DecimalCount : INTEGER
+}
+
+entity "ref_Accounts" as ref_Accounts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Type : INTEGER
+  * Name : TEXT
+  Currency : INTEGER <<no FK declared -> ref_Currencies>>
+  Emitent : TEXT
+  Last4Digits : INTEGER
+  Comment : TEXT
+  * StartBalance : REAL
+  * IsClosed : INTEGER
+  CustomOrder : INTEGER
+  CreditLimit : REAL
+}
+
+}
+
+' =====================================================================
+package "Classifiers (hierarchical references)" {
+
+entity "ref_Categories" as ref_Categories {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Name : TEXT
+  COLOR : TEXT
+  ParentCategory : INTEGER <<no FK declared -> ref_Categories>>
+  * OrderNumber : INTEGER
+  * Sign : INTEGER
+}
+
+entity "ref_Payees" as ref_Payees {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Name : TEXT
+  DefCategory : INTEGER <<no FK declared -> ref_Categories>>
+}
+
+entity "ref_Projects" as ref_Projects {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Name : TEXT
+  * isActive : INTEGER
+}
+
+entity "ref_Locations" as ref_Locations {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Name : TEXT
+  * Lon : REAL
+  * Lat : REAL
+  Radius : INTEGER
+  Address : TEXT
+}
+
+entity "ref_Departments" as ref_Departments {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Name : TEXT
+  * isActive : INTEGER
+}
+
+entity "ref_SimpleDebts" as ref_SimpleDebts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Name : TEXT
+  * isActive : INTEGER
+}
+
+entity "ref_Senders" as ref_Senders {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Name : TEXT
+  * PhoneNo : TEXT
+  AmountPos : INTEGER
+  BalancePos : INTEGER
+  LeadingCurrencySymbol : INTEGER
+  DateFormat : TEXT
+  * isActive : INTEGER
+  --
+  UQ (Name) <<inline UNIQUE>>
+  UQ (PhoneNo) <<inline UNIQUE>>
+}
+
+}
+
+' =====================================================================
+package "Transactions" {
+
+entity "log_Transactions" as log_Transactions {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * DateTime : TEXT
+  * SrcAccount : INTEGER <<no FK declared -> ref_Accounts>>
+  Payee : INTEGER <<no FK declared -> ref_Payees>>
+  Category : INTEGER <<no FK declared -> ref_Categories>>
+  * Amount : REAL
+  Project : INTEGER <<no FK declared -> ref_Projects>>
+  Location : INTEGER <<no FK declared -> ref_Locations>>
+  Comment : TEXT
+  File : TEXT
+  * DestAccount : INTEGER <<no FK declared -> ref_Accounts>>
+  * ExchangeRate : REAL
+  * AutoCreated : INTEGER
+  Lat : REAL
+  Lon : REAL
+  Accuracy : INTEGER
+  Department : INTEGER <<no FK declared -> ref_Departments>>
+  SimpleDebt : INTEGER <<no FK declared -> ref_SimpleDebts>>
+}
+
+}
+
+' =====================================================================
+package "Templates, SMS import" {
+
+entity "log_Templates" as log_Templates {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * SrcAccount : INTEGER <<no FK declared -> ref_Accounts>>
+  Payee : INTEGER <<no FK declared -> ref_Payees>>
+  Category : INTEGER <<no FK declared -> ref_Categories>>
+  * Amount : REAL
+  Project : INTEGER <<no FK declared -> ref_Projects>>
+  Location : INTEGER <<no FK declared -> ref_Locations>>
+  * Name : TEXT
+  * DestAccount : INTEGER <<no FK declared -> ref_Accounts>>
+  * ExchangeRate : REAL
+  * Type : INTEGER
+  Department : INTEGER <<no FK declared -> ref_Departments>>
+}
+
+entity "log_Incoming_SMS" as log_Incoming_SMS {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * DateTime : TEXT
+  * Sender : INTEGER <<no FK declared -> ref_Senders>>
+  * Body : TEXT
+}
+
+entity "ref_Sms_Parser_Patterns" as ref_Sms_Parser_Patterns {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Type : INTEGER
+  * Object : TEXT
+  * Pattern : TEXT
+}
+
+}
+
+' =====================================================================
+package "Debts and budget" {
+
+entity "ref_Debts" as ref_Debts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Account : INTEGER <<no FK declared -> ref_Accounts>>
+  * Payee : INTEGER <<no FK declared -> ref_Payees>>
+  * Category : INTEGER <<no FK declared -> ref_Categories>>
+  * Closed : INTEGER
+  SrcAccount : INTEGER <<no FK declared -> ref_Accounts>>
+  Comment : TEXT
+}
+
+entity "ref_budget" as ref_budget {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Year : INTEGER
+  * Month : INTEGER
+  * Category : INTEGER <<no FK declared -> ref_Categories>>
+  * Amount : REAL
+  * Currency : INTEGER <<no FK declared -> ref_Currencies>>
+}
+
+entity "ref_budget_debts" as ref_budget_debts {
+  * _id : INTEGER <<PK AUTOINCREMENT>>
+  * Year : INTEGER
+  * Month : INTEGER
+  * Debt : INTEGER <<no FK declared -> ref_Debts>>
+  * Amount : REAL
+}
+
+}
+
+' =====================================================================
+' Relations (FK edges from DDL; "no FK declared" columns are drawn as dashed links)
+
+ref_Currencies ||..o{ ref_Accounts : "Currency (no FK)"
+ref_Categories ||..o{ ref_Categories : "ParentCategory (no FK)"
+ref_Categories ||..o{ ref_Payees : "DefCategory (no FK)"
+ref_Accounts ||..o{ log_Transactions : "SrcAccount (no FK)"
+ref_Payees ||..o{ log_Transactions : "Payee (no FK)"
+ref_Categories ||..o{ log_Transactions : "Category (no FK)"
+ref_Projects ||..o{ log_Transactions : "Project (no FK)"
+ref_Locations ||..o{ log_Transactions : "Location (no FK)"
+ref_Accounts ||..o{ log_Transactions : "DestAccount (no FK)"
+ref_Departments ||..o{ log_Transactions : "Department (no FK)"
+ref_SimpleDebts ||..o{ log_Transactions : "SimpleDebt (no FK)"
+ref_Accounts ||..o{ log_Templates : "SrcAccount (no FK)"
+ref_Payees ||..o{ log_Templates : "Payee (no FK)"
+ref_Categories ||..o{ log_Templates : "Category (no FK)"
+ref_Projects ||..o{ log_Templates : "Project (no FK)"
+ref_Locations ||..o{ log_Templates : "Location (no FK)"
+ref_Accounts ||..o{ log_Templates : "DestAccount (no FK)"
+ref_Departments ||..o{ log_Templates : "Department (no FK)"
+ref_Senders ||..o{ log_Incoming_SMS : "Sender (no FK)"
+ref_Accounts ||..o{ ref_Debts : "Account (no FK)"
+ref_Payees ||..o{ ref_Debts : "Payee (no FK)"
+ref_Categories ||..o{ ref_Debts : "Category (no FK)"
+ref_Accounts ||..o{ ref_Debts : "SrcAccount (no FK)"
+ref_Categories ||..o{ ref_budget : "Category (no FK)"
+ref_Currencies ||..o{ ref_budget : "Currency (no FK)"
+ref_Debts ||..o{ ref_budget_debts : "Debt (no FK)"
+
+' Changes relative to the previous version:
+' update17: + ref_Senders; log_Incoming_SMS rebuilt, Sender TEXT (phone number) -> INTEGER (id of ref_Senders); Type=5 markers of ref_Sms_Parser_Patterns moved to ref_Senders (data).
+@enduml
