@@ -42,10 +42,6 @@ public interface AbstractDAO {
 
     List<IAbstractModel> getModelsByIDs(List<Long> idList);
 
-    long getIDByFBID(String FBID);
-
-    long getLastTS();
-
     void deleteAllModels();
 
     List<IAbstractModel> bulkCreateModel(List<IAbstractModel> models, IOnConflict onConflictListener, boolean updateDependencies) throws Exception;

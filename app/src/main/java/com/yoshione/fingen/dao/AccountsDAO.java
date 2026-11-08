@@ -6,7 +6,9 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.Cabbage;
@@ -58,20 +60,21 @@ public class AccountsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         Account.AccountType accountType = Account.AccountType.values()[cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_TYPE))];
         account.setAccountType(accountType);
         account.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_NAME)));
-        account.setCabbageId(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_CURRENCY)));
+        long currencyId = DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_CURRENCY));
+        account.setCabbageId(currencyId);
+        int digits = CurrencyScale.forCurrency(mDatabase, currencyId);
         account.setEmitent(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_EMITENT)));
         account.setLast4Digits(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_LAST4DIGITS)));
         account.setComment(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_COMMENT)));
-        account.setStartBalance(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_STARTBALANCE))));
-        account.setIncome(new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("Income"))));
-        account.setExpense(new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("Expense"))));
+        account.setStartBalance(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_STARTBALANCE)), digits));
+        account.setIncome(CurrencyScale.fromMinor(cursor.getLong(cursor.getColumnIndexOrThrow("Income")), digits));
+        account.setExpense(CurrencyScale.fromMinor(cursor.getLong(cursor.getColumnIndexOrThrow("Expense")), digits));
 
         account.setIsClosed(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_ISCLOSED)) == 1);
         account.setOrder(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_ORDER)));
 
-        account.setCreditLimit(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_CREDITLIMIT))));
+        account.setCreditLimit(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_ACCOUNTS_CREDITLIMIT)), digits));
 
-        account = (Account) DBHelper.getSyncDataFromCursor(account, cursor, mColumnIndexes);
 
         return account;
     }
@@ -185,7 +188,7 @@ public class AccountsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
             try {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
-                        cabbage = cursor.getLong(1);
+                        cabbage = DbRefs.getRef(cursor, 1);
                         ids = array.get(cabbage);
                         if (ids == null) {
                             ids = new HashSet<>();

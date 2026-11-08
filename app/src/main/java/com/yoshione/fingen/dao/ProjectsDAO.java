@@ -8,6 +8,7 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.model.Project;
@@ -37,9 +38,9 @@ public class ProjectsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
 
     public Project createProject(Project project, Context context) throws Exception {
         List<?> models = getItems(getTableName(), null,
-                String.format("%s = '%s' AND %s = %s AND %s != %s",
+                String.format("%s = '%s' AND %s AND %s != %s",
                         DBHelper.C_REF_PROJECTS_NAME, project.getName(),
-                        DBHelper.C_PARENTID, project.getParentID(),
+                        project.getParentID() < 0 ? DBHelper.C_PARENTID + " IS NULL" : DBHelper.C_PARENTID + " = " + project.getParentID(),
                         DBHelper.C_ID, String.valueOf(project.getID()))
                 , null, null, null);
         if (!models.isEmpty()) {
@@ -61,7 +62,7 @@ public class ProjectsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         project.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
         project.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_PROJECTS_NAME)));
         project.setFullName(cursor.getString(mColumnIndexes.get(DBHelper.C_FULL_NAME)));
-        project.setParentID(cursor.getLong(mColumnIndexes.get(DBHelper.C_PARENTID)));
+        project.setParentID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_PARENTID)));
         project.setIsActive(Boolean.valueOf(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_PROJECTS_ISACTIVE))));
         project.setOrderNum(cursor.getInt(mColumnIndexes.get(DBHelper.C_ORDERNUMBER)));
         try {
@@ -71,7 +72,6 @@ public class ProjectsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         }
 
 
-        project = (Project) DBHelper.getSyncDataFromCursor(project, cursor, mColumnIndexes);
 
         return project;
     }
@@ -81,7 +81,7 @@ public class ProjectsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         ContentValues values = new ContentValues();
         //Обнуляем таблице транзакций
         values.clear();
-        values.put(DBHelper.C_LOG_TRANSACTIONS_PROJECT, -1);
+        values.putNull(DBHelper.C_LOG_TRANSACTIONS_PROJECT);
         TransactionsDAO.getInstance(context).bulkUpdateItem(DBHelper.C_LOG_TRANSACTIONS_PROJECT + " = " + model.getID(), values, resetTS);
 
         super.deleteModel(model, resetTS, context);

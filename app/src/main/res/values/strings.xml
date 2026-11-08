@@ -724,6 +724,7 @@
     <!-- 6. Currencies -->
     <!-- Entities -->
     <string name="ent_currency_scale" formatted="false">Number of digits after decimal point</string>
+    <string name="err_currency_scale_range" formatted="false">Number of digits after decimal point must be from 0 to 8</string>
 
     <!-- 6. Currencies -->
     <!-- Titles -->
@@ -2103,4 +2104,15 @@
     <string name="msg_backup_password_warning" formatted="false">Backups are not being created: the backup password cannot be read on this device. Enter the password again in the Backup and restore screen.</string>
     <string name="msg_backup_folder_do_not_remind" formatted="false">Do not remind me</string>
     <string name="msg_pin_reset_notice" formatted="false">PIN protection was reset after the app update. Turn it on again in Settings.</string>
+    <string name="db_upgrade_title" formatted="false">Updating the database</string>
+    <string name="db_upgrade_hint" formatted="false">Please wait and do not close the app. This can take a few minutes.</string>
+    <string name="db_upgrade_stage_prepare" formatted="false">Preparing a copy of the data…</string>
+    <string name="db_upgrade_stage_convert" formatted="false">Converting data…</string>
+    <string name="db_upgrade_stage_balance" formatted="false">Recalculating balances…</string>
+    <string name="db_upgrade_stage_verify" formatted="false">Verifying the result…</string>
+    <string name="db_upgrade_no_space" formatted="false">Not enough free space: the update needs about %1$d MB. Free up some space and try again. Your data has not been changed.</string>
+    <string name="db_upgrade_failed" formatted="false">The database update failed. Your data has not been changed: the previous version and a copy of it (fingen.db.pre36) are kept. Try again; if the error repeats, contact support.</string>
+    <string name="db_upgrade_verify_failed" formatted="false">The update result did not pass verification and was rolled back. Your data has not been changed: the previous version and a copy of it (fingen.db.pre36) are kept. Try again; if the error repeats, contact support.</string>
+    <string name="db_upgrade_retry" formatted="false">Retry</string>
+    <string name="db_upgrade_free_space" formatted="false">Free up space</string>
 </resources>

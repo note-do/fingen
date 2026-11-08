@@ -20,6 +20,8 @@ import com.yoshione.fingen.model.Transaction;
 import com.yoshione.fingen.utils.CabbageFormatter;
 import com.yoshione.fingen.utils.SmsParser;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -51,6 +53,19 @@ public class SmsParserTest {
 
     private List<SmsTest> smsTests;
 
+    private DbSnapshot mSnapshot;
+
+    @Before
+    public void setUp() {
+        // Test rows are removed in tearDown; reference data (ref_Currencies and others) is left untouched
+        mSnapshot = DbSnapshot.take(InstrumentationRegistry.getInstrumentation().getTargetContext());
+    }
+
+    @After
+    public void tearDown() {
+        mSnapshot.restore(InstrumentationRegistry.getInstrumentation().getTargetContext());
+    }
+
     @Test
 
     public void testName() throws Exception {
@@ -63,7 +78,6 @@ public class SmsParserTest {
 
         loadCSV();
 
-        DBHelper.getInstance(context).clearDB();
         Cabbage cabbage1 = null;
         Cabbage cabbage2 = null;
         Account account = null;

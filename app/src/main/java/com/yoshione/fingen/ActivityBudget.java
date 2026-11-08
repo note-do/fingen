@@ -43,6 +43,10 @@ public class ActivityBudget extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (isFinishing()) {
+            // Redirected to the DB upgrade screen
+            return;
+        }
         mBinding = ActivityBudgetBinding.bind(getContentRoot());
         viewPager = mBinding.viewPager;
 

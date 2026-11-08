@@ -83,6 +83,10 @@ public class ActivityReports extends ToolbarActivity {
     @SuppressWarnings("unchecked")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (isFinishing()) {
+            // Redirected to the DB upgrade screen
+            return;
+        }
         mBinding = ActivityReportsBinding.bind(getContentRoot());
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override

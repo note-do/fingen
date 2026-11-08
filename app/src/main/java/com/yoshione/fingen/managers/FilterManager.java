@@ -134,7 +134,7 @@ public class FilterManager {
         HashSet<Long> ids = getAccountIDsFromFilters(filters, allAccountIDS);
 
         if (ids.isEmpty()) {
-            return String.format("(%s = -1 AND %s = -1)", DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT, DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT);
+            return "(0 = 1)";
         } else {
             String s = TextUtils.join(",", ids);
             if (filtersForList) {
@@ -174,7 +174,7 @@ public class FilterManager {
                     posCondition = String.format("%s IN (%s)", field, posIDsString);
                 }
                 if (!negIds.isEmpty()) {
-                    negCondition = String.format("%s NOT IN (%s)", field, negIDsString);
+                    negCondition = String.format("(%s IS NULL OR %s NOT IN (%s))", field, field, negIDsString);
                 }
                 break;
             case IAbstractModel.MODEL_TYPE_PROJECT:
@@ -182,31 +182,31 @@ public class FilterManager {
                     if (!posIds.isEmpty()) {
                         posCondition = String.format(
                                 "CASE WHEN" +
-                                        " lt.Split\n" +
+                                        " lt.IsSplit\n" +
                                         "THEN" +
-                                        " EXISTS(SELECT CASE WHEN ProjectID < 0 THEN Project ELSE ProjectID END AS cID FROM log_Products WHERE TransactionID = lt._id AND Deleted = 0 AND cID IN(%s) LIMIT 1)\n" +
+                                        " EXISTS(SELECT COALESCE(log_Products.ProjectId, lt.ProjectId) AS cID FROM log_Products WHERE TransactionId = lt._id AND Deleted = 0 AND cID IN(%s) LIMIT 1)\n" +
                                         "ELSE" +
-                                        " Project IN (%s) " +
+                                        " lt.ProjectId IN (%s) " +
                                         "END",
                                 posIDsString, posIDsString);
                     }
                     if (!negIds.isEmpty()) {
                         negCondition = String.format(
                                 "CASE WHEN" +
-                                        " lt.Split\n" +
+                                        " lt.IsSplit\n" +
                                         "THEN" +
-                                        " EXISTS(SELECT CASE WHEN ProjectID < 0 THEN Project ELSE ProjectID END AS cID FROM log_Products WHERE TransactionID = lt._id AND Deleted = 0 AND cID NOT IN (%s) LIMIT 1)\n" +
+                                        " EXISTS(SELECT COALESCE(log_Products.ProjectId, lt.ProjectId) AS cID FROM log_Products WHERE TransactionId = lt._id AND Deleted = 0 AND (cID IS NULL OR cID NOT IN (%s)) LIMIT 1)\n" +
                                         "ELSE" +
-                                        " Project NOT IN (%s) " +
+                                        " (lt.ProjectId IS NULL OR lt.ProjectId NOT IN (%s)) " +
                                         "END",
                                 negIDsString, negIDsString);
                     }
                 } else {
                     if (!posIds.isEmpty()) {
-                        posCondition = String.format("Project IN (%s)", posIDsString);
+                        posCondition = String.format("ProjectId IN (%s)", posIDsString);
                     }
                     if (!negIds.isEmpty()) {
-                        negCondition = String.format("Project NOT IN (%s)", negIDsString);
+                        negCondition = String.format("(ProjectId IS NULL OR ProjectId NOT IN (%s))", negIDsString);
                     }
                 }
 
@@ -216,31 +216,31 @@ public class FilterManager {
                     if (!posIds.isEmpty()) {
                         posCondition = String.format(
                                 "CASE WHEN" +
-                                " lt.Split\n" +
+                                " lt.IsSplit\n" +
                                 "THEN" +
-                                " EXISTS(SELECT CASE WHEN CategoryID < 0 THEN Category ELSE CategoryID END AS cID FROM log_Products WHERE TransactionID = lt._id AND Deleted = 0 AND cID IN(%s) LIMIT 1)\n" +
+                                " EXISTS(SELECT COALESCE(log_Products.CategoryId, lt.CategoryId) AS cID FROM log_Products WHERE TransactionId = lt._id AND Deleted = 0 AND cID IN(%s) LIMIT 1)\n" +
                                 "ELSE" +
-                                " Category IN (%s) " +
+                                " lt.CategoryId IN (%s) " +
                                 "END",
                                 posIDsString, posIDsString);
                     }
                     if (!negIds.isEmpty()) {
                         negCondition = String.format(
                                 "CASE WHEN" +
-                                        " lt.Split\n" +
+                                        " lt.IsSplit\n" +
                                         "THEN" +
-                                        " EXISTS(SELECT CASE WHEN CategoryID < 0 THEN Category ELSE CategoryID END AS cID FROM log_Products WHERE TransactionID = lt._id AND Deleted = 0 AND cID NOT IN (%s) LIMIT 1)\n" +
+                                        " EXISTS(SELECT COALESCE(log_Products.CategoryId, lt.CategoryId) AS cID FROM log_Products WHERE TransactionId = lt._id AND Deleted = 0 AND (cID IS NULL OR cID NOT IN (%s)) LIMIT 1)\n" +
                                         "ELSE" +
-                                        " Category NOT IN (%s) " +
+                                        " (lt.CategoryId IS NULL OR lt.CategoryId NOT IN (%s)) " +
                                         "END",
                                 negIDsString, negIDsString);
                     }
                 } else {
                     if (!posIds.isEmpty()) {
-                        posCondition = String.format("Category IN (%s)", posIDsString);
+                        posCondition = String.format("CategoryId IN (%s)", posIDsString);
                     }
                     if (!negIds.isEmpty()) {
-                        negCondition = String.format("Category NOT IN (%s)", negIDsString);
+                        negCondition = String.format("(CategoryId IS NULL OR CategoryId NOT IN (%s))", negIDsString);
                     }
                 }
 

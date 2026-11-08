@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IOrderable;
 
@@ -116,8 +117,8 @@ public class Payee extends BaseModel implements IAbstractModel, IOrderable {
         ContentValues values = super.getCV();
 
         values.put(DBHelper.C_REF_PAYEES_NAME, getName());
-        values.put(DBHelper.C_REF_PAYEES_DEFCATEGORY, getDefCategoryID());
-        values.put(DBHelper.C_PARENTID, mParentID);
+        DbRefs.putRef(values, DBHelper.C_REF_PAYEES_DEFCATEGORY, getDefCategoryID());
+        DbRefs.putRef(values, DBHelper.C_PARENTID, mParentID);
         values.put(DBHelper.C_ORDERNUMBER, getOrderNum());
         return values;
     }

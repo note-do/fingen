@@ -744,43 +744,43 @@ public final class FixtureDb {
         expectCount(db, errors, "ref_Sms_Parser_Patterns", "", spec.markers);
 
         long noProduct = count(db, "SELECT COUNT(*) FROM log_Transactions t WHERE NOT EXISTS ("
-                + "SELECT 1 FROM log_Products p WHERE p.TransactionID = t._id AND p.ProductID = 0)");
+                + "SELECT 1 FROM log_Products p WHERE p.TransactionId = t._id AND p.ProductId = 0)");
         if (noProduct != 0) {
-            errors.add(noProduct + " transactions have no default log_Products row (ProductID = 0)");
+            errors.add(noProduct + " transactions have no default log_Products row (ProductId = 0)");
         }
         long badSum = count(db, "SELECT COUNT(*) FROM log_Transactions t WHERE t.Deleted = 0 AND ABS(t.Amount - "
-                + "(SELECT IFNULL(SUM(p.Price * p.Quantity), 0) FROM log_Products p "
-                + "WHERE p.TransactionID = t._id AND p.Deleted = 0)) > 0.01");
+                + "(SELECT IFNULL(SUM(p.Price * p.Quantity), 0) / 1000.0 FROM log_Products p "
+                + "WHERE p.TransactionId = t._id AND p.Deleted = 0)) > 1.0");
         if (badSum != 0) {
             errors.add(badSum + " transactions where the sum of log_Products differs from Amount");
         }
-        long badSplit = count(db, "SELECT COUNT(*) FROM log_Transactions t WHERE t.Deleted = 0 AND (t.Split = 1) != "
-                + "((SELECT COUNT(*) FROM log_Products p WHERE p.TransactionID = t._id AND p.Deleted = 0) > 1)");
+        long badSplit = count(db, "SELECT COUNT(*) FROM log_Transactions t WHERE t.Deleted = 0 AND (t.IsSplit = 1) != "
+                + "((SELECT COUNT(*) FROM log_Products p WHERE p.TransactionId = t._id AND p.Deleted = 0) > 1)");
         if (badSplit != 0) {
-            errors.add(badSplit + " transactions where Split does not match the number of log_Products rows");
+            errors.add(badSplit + " transactions where IsSplit does not match the number of log_Products rows");
         }
 
         String[][] links = {
-                {"log_Transactions", "SrcAccount", "ref_Accounts"}, {"log_Transactions", "DestAccount", "ref_Accounts"},
-                {"log_Transactions", "Payee", "ref_Payees"}, {"log_Transactions", "Category", "ref_Categories"},
-                {"log_Transactions", "Project", "ref_Projects"}, {"log_Transactions", "SimpleDebt", "ref_SimpleDebts"},
-                {"log_Transactions", "Department", "ref_Departments"}, {"log_Transactions", "Location", "ref_Locations"},
-                {"log_Products", "TransactionID", "log_Transactions"}, {"log_Products", "ProductID", "ref_Products"},
-                {"log_Products", "CategoryID", "ref_Categories"}, {"log_Products", "ProjectID", "ref_Projects"},
-                {"ref_Accounts", "Currency", "ref_Currencies"}, {"ref_Categories", "ParentID", "ref_Categories"},
-                {"ref_Payees", "ParentID", "ref_Payees"}, {"ref_Payees", "DefCategory", "ref_Categories"},
-                {"ref_SimpleDebts", "Currency", "ref_Currencies"},
-                {"log_Templates", "SrcAccount", "ref_Accounts"}, {"log_Templates", "DestAccount", "ref_Accounts"},
-                {"log_Templates", "Payee", "ref_Payees"}, {"log_Templates", "Category", "ref_Categories"},
-                {"log_Templates", "Project", "ref_Projects"}, {"log_Templates", "Department", "ref_Departments"},
-                {"log_Templates", "Location", "ref_Locations"},
-                {"ref_Debts", "Account", "ref_Accounts"}, {"ref_Debts", "Payee", "ref_Payees"},
-                {"ref_Debts", "Category", "ref_Categories"},
-                {"ref_budget", "Category", "ref_Categories"}, {"ref_budget", "Currency", "ref_Currencies"},
-                {"ref_budget_debts", "Debt", "ref_Debts"}, {"log_Incoming_SMS", "Sender", "ref_Senders"}
+                {"log_Transactions", "SrcAccountId", "ref_Accounts"}, {"log_Transactions", "DestAccountId", "ref_Accounts"},
+                {"log_Transactions", "PayeeId", "ref_Payees"}, {"log_Transactions", "CategoryId", "ref_Categories"},
+                {"log_Transactions", "ProjectId", "ref_Projects"}, {"log_Transactions", "SimpleDebtId", "ref_SimpleDebts"},
+                {"log_Transactions", "DepartmentId", "ref_Departments"}, {"log_Transactions", "LocationId", "ref_Locations"},
+                {"log_Products", "TransactionId", "log_Transactions"}, {"log_Products", "ProductId", "ref_Products"},
+                {"log_Products", "CategoryId", "ref_Categories"}, {"log_Products", "ProjectId", "ref_Projects"},
+                {"ref_Accounts", "CurrencyId", "ref_Currencies"}, {"ref_Categories", "ParentId", "ref_Categories"},
+                {"ref_Payees", "ParentId", "ref_Payees"}, {"ref_Payees", "DefaultCategoryId", "ref_Categories"},
+                {"ref_SimpleDebts", "CurrencyId", "ref_Currencies"},
+                {"log_Templates", "SrcAccountId", "ref_Accounts"}, {"log_Templates", "DestAccountId", "ref_Accounts"},
+                {"log_Templates", "PayeeId", "ref_Payees"}, {"log_Templates", "CategoryId", "ref_Categories"},
+                {"log_Templates", "ProjectId", "ref_Projects"}, {"log_Templates", "DepartmentId", "ref_Departments"},
+                {"log_Templates", "LocationId", "ref_Locations"},
+                {"ref_Debts", "AccountId", "ref_Accounts"}, {"ref_Debts", "PayeeId", "ref_Payees"},
+                {"ref_Debts", "CategoryId", "ref_Categories"},
+                {"ref_budget", "CategoryId", "ref_Categories"}, {"ref_budget", "CurrencyId", "ref_Currencies"},
+                {"ref_budget_debts", "DebtId", "ref_Debts"}, {"log_Incoming_SMS", "SenderId", "ref_Senders"}
         };
         for (String[] link : links) {
-            long dangling = count(db, String.format("SELECT COUNT(*) FROM %1$s s WHERE s.%2$s >= 0 AND NOT EXISTS ("
+            long dangling = count(db, String.format("SELECT COUNT(*) FROM %1$s s WHERE s.%2$s IS NOT NULL AND NOT EXISTS ("
                     + "SELECT 1 FROM %3$s r WHERE r._id = s.%2$s)", link[0], link[1], link[2]));
             if (dangling != 0) {
                 errors.add(dangling + " rows of " + link[0] + "." + link[1] + " point to missing " + link[2]);
@@ -813,7 +813,7 @@ public final class FixtureDb {
         for (int p = 0; p < SUMMARY_PERIODS.length; p++) {
             long start = DateRangeFilter.getRangeStart(SUMMARY_PERIODS[p][0], SUMMARY_PERIODS[p][1], ctx).getTime();
             long end = DateRangeFilter.getRangeEnd(SUMMARY_PERIODS[p][0], SUMMARY_PERIODS[p][1], ctx).getTime();
-            String where = " FROM log_Transactions WHERE Deleted = 0 AND DestAccount < 0 AND DateTime >= " + start
+            String where = " FROM log_Transactions WHERE Deleted = 0 AND DestAccountId IS NULL AND DateTime >= " + start
                     + " AND DateTime <= " + end;
             result[p][0] = count(db, "SELECT COUNT(*)" + where + " AND Amount > 0");
             result[p][1] = count(db, "SELECT COUNT(*)" + where + " AND Amount < 0");

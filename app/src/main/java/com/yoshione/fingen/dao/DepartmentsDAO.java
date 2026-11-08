@@ -7,6 +7,7 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.model.Department;
@@ -42,13 +43,12 @@ public class DepartmentsDAO extends BaseDAO implements AbstractDAO, IDaoInherito
     private Department cursorToDepartment(Cursor cursor) {
         Department department = new Department();
         department.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
-        department.setParentID(cursor.getLong(mColumnIndexes.get(DBHelper.C_PARENTID)));
+        department.setParentID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_PARENTID)));
         department.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_DEPARTMENTS_NAME)));
         department.setFullName(cursor.getString(mColumnIndexes.get(DBHelper.C_FULL_NAME)));
         department.setIsActive(Boolean.valueOf(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_DEPARTMENTS_ISACTIVE))));
         department.setOrderNum(cursor.getInt(mColumnIndexes.get(DBHelper.C_ORDERNUMBER)));
 
-        department = (Department) DBHelper.getSyncDataFromCursor(department, cursor, mColumnIndexes);
 
         return department;
     }
@@ -57,7 +57,7 @@ public class DepartmentsDAO extends BaseDAO implements AbstractDAO, IDaoInherito
     public void deleteModel(IAbstractModel model, boolean resetTS, Context context) {
         //Обнуляем таблице транзакций
         ContentValues values = new ContentValues();
-        values.put(DBHelper.C_LOG_TRANSACTIONS_DEPARTMENT, -1);
+        values.putNull(DBHelper.C_LOG_TRANSACTIONS_DEPARTMENT);
         TransactionsDAO.getInstance(context).bulkUpdateItem(DBHelper.C_LOG_TRANSACTIONS_DEPARTMENT + " = " + model.getID(), values, resetTS);
 
         super.deleteModel(model, resetTS, context);

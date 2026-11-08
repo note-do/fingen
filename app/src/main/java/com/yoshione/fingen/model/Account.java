@@ -6,6 +6,7 @@ import android.os.Parcel;
 import androidx.annotation.NonNull;
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IOrderable;
 
@@ -312,7 +313,7 @@ public class Account extends BaseModel implements IAbstractModel, IOrderable {
         ContentValues values = super.getCV();
 
         values.put(DBHelper.C_REF_ACCOUNTS_NAME, getName());
-        values.put(DBHelper.C_REF_ACCOUNTS_CURRENCY, getCabbageId());
+        DbRefs.putRef(values, DBHelper.C_REF_ACCOUNTS_CURRENCY, getCabbageId());
         values.put(DBHelper.C_REF_ACCOUNTS_EMITENT, getEmitent());
         values.put(DBHelper.C_REF_ACCOUNTS_COMMENT, getComment());
         values.put(DBHelper.C_REF_ACCOUNTS_STARTBALANCE, getStartBalance().doubleValue());

@@ -724,6 +724,7 @@
     <!-- 6. Currencies -->
     <!-- Entities -->
     <string name="ent_currency_scale" formatted="false">Количество знаков после запятой</string>
+    <string name="err_currency_scale_range" formatted="false">Количество знаков после запятой должно быть от 0 до 8</string>
 
     <!-- 6. Currencies -->
     <!-- Titles -->
@@ -2103,4 +2104,15 @@
     <string name="msg_backup_password_warning" formatted="false">Резервные копии не создаются: пароль резервной копии не удалось прочитать на этом устройстве. Введите пароль заново в разделе «Резервное копирование».</string>
     <string name="msg_backup_folder_do_not_remind" formatted="false">Не напоминать</string>
     <string name="msg_pin_reset_notice" formatted="false">PIN-защита сброшена после обновления приложения. Включите её заново в настройках.</string>
+    <string name="db_upgrade_title" formatted="false">Обновление базы данных</string>
+    <string name="db_upgrade_hint" formatted="false">Подождите и не закрывайте приложение. Это может занять несколько минут.</string>
+    <string name="db_upgrade_stage_prepare" formatted="false">Подготовка копии данных…</string>
+    <string name="db_upgrade_stage_convert" formatted="false">Преобразование данных…</string>
+    <string name="db_upgrade_stage_balance" formatted="false">Пересчёт остатков…</string>
+    <string name="db_upgrade_stage_verify" formatted="false">Проверка результата…</string>
+    <string name="db_upgrade_no_space" formatted="false">Недостаточно свободного места: для обновления нужно около %1$d МБ. Освободите место и повторите. Ваши данные не изменены.</string>
+    <string name="db_upgrade_failed" formatted="false">Не удалось обновить базу данных. Ваши данные не изменены: предыдущая версия и её копия (fingen.db.pre36) сохранены. Повторите попытку; если ошибка повторяется, обратитесь в поддержку.</string>
+    <string name="db_upgrade_verify_failed" formatted="false">Результат обновления не прошёл проверку и был отменён. Ваши данные не изменены: предыдущая версия и её копия (fingen.db.pre36) сохранены. Повторите попытку; если ошибка повторяется, обратитесь в поддержку.</string>
+    <string name="db_upgrade_retry" formatted="false">Повторить</string>
+    <string name="db_upgrade_free_space" formatted="false">Освободить место</string>
 </resources>

@@ -724,6 +724,7 @@
     <!-- 6. Currencies -->
     <!-- Entities -->
     <string name="ent_currency_scale" formatted="false">Кількість знаків після коми</string>
+    <string name="err_currency_scale_range" formatted="false">Кількість знаків після коми має бути від 0 до 8</string>
 
     <!-- 6. Currencies -->
     <!-- Titles -->
@@ -2103,4 +2104,15 @@
     <string name="pin_code_mismatch" formatted="false">PIN-коди не збігаються</string>
     <string name="msg_backup_password_lost" formatted="false">Пароль резервної копії неможливо прочитати на цьому пристрої. Введіть пароль резервної копії знову, до того часу резервне копіювання призупинено</string>
     <string name="msg_backup_password_not_saved" formatted="false">Пароль резервної копії не збережено</string>
+    <string name="db_upgrade_title" formatted="false">Оновлення бази даних</string>
+    <string name="db_upgrade_hint" formatted="false">Зачекайте і не закривайте застосунок. Це може тривати кілька хвилин.</string>
+    <string name="db_upgrade_stage_prepare" formatted="false">Підготовка копії даних…</string>
+    <string name="db_upgrade_stage_convert" formatted="false">Перетворення даних…</string>
+    <string name="db_upgrade_stage_balance" formatted="false">Перерахунок залишків…</string>
+    <string name="db_upgrade_stage_verify" formatted="false">Перевірка результату…</string>
+    <string name="db_upgrade_no_space" formatted="false">Недостатньо вільного місця: для оновлення потрібно близько %1$d МБ. Звільніть місце і повторіть. Ваші дані не змінено.</string>
+    <string name="db_upgrade_failed" formatted="false">Не вдалося оновити базу даних. Ваші дані не змінено: попередню версію та її копію (fingen.db.pre36) збережено. Повторіть спробу; якщо помилка повторюється, зверніться до підтримки.</string>
+    <string name="db_upgrade_verify_failed" formatted="false">Результат оновлення не пройшов перевірку і був скасований. Ваші дані не змінено: попередню версію та її копію (fingen.db.pre36) збережено. Повторіть спробу; якщо помилка повторюється, зверніться до підтримки.</string>
+    <string name="db_upgrade_retry" formatted="false">Повторити</string>
+    <string name="db_upgrade_free_space" formatted="false">Звільнити місце</string>
 </resources>

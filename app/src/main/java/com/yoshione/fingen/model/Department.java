@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 /**
@@ -104,7 +105,7 @@ public class Department extends BaseModel implements IAbstractModel {
         ContentValues values = super.getCV();
         values.put(DBHelper.C_REF_DEPARTMENTS_NAME,getName());
         values.put(DBHelper.C_REF_DEPARTMENTS_ISACTIVE, getIsActive());
-        values.put(DBHelper.C_PARENTID, mParentID);
+        DbRefs.putRef(values, DBHelper.C_PARENTID, mParentID);
         values.put(DBHelper.C_ORDERNUMBER, getOrderNum());
         return values;
     }

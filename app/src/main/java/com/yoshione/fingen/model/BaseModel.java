@@ -32,11 +32,7 @@ public class BaseModel implements Parcelable, IAbstractModel {
     private long mID;
     private String mName;
     private String mFullName;
-    private String mFBID;
-    private long mTS;
     private boolean mDeleted;
-    private boolean mDirty;
-    private String mLastEdited;
     private boolean mSelected;
     private BigDecimal mIncome;
     private BigDecimal mExpense;
@@ -45,11 +41,7 @@ public class BaseModel implements Parcelable, IAbstractModel {
 
     public BaseModel() {
         mID = -1;
-        mFBID = "";
-        mTS = -1;
         mDeleted = false;
-        mDirty = false;
-        mLastEdited = "";
         mName = "";
         mFullName = "";
         mIncome = BigDecimal.ZERO;
@@ -60,9 +52,7 @@ public class BaseModel implements Parcelable, IAbstractModel {
         mID = id;
         mIncome = BigDecimal.ZERO;
         mExpense = BigDecimal.ZERO;
-        mTS = -1;
         mDeleted = false;
-        mDirty = false;
     }
 
     public boolean isSelected() {
@@ -89,48 +79,12 @@ public class BaseModel implements Parcelable, IAbstractModel {
     }
 
     @Override
-    public String getFBID() {
-        return mFBID;
-    }
-
-    @Override
-    public void setFBID(String FBID) {
-        mFBID = FBID;
-    }
-
-    @Override
-    public long getTS() {
-        return mTS;
-    }
-
-    @Override
-    public void setTS(long TS) {
-        mTS = TS;
-    }
-
-    @Override
     public boolean isDeleted() {
         return mDeleted;
     }
 
     public void setDeleted(boolean deleted) {
         mDeleted = deleted;
-    }
-
-    public boolean isDirty() {
-        return mDirty;
-    }
-
-    public void setDirty(boolean dirty) {
-        mDirty = dirty;
-    }
-
-    public String getLastEdited() {
-        return mLastEdited;
-    }
-
-    public void setLastEdited(String lastEdited) {
-        mLastEdited = lastEdited;
     }
 
     public BigDecimal getIncome() {
@@ -308,13 +262,14 @@ public class BaseModel implements Parcelable, IAbstractModel {
 
     @Override
     public String toString() {
-        return String.format("id - %s, FBID = %s, TS = %s, Deleted = %s", String.valueOf(mID), mFBID, String.valueOf(mTS), String.valueOf(mDeleted));
+        return String.format("id - %s, Deleted = %s", String.valueOf(mID), String.valueOf(mDeleted));
     }
 
     @Override
     public ContentValues getCV() {
         ContentValues values = new ContentValues();
-        return DBHelper.addSyncDataToCV(values, this);
+        values.put(DBHelper.C_SYNC_DELETED, 0);
+        return values;
     }
 
     @Override
@@ -419,11 +374,7 @@ public class BaseModel implements Parcelable, IAbstractModel {
         dest.writeLong(this.mID);
         dest.writeString(this.mName);
         dest.writeString(this.mFullName);
-        dest.writeString(this.mFBID);
-        dest.writeLong(this.mTS);
         dest.writeByte(this.mDeleted ? (byte) 1 : (byte) 0);
-        dest.writeByte(this.mDirty ? (byte) 1 : (byte) 0);
-        dest.writeString(this.mLastEdited);
         dest.writeByte(this.mSelected ? (byte) 1 : (byte) 0);
         dest.writeSerializable(this.mIncome);
         dest.writeSerializable(this.mExpense);
@@ -435,11 +386,7 @@ public class BaseModel implements Parcelable, IAbstractModel {
         this.mID = in.readLong();
         this.mName = in.readString();
         this.mFullName = in.readString();
-        this.mFBID = in.readString();
-        this.mTS = in.readLong();
         this.mDeleted = in.readByte() != 0;
-        this.mDirty = in.readByte() != 0;
-        this.mLastEdited = in.readString();
         this.mSelected = in.readByte() != 0;
         this.mIncome = (BigDecimal) in.readSerializable();
         this.mExpense = (BigDecimal) in.readSerializable();

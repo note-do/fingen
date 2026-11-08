@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.os.Parcel;
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 import java.math.BigDecimal;
@@ -115,9 +116,9 @@ public class ProductEntry extends BaseModel implements IAbstractModel {
     public ContentValues getCV() {
         ContentValues values = super.getCV();
 
-        values.put(DBHelper.C_LOG_PRODUCTS_TRANSACTIONID, mTransactionID);
-        values.put(DBHelper.C_LOG_PRODUCTS_CATEGORY_ID, mCategoryID);
-        values.put(DBHelper.C_LOG_PRODUCTS_PROJECT_ID, mProjectID);
+        DbRefs.putRef(values, DBHelper.C_LOG_PRODUCTS_TRANSACTIONID, mTransactionID);
+        DbRefs.putRef(values, DBHelper.C_LOG_PRODUCTS_CATEGORY_ID, mCategoryID);
+        DbRefs.putRef(values, DBHelper.C_LOG_PRODUCTS_PROJECT_ID, mProjectID);
         values.put(DBHelper.C_LOG_PRODUCTS_PRODUCTID, mProductID);
         values.put(DBHelper.C_LOG_PRODUCTS_QUANTITY, mQuantity.doubleValue());
         values.put(DBHelper.C_LOG_PRODUCTS_PRICE, mPrice.doubleValue());

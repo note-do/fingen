@@ -7,6 +7,7 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.model.Category;
@@ -47,17 +48,16 @@ public class PayeesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         payee.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
         payee.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_PAYEES_NAME)));
         payee.setFullName(cursor.getString(mColumnIndexes.get(DBHelper.C_FULL_NAME)));
-        payee.setParentID(cursor.getLong(mColumnIndexes.get(DBHelper.C_PARENTID)));
+        payee.setParentID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_PARENTID)));
 
         payee.setOrderNum(cursor.getInt(mColumnIndexes.get(DBHelper.C_ORDERNUMBER)));
 
         if (!cursor.isNull(mColumnIndexes.get(DBHelper.C_REF_PAYEES_DEFCATEGORY))) {
-            payee.setDefCategoryID(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_PAYEES_DEFCATEGORY)));
+            payee.setDefCategoryID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_REF_PAYEES_DEFCATEGORY)));
         } else {
             payee.setDefCategoryID(-1);
         }
 
-        payee = (Payee) DBHelper.getSyncDataFromCursor(payee, cursor, mColumnIndexes);
 
         return payee;
     }
@@ -67,17 +67,17 @@ public class PayeesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         ContentValues values = new ContentValues();
         //Обнуляем таблице транзакций
         values.clear();
-        values.put(DBHelper.C_LOG_TRANSACTIONS_PAYEE, -1);
+        values.putNull(DBHelper.C_LOG_TRANSACTIONS_PAYEE);
         TransactionsDAO.getInstance(context).bulkUpdateItem(DBHelper.C_LOG_TRANSACTIONS_PAYEE + " = " + model.getID(), values, resetTS);
 
         //Обнуляем таблице шаблонов
         values.clear();
-        values.put(DBHelper.C_LOG_TEMPLATES_PAYEE, -1);
+        values.putNull(DBHelper.C_LOG_TEMPLATES_PAYEE);
         TemplatesDAO.getInstance(context).bulkUpdateItem(DBHelper.C_LOG_TEMPLATES_PAYEE + " = " + model.getID(), values, resetTS);
 
         //Обнуляем таблице долгов
         values.clear();
-        values.put(DBHelper.C_REF_DEBTS_PAYEE, -1);
+        values.putNull(DBHelper.C_REF_DEBTS_PAYEE);
         CreditsDAO.getInstance(context).bulkUpdateItem(DBHelper.C_REF_DEBTS_PAYEE + " = " + model.getID(), values, resetTS);
 
         //Удаляем все маркеры

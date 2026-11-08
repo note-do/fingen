@@ -6,11 +6,13 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.adapter.AdapterBudget;
 import com.yoshione.fingen.classes.ListSumsByCabbage;
 import com.yoshione.fingen.classes.SumsByCabbage;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.managers.AccountManager;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.model.Account;
 import com.yoshione.fingen.model.BudgetForCategory;
@@ -55,12 +57,11 @@ public class CreditsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
 
         credit.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
         credit.setAccountID(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_DEBTS_ACCOUNT)));
-        credit.setPayeeID(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_DEBTS_PAYEE)));
-        credit.setCategoryID(cursor.getLong(mColumnIndexes.get(DBHelper.C_REF_DEBTS_CATEGORY)));
+        credit.setPayeeID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_REF_DEBTS_PAYEE)));
+        credit.setCategoryID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_REF_DEBTS_CATEGORY)));
         credit.setClosed(cursor.getInt(mColumnIndexes.get(DBHelper.C_REF_DEBTS_CLOSED)) == 1);
         credit.setComment(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_DEBTS_COMMENT)));
 
-        credit = (Credit) DBHelper.getSyncDataFromCursor(credit, cursor, mColumnIndexes);
 
         return credit;
     }
@@ -116,24 +117,27 @@ public class CreditsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         c.set(year,month,c.getActualMaximum(Calendar.DAY_OF_MONTH),23,59,59);
         Date end = c.getTime();
 
+        String divisor = CurrencyScale.divisorSql("dc.DecimalCount");
         String sql = String.format(
                 "SELECT DISTINCT ref_Debts.*,\n" +
                 "   (\n" +
                 "   SELECT Amount\n" +
                 "   FROM ref_budget_debts\n" +
-                "   WHERE Year = %s AND Month = %s AND ref_Debts._id = Debt AND ref_budget_debts.Deleted = 0\n" +
-                "   ) AS Plan,   \n" +
+                "   WHERE Year = %s AND Month = %s AND ref_Debts._id = DebtId AND ref_budget_debts.Deleted = 0\n" +
+                "   ) / " + divisor + " AS Plan,   \n" +
                 "   (\n" +
                 "   SELECT SUM(Amount) \n" +
                 "   FROM log_Transactions \n" +
-                "   WHERE log_Transactions.SrcAccount = Account AND DateTime >= %s AND DateTime <= %s  AND log_Transactions.Deleted = 0\n" +
-                "   ) AS t1,\n" +
+                "   WHERE log_Transactions.SrcAccountId = ref_Debts.AccountId AND DateTime >= %s AND DateTime <= %s  AND log_Transactions.Deleted = 0\n" +
+                "   ) / " + divisor + " AS t1,\n" +
                 "   (\n" +
                 "   SELECT SUM(Amount) \n" +
                 "   FROM log_Transactions \n" +
-                "   WHERE log_Transactions.DestAccount = Account AND DateTime >= %s AND DateTime <= %s  AND log_Transactions.Deleted = 0\n" +
-                "   )*-1 AS t2\n" +
-                "FROM ref_Debts LEFT OUTER JOIN ref_budget_debts ON ref_Debts._id = Debt\n" +
+                "   WHERE log_Transactions.DestAccountId = ref_Debts.AccountId AND DateTime >= %s AND DateTime <= %s  AND log_Transactions.Deleted = 0\n" +
+                "   )*-1 / " + divisor + " AS t2\n" +
+                "FROM ref_Debts LEFT OUTER JOIN ref_budget_debts ON ref_Debts._id = DebtId\n" +
+                "   LEFT OUTER JOIN ref_Accounts da ON da._id = ref_Debts.AccountId\n" +
+                "   LEFT OUTER JOIN ref_Currencies dc ON dc._id = da.CurrencyId\n" +
                 "WHERE ref_Debts.Deleted = 0 AND (Plan IS NOT NULL OR t1 IS NOT NULL OR t2 IS NOT NULL)",
                 String.valueOf(year), String.valueOf(month),
                 String.valueOf(start.getTime()), String.valueOf(end.getTime()),
@@ -160,9 +164,9 @@ public class CreditsDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         Cabbage cabbage = AccountManager.getCabbage(account, context);
         BigDecimal plan;
         BigDecimal fact;
-        plan = new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.C_REF_CATEGORIES_PLAN)));
-        fact = new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("t1")))
-                .add(new BigDecimal(cursor.getDouble(cursor.getColumnIndexOrThrow("t2"))));
+        plan = BigDecimal.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.C_REF_CATEGORIES_PLAN)));
+        fact = BigDecimal.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow("t1")))
+                .add(BigDecimal.valueOf(cursor.getDouble(cursor.getColumnIndexOrThrow("t2"))));
         SumsByCabbage sums = new SumsByCabbage(cabbage.getID(), BigDecimal.ZERO, BigDecimal.ZERO);
         if (plan.compareTo(BigDecimal.ZERO) < 0) {
             sums.setOutPlan(plan);

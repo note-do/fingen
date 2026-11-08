@@ -56,12 +56,11 @@ public class DeletedProductsTest {
         ContentValues cv = new ContentValues();
         cv.put("Name", "DelProd account " + System.nanoTime());
         cv.put("Type", 0);
-        cv.put("Currency", CURRENCY_USD);
-        cv.put("StartBalance", 0.0);
+        cv.put("CurrencyId", CURRENCY_USD);
+        cv.put("StartBalance", 0);
         cv.put("IsClosed", 0);
-        cv.put("CustomOrder", 0);
+        cv.put("OrderNumber", 0);
         cv.put("Deleted", 0);
-        cv.put("Dirty", 0);
         mAccountId = db.insertOrThrow("ref_Accounts", null, cv);
         mCategoryLive = insertCategory("zzlive" + System.nanoTime());
         mCategoryDead = insertCategory("zzdead" + System.nanoTime());
@@ -77,15 +76,10 @@ public class DeletedProductsTest {
 
     private long insertCategory(String name) {
         ContentValues cv = new ContentValues();
-        cv.put("FBID", "");
-        cv.put("TS", -1);
         cv.put("Deleted", 0);
-        cv.put("Dirty", 0);
-        cv.put("LastEdited", "");
         cv.put("Name", name);
-        cv.put("ParentID", -1);
+        cv.putNull("ParentId");
         cv.put("OrderNumber", 0);
-        cv.put("Sign", 0);
         cv.put("FullName", name);
         cv.put("SearchString", name);
         return DBHelper.getInstance(mContext).getWritableDatabase().insertOrThrow("ref_Categories", null, cv);
@@ -93,34 +87,33 @@ public class DeletedProductsTest {
 
     private long insertTransaction(double amount, long category, boolean split) {
         ContentValues cv = new ContentValues();
-        cv.put("FBID", "");
-        cv.put("TS", -1);
         cv.put("Deleted", 0);
-        cv.put("Dirty", 0);
-        cv.put("LastEdited", "");
         cv.put("DateTime", new Date().getTime());
-        cv.put("SrcAccount", mAccountId);
-        cv.put("DestAccount", -1);
-        cv.put("Amount", amount);
-        cv.put("Category", category);
-        cv.put("Split", split ? 1 : 0);
-        cv.put("ExchangeRate", 1.0);
-        cv.put("AutoCreated", 0);
+        cv.put("SrcAccountId", mAccountId);
+        cv.putNull("DestAccountId");
+        // amounts are minor units of the account currency (2 digits)
+        cv.put("Amount", Math.round(amount * 100));
+        if (category < 0) {
+            cv.putNull("CategoryId");
+        } else {
+            cv.put("CategoryId", category);
+        }
+        cv.put("IsSplit", split ? 1 : 0);
+        cv.put("ExchangeRate", 1000000);
+        cv.put("IsAutoCreated", 0);
         return DBHelper.getInstance(mContext).getWritableDatabase().insertOrThrow("log_Transactions", null, cv);
     }
 
     private void insertProduct(long transactionId, long categoryId, double price, boolean deleted) {
         ContentValues cv = new ContentValues();
-        cv.put("FBID", "");
-        cv.put("TS", -1);
         cv.put("Deleted", deleted ? 1 : 0);
-        cv.put("Dirty", 0);
-        cv.put("LastEdited", "");
-        cv.put("TransactionID", transactionId);
-        cv.put("CategoryID", categoryId);
-        cv.put("ProjectID", -1);
-        cv.put("Price", price);
-        cv.put("Quantity", 1.0);
+        cv.put("TransactionId", transactionId);
+        cv.put("ProductId", 0);
+        cv.put("CategoryId", categoryId);
+        cv.putNull("ProjectId");
+        // prices are minor units of the account currency (2 digits), quantity 1 = 1000
+        cv.put("Price", Math.round(price * 100));
+        cv.put("Quantity", 1000);
         DBHelper.getInstance(mContext).getWritableDatabase().insertOrThrow("log_Products", null, cv);
     }
 

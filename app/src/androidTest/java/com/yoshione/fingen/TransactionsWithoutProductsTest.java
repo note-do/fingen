@@ -48,12 +48,11 @@ public class TransactionsWithoutProductsTest {
         ContentValues cv = new ContentValues();
         cv.put("Name", "NoProducts account " + System.nanoTime());
         cv.put("Type", 0);
-        cv.put("Currency", CURRENCY_USD);
-        cv.put("StartBalance", 0.0);
+        cv.put("CurrencyId", CURRENCY_USD);
+        cv.put("StartBalance", 0);
         cv.put("IsClosed", 0);
-        cv.put("CustomOrder", 0);
+        cv.put("OrderNumber", 0);
         cv.put("Deleted", 0);
-        cv.put("Dirty", 0);
         mAccountId = DBHelper.getInstance(mContext).getWritableDatabase().insertOrThrow("ref_Accounts", null, cv);
     }
 
@@ -71,17 +70,14 @@ public class TransactionsWithoutProductsTest {
 
     private long insertTransactionWithoutProducts(double amount) {
         ContentValues cv = new ContentValues();
-        cv.put("FBID", "");
-        cv.put("TS", -1);
         cv.put("Deleted", 0);
-        cv.put("Dirty", 0);
-        cv.put("LastEdited", "");
         cv.put("DateTime", new Date().getTime());
-        cv.put("SrcAccount", mAccountId);
-        cv.put("DestAccount", -1);
-        cv.put("Amount", amount);
-        cv.put("ExchangeRate", 1.0);
-        cv.put("AutoCreated", 0);
+        cv.put("SrcAccountId", mAccountId);
+        cv.putNull("DestAccountId");
+        // amounts are minor units of the account currency (2 digits)
+        cv.put("Amount", Math.round(amount * 100));
+        cv.put("ExchangeRate", 1000000);
+        cv.put("IsAutoCreated", 0);
         return DBHelper.getInstance(mContext).getWritableDatabase().insertOrThrow("log_Transactions", null, cv);
     }
 
@@ -114,7 +110,7 @@ public class TransactionsWithoutProductsTest {
 
     private int countProducts(long transactionId) {
         android.database.Cursor c = DBHelper.getInstance(mContext).getReadableDatabase()
-                .rawQuery("SELECT COUNT(*) FROM log_Products WHERE TransactionID = ?", new String[]{String.valueOf(transactionId)});
+                .rawQuery("SELECT COUNT(*) FROM log_Products WHERE TransactionId = ?", new String[]{String.valueOf(transactionId)});
         try {
             c.moveToFirst();
             return c.getInt(0);

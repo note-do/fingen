@@ -82,6 +82,10 @@ public class ActivityEditAccount extends ToolbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (isFinishing()) {
+            // Redirected to the DB upgrade screen
+            return;
+        }
         mBinding = ActivityEditAccountBinding.bind(getContentRoot());
         editTextName = mBinding.editTextName;
         editTextType = mBinding.editTextType;

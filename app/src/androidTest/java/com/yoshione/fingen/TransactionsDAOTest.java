@@ -58,12 +58,11 @@ public class TransactionsDAOTest {
         ContentValues cv = new ContentValues();
         cv.put("Name", "Tx account " + System.nanoTime());
         cv.put("Type", 0);
-        cv.put("Currency", CURRENCY_USD);
-        cv.put("StartBalance", 0.0);
+        cv.put("CurrencyId", CURRENCY_USD);
+        cv.put("StartBalance", 0);
         cv.put("IsClosed", 0);
-        cv.put("CustomOrder", 0);
+        cv.put("OrderNumber", 0);
         cv.put("Deleted", 0);
-        cv.put("Dirty", 0);
         return DBHelper.getInstance(mContext).getWritableDatabase().insertOrThrow("ref_Accounts", null, cv);
     }
 

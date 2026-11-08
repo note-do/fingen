@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Auto Backup and device transfer rules for API 31+: secrets stay on the device -->
+<!-- Auto Backup and device transfer rules for API 31+: secrets and migration copies stay on the device -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="sharedpref" path="com.yoshione.fingen.dropbox.xml"/>
         <exclude domain="sharedpref" path="com.yoshione.fingen.secure.xml"/>
+        <exclude domain="database" path="fingen.db.pre36"/>
+        <exclude domain="database" path="fingen.db.bak"/>
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="com.yoshione.fingen.dropbox.xml"/>
         <exclude domain="sharedpref" path="com.yoshione.fingen.secure.xml"/>
+        <exclude domain="database" path="fingen.db.pre36"/>
+        <exclude domain="database" path="fingen.db.bak"/>
     </device-transfer>
 </data-extraction-rules>

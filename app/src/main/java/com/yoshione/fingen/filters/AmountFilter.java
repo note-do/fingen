@@ -83,19 +83,21 @@ public class AmountFilter extends AbstractFilter implements Parcelable {
         if (!mEnabled) return "";
 
         String ids = TextUtils.join(",", allAccountIDS);
+        // Amount в БД - минорные единицы валюты счета-источника, диапазон задается в десятичном виде
+        String amount = DBHelper.srcAmountDecimalSql("Amount", "SrcAccountId");
 
         String transactionIncome =
-                String.format("DestAccount < 0 AND SrcAccount IN (%s) AND Amount BETWEEN %s AND %s",
-                        ids, mMinAmount.abs().toString(), mMaxAmount.abs().toString());
+                String.format("DestAccountId IS NULL AND SrcAccountId IN (%s) AND %s BETWEEN %s AND %s",
+                        ids, amount, mMinAmount.abs().toString(), mMaxAmount.abs().toString());
         String transactionExpense =
-                String.format("DestAccount < 0 AND SrcAccount IN (%s) AND Amount BETWEEN %s AND %s",
-                        ids, mMaxAmount.abs().negate().toString(), mMinAmount.negate().toString());
+                String.format("DestAccountId IS NULL AND SrcAccountId IN (%s) AND %s BETWEEN %s AND %s",
+                        ids, amount, mMaxAmount.abs().negate().toString(), mMinAmount.negate().toString());
         String transferIncome =
-                String.format("DestAccount IN (%s) AND Amount BETWEEN %s AND %s",
-                        ids, mMaxAmount.abs().negate().toString(), mMinAmount.negate().toString());
+                String.format("DestAccountId IN (%s) AND %s BETWEEN %s AND %s",
+                        ids, amount, mMaxAmount.abs().negate().toString(), mMinAmount.negate().toString());
         String transferExpense =
-                String.format("DestAccount >= 0 AND SrcAccount IN (%s) AND Amount BETWEEN %s AND %s",
-                        ids, mMaxAmount.abs().negate().toString(), mMinAmount.abs().negate().toString());
+                String.format("DestAccountId IS NOT NULL AND SrcAccountId IN (%s) AND %s BETWEEN %s AND %s",
+                        ids, amount, mMaxAmount.abs().negate().toString(), mMinAmount.abs().negate().toString());
 
         String condition = "";
         switch (mType) {
@@ -137,13 +139,13 @@ public class AmountFilter extends AbstractFilter implements Parcelable {
             String neg;
             String type;
             if (mIncome) {
-                pos = String.format("%s BETWEEN %s AND %s", DBHelper.C_LOG_TRANSACTIONS_AMOUNT, mMinAmount.abs().toString(), mMaxAmount.abs().toString());
+                pos = String.format("%s BETWEEN %s AND %s", DBHelper.srcAmountDecimalSql(DBHelper.C_LOG_TRANSACTIONS_AMOUNT, DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT), mMinAmount.abs().toString(), mMaxAmount.abs().toString());
             } else {
                 pos = "";
             }
 
             if (mExpense) {
-                neg = String.format("%s BETWEEN %s AND %s", DBHelper.C_LOG_TRANSACTIONS_AMOUNT, mMaxAmount.abs().
+                neg = String.format("%s BETWEEN %s AND %s", DBHelper.srcAmountDecimalSql(DBHelper.C_LOG_TRANSACTIONS_AMOUNT, DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT), mMaxAmount.abs().
                         multiply(new BigDecimal(-1)).toString(), mMinAmount.multiply(new BigDecimal(-1)).toString());
             } else {
                 neg = "";
@@ -156,12 +158,12 @@ public class AmountFilter extends AbstractFilter implements Parcelable {
                     break;
                 }
                 case TRANSACTION_TYPE_TRANSACTION: {
-                    type = String.format("%s < 0", DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT);
+                    type = String.format("%s IS NULL", DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT);
                     break;
                 }
 
                 case TRANSACTION_TYPE_TRANSFER: {
-                    type = String.format("%s >= 0", DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT);
+                    type = String.format("%s IS NOT NULL", DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT);
                     break;
                 }
             }

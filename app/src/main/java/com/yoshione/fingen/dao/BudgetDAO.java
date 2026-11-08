@@ -7,6 +7,7 @@ import android.util.Pair;
 
 import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.model.BudgetCatSync;
 import com.yoshione.fingen.model.Cabbage;
@@ -95,7 +96,7 @@ public class BudgetDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
 
         String cat;//часть выражения SELECT отвечающая за выбор категории
         if (categoryId != -1) {
-            cat = String.format(" AND Category = %s", String.valueOf(categoryId));
+            cat = String.format(" AND CategoryId = %s", String.valueOf(categoryId));
         } else {
             cat = "";
         }
@@ -122,11 +123,11 @@ public class BudgetDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         sql = "INSERT INTO ref_budget SELECT * FROM temp_budget";
 
         if (!replace) {
-            sql = sql + "\nWHERE NOT EXISTS (SELECT Year, Month, Category, Currency\n" +
+            sql = sql + "\nWHERE NOT EXISTS (SELECT Year, Month, CategoryId, CurrencyId\n" +
                     "       FROM ref_budget WHERE Year = temp_budget.Year " +
                     "       AND Month = temp_budget.Month " +
-                    "       AND Currency = temp_budget.Currency " +
-                    "       AND Category = temp_budget.Category" +
+                    "       AND CurrencyId = temp_budget.CurrencyId " +
+                    "       AND CategoryId = temp_budget.CategoryId" +
                     "       AND Deleted = 0);";
         }
         mDatabase.execSQL(sql);
@@ -147,9 +148,9 @@ public class BudgetDAO extends BaseDAO implements AbstractDAO, IDaoInheritor {
         budgetCatSync.setMonth(cursor.getInt(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_MONTH)));
         budgetCatSync.setCategoryID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_CATEGORY)));
         budgetCatSync.setCabbageID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_CURRENCY)));
-        budgetCatSync.setAmount(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_AMOUNT)));
+        budgetCatSync.setAmount(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_AMOUNT)),
+                CurrencyScale.forCurrency(mDatabase, budgetCatSync.getCabbageID())).doubleValue());
 
-        budgetCatSync = (BudgetCatSync) DBHelper.getSyncDataFromCursor(budgetCatSync, cursor, mColumnIndexes);
 
         return budgetCatSync;
     }

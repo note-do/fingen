@@ -5,6 +5,7 @@ import android.os.Parcel;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 
@@ -124,9 +125,9 @@ public class BudgetCatSync extends BaseModel implements IAbstractModel {
 
         values.put(DBHelper.C_LOG_BUDGET_YEAR,mYear);
         values.put(DBHelper.C_LOG_BUDGET_MONTH,mMonth);
-        values.put(DBHelper.C_LOG_BUDGET_CATEGORY,mCategoryID);
+        DbRefs.putRef(values, DBHelper.C_LOG_BUDGET_CATEGORY, mCategoryID);
         values.put(DBHelper.C_LOG_BUDGET_AMOUNT,mAmount);
-        values.put(DBHelper.C_LOG_BUDGET_CURRENCY,mCabbageID);
+        DbRefs.putRef(values, DBHelper.C_LOG_BUDGET_CURRENCY, mCabbageID);
         return values;
     }
 

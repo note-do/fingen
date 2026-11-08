@@ -21,6 +21,9 @@ public class ActivityShortcut extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (ActivityDbUpgrade.redirectIfNeeded(this)) {
+            return;
+        }
 
         AlertDialog.Builder builderSingle = new AlertDialog.Builder(this);
         final ArrayAdapter<Template> arrayAdapterTemplates = new ArrayAdapter<>(this, android.R.layout.select_dialog_singlechoice);

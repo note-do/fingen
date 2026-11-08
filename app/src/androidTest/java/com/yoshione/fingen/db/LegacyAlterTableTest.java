@@ -106,7 +106,7 @@ public class LegacyAlterTableTest {
         String sqliteVersion;
         String defaultPragma;
         try {
-            assertEquals(35, def.getVersion());
+            assertEquals(36, def.getVersion());
             sqliteVersion = queryString(def, "SELECT sqlite_version()");
             defaultPragma = queryString(def, "PRAGMA legacy_alter_table");
             defaultDump = dumpData(def);
@@ -123,7 +123,7 @@ public class LegacyAlterTableTest {
         MigrationTestHelper.createFixture(mContext, version, seed(version));
         SQLiteDatabase on = MigrationTestHelper.openMigratedWithPragmas(mContext, name, "PRAGMA legacy_alter_table=ON");
         try {
-            assertEquals(35, on.getVersion());
+            assertEquals(36, on.getVersion());
             // the connection setting is applied (the connection is the one that ran onUpgrade)
             assertEquals("legacy_alter_table in ON mode", "1", queryString(on, "PRAGMA legacy_alter_table"));
             List<String> onRefs = oldReferences(on);
@@ -141,7 +141,7 @@ public class LegacyAlterTableTest {
         MigrationTestHelper.createFixture(mContext, version, seed(version));
         SQLiteDatabase off = MigrationTestHelper.openMigratedWithPragmas(mContext, name, "PRAGMA legacy_alter_table=OFF");
         try {
-            assertEquals(35, off.getVersion());
+            assertEquals(36, off.getVersion());
             assertEquals("legacy_alter_table in OFF mode", "0", queryString(off, "PRAGMA legacy_alter_table"));
             Log.i(TAG, "v" + version + " references to *_old with legacy_alter_table=OFF: " + oldReferences(off));
             assertEquals("data of the default mode and of legacy_alter_table=OFF", defaultDump, dumpData(off));

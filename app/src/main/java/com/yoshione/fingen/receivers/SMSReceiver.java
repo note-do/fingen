@@ -12,6 +12,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import androidx.core.content.ContextCompat;
 import android.telephony.SmsMessage;
+import android.util.Log;
 
 import com.yoshione.fingen.ActivityEditTransaction;
 import com.yoshione.fingen.ActivityMain;
@@ -19,6 +20,7 @@ import com.yoshione.fingen.BuildConfig;
 import com.yoshione.fingen.FgConst;
 import com.yoshione.fingen.R;
 import com.yoshione.fingen.dao.AccountsDAO;
+import com.yoshione.fingen.db.DbUpgradeGate;
 import com.yoshione.fingen.dao.SendersDAO;
 import com.yoshione.fingen.dao.SmsDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
@@ -44,6 +46,7 @@ import java.util.Date;
  *
  */
 public class SMSReceiver extends BroadcastReceiver {
+    private static final String TAG = "SMSReceiver";
     private static final String ACTION_SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
     public static final int NOTIFICATION_ID_TRANSACTION_AUTO_CREATED = 0;
     private static String sLastSms = "";
@@ -55,6 +58,11 @@ public class SMSReceiver extends BroadcastReceiver {
         String action = intent.getAction();
 
         if (action != null && action.equals(ACTION_SMS_RECEIVED)) {
+            if (DbUpgradeGate.needsUpgrade(context)) {
+                // The sender lookup needs the DB, and it must not be opened before the upgrade screen runs it
+                Log.w(TAG, "SMS ignored: DB upgrade is pending");
+                return;
+            }
 
             String address = null;
             StringBuilder str = new StringBuilder();

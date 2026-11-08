@@ -7,6 +7,7 @@ import android.util.Pair;
 
 import com.yoshione.fingen.DBHelper;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.model.BudgetCreditSync;
 import com.yoshione.fingen.model.Credit;
@@ -72,7 +73,7 @@ public class BudgetCreditsDAO extends BaseDAO implements AbstractDAO, IDaoInheri
         mDatabase.execSQL(sql);
         String cat = "";
         if (categoryId != -1) {
-            cat = String.format(" AND Debt = %s", String.valueOf(categoryId));
+            cat = String.format(" AND DebtId = %s", String.valueOf(categoryId));
         }
         sql = String.format("CREATE TEMP TABLE IF NOT EXISTS temp_budget AS\n" +
                         "SELECT * FROM ref_budget_debts WHERE Year = %s AND Month = %s%s AND Deleted = 0;",
@@ -85,10 +86,10 @@ public class BudgetCreditsDAO extends BaseDAO implements AbstractDAO, IDaoInheri
         sql = "INSERT INTO ref_budget_debts SELECT * FROM temp_budget";
 
         if (!replace) {
-            sql = sql + "\nWHERE NOT EXISTS (SELECT Year, Month, Debt\n" +
+            sql = sql + "\nWHERE NOT EXISTS (SELECT Year, Month, DebtId\n" +
                     "       FROM ref_budget_debts WHERE Year = temp_budget.Year " +
                     "       AND Month = temp_budget.Month " +
-                    "       AND Debt = temp_budget.Debt" +
+                    "       AND DebtId = temp_budget.DebtId" +
                     "       AND Deleted = 0);";
         }
         mDatabase.execSQL(sql);
@@ -108,9 +109,9 @@ public class BudgetCreditsDAO extends BaseDAO implements AbstractDAO, IDaoInheri
         budgetCreditSync.setYear(cursor.getInt(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_DEBTS_YEAR)));
         budgetCreditSync.setMonth(cursor.getInt(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_DEBTS_MONTH)));
         budgetCreditSync.setCreditID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_DEBTS_CREDIT)));
-        budgetCreditSync.setAmount(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_AMOUNT)));
+        budgetCreditSync.setAmount(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_BUDGET_AMOUNT)),
+                CurrencyScale.forDebt(mDatabase, budgetCreditSync.getCreditID())).doubleValue());
 
-        budgetCreditSync = (BudgetCreditSync) DBHelper.getSyncDataFromCursor(budgetCreditSync, cursor, mColumnIndexes);
 
         return budgetCreditSync;
     }

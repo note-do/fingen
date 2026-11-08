@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 //import com.arellomobile.mvp.MvpDelegate;
+import com.yoshione.fingen.ActivityDbUpgrade;
 import com.yoshione.fingen.ActivityMain;
 import com.yoshione.fingen.BuildConfig;
 import com.yoshione.fingen.FGApplication;
@@ -52,6 +53,13 @@ public abstract class ToolbarActivity extends AppCompatActivity implements IUnsu
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mCompositeDisposable = new CompositeDisposable();
+
+        // DB upgrade pending: show its screen instead of this one, before any DBHelper access.
+        // The activity finishes inside onCreate, so subclasses must return after super.onCreate if isFinishing()
+        if (ActivityDbUpgrade.redirectIfNeeded(this)) {
+            return;
+        }
 
 //        getMvpDelegate().onCreate(savedInstanceState);
 
@@ -62,8 +70,6 @@ public abstract class ToolbarActivity extends AppCompatActivity implements IUnsu
         setSupportActionBar(toolbar);
 
         FGApplication.getAppComponent().inject(this);
-
-        mCompositeDisposable = new CompositeDisposable();
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

@@ -8,11 +8,13 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.adapter.AdapterBudget;
 import com.yoshione.fingen.classes.ListSumsByCabbage;
 import com.yoshione.fingen.classes.SumsByCabbage;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.model.BudgetForCategory;
 import com.yoshione.fingen.model.Category;
 import com.yoshione.fingen.utils.ColorUtils;
@@ -47,9 +49,9 @@ public class CategoriesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor
 
     public Category createCategory(Category category, Context context) throws Exception {
         List<?> models = getItems(getTableName(), null,
-                String.format("%s = '%s' AND %s = %s AND %s != %s",
+                String.format("%s = '%s' AND %s AND %s != %s",
                         DBHelper.C_REF_CATEGORIES_NAME, category.getName(),
-                        DBHelper.C_PARENTID, category.getParentID(),
+                        category.getParentID() < 0 ? DBHelper.C_PARENTID + " IS NULL" : DBHelper.C_PARENTID + " = " + category.getParentID(),
                         DBHelper.C_ID, String.valueOf(category.getID()))
                 , null, null, null);
         if (!models.isEmpty()) {
@@ -71,12 +73,11 @@ public class CategoriesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor
 
         category.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
         category.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_CATEGORIES_NAME)));
-        category.setParentID(cursor.getLong(mColumnIndexes.get(DBHelper.C_PARENTID)));
+        category.setParentID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_PARENTID)));
 
         category.setColor(Color.parseColor(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_CATEGORIES_COLOR))));
         category.setOrderNum(cursor.getInt(mColumnIndexes.get(DBHelper.C_ORDERNUMBER)));
 
-        category = (Category) DBHelper.getSyncDataFromCursor(category, cursor, mColumnIndexes);
 
         category.setFullName(cursor.getString(mColumnIndexes.get(DBHelper.C_FULL_NAME)));
 
@@ -89,8 +90,8 @@ public class CategoriesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor
         BigDecimal fact;
         long cabbageId;
         cabbageId = cursor.getLong(cabbageCI);
-        plan = new BigDecimal(cursor.getDouble(planCI));
-        fact = new BigDecimal(cursor.getDouble(factCI));
+        plan = BigDecimal.valueOf(cursor.getDouble(planCI));
+        fact = BigDecimal.valueOf(cursor.getDouble(factCI));
         SumsByCabbage sums = new SumsByCabbage(cabbageId, BigDecimal.ZERO, BigDecimal.ZERO);
         if (plan.compareTo(BigDecimal.ZERO) < 0) {
             sums.setOutPlan(plan);
@@ -115,7 +116,7 @@ public class CategoriesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor
             category.setName(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_CATEGORIES_NAME)));
 //            category.setColor(Color.parseColor(cursor.getString(mColumnIndexes.get(DBHelper.C_REF_CATEGORIES_COLOR))));
             if (!cursor.isNull(mColumnIndexes.get(DBHelper.C_PARENTID))) {
-                category.setParentID(cursor.getLong(mColumnIndexes.get(DBHelper.C_PARENTID)));
+                category.setParentID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_PARENTID)));
             } else {
                 category.setParentID(-1);
             }
@@ -138,22 +139,22 @@ public class CategoriesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor
 
         //Обнуляем эту категорию в таблице транзакций
         values.clear();
-        values.put(DBHelper.C_LOG_TRANSACTIONS_CATEGORY, -1);
+        values.putNull(DBHelper.C_LOG_TRANSACTIONS_CATEGORY);
         TransactionsDAO.getInstance(context).bulkUpdateItem(DBHelper.C_LOG_TRANSACTIONS_CATEGORY + " = " + model.getID(), values, resetTS);
 
         //Обнуляем эту категорию в таблице шаблонов
         values.clear();
-        values.put(DBHelper.C_LOG_TEMPLATES_CATEGORY, -1);
+        values.putNull(DBHelper.C_LOG_TEMPLATES_CATEGORY);
         TemplatesDAO.getInstance(context).bulkUpdateItem(DBHelper.C_LOG_TEMPLATES_CATEGORY + " = " + model.getID(), values, resetTS);
 
         //Обнуляем эту категорию в таблице Получателей
         values.clear();
-        values.put(DBHelper.C_REF_PAYEES_DEFCATEGORY, -1);
+        values.putNull(DBHelper.C_REF_PAYEES_DEFCATEGORY);
         PayeesDAO.getInstance(context).bulkUpdateItem(DBHelper.C_REF_PAYEES_DEFCATEGORY + " = " + model.getID(), values, resetTS);
 
         //Обнуляем эту категорию в таблице долгов
         values.clear();
-        values.put(DBHelper.C_REF_DEBTS_CATEGORY, -1);
+        values.putNull(DBHelper.C_REF_DEBTS_CATEGORY);
         CreditsDAO.getInstance(context).bulkUpdateItem(DBHelper.C_REF_DEBTS_CATEGORY + " = " + model.getID(), values, resetTS);
 
         super.deleteModel(model, resetTS, context);
@@ -173,32 +174,33 @@ public class CategoriesDAO extends BaseDAO implements AbstractDAO, IDaoInheritor
         Date end = c.getTime();
 //        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.getInstance(context);
 
+        String divisor = CurrencyScale.divisorSql("ref_Currencies.DecimalCount");
         String sql = String.format(
                 "SELECT DISTINCT ref_Categories.*, ref_Currencies._id as Currency,\n" +
                         "   (\n" +
                         "   IFNULL((\n" +
                         "       SELECT Amount\n" +
                         "       FROM ref_budget as b\n" +
-                        "       WHERE Year = %s AND Month = %s AND ref_Categories._id = Category and Currency = ref_Currencies._id AND b.Deleted = 0\n" +
-                        "   ), 0)) AS Plan,\n" +
+                        "       WHERE Year = %s AND Month = %s AND ref_Categories._id = CategoryId and CurrencyId = ref_Currencies._id AND b.Deleted = 0\n" +
+                        "   ), 0)) / " + divisor + " AS Plan,\n" +
                         "   (\n" +
                         "   IFNULL((\n" +
-                        "       SELECT SUM(IFNULL(prod.Price*prod.Quantity, t.Amount))\n" +
+                        "       SELECT SUM(IFNULL(prod.Price*prod.Quantity/1000.0, t.Amount))\n" +
                         "       FROM (\n" +
-                        "           SELECT log_Transactions.*, ref_Accounts.Currency\n" +
+                        "           SELECT log_Transactions.*, ref_Accounts.CurrencyId AS Currency\n" +
                         "           FROM log_Transactions, ref_Accounts\n" +
-                        "           WHERE SrcAccount = ref_Accounts._id AND log_Transactions.Deleted = 0 AND IsClosed = 0) as t\n" +
-                        "       LEFT JOIN log_Products prod ON t._id = prod.TransactionID AND prod.Deleted = 0 \n" +
+                        "           WHERE SrcAccountId = ref_Accounts._id AND log_Transactions.Deleted = 0 AND IsClosed = 0) as t\n" +
+                        "       LEFT JOIN log_Products prod ON t._id = prod.TransactionId AND prod.Deleted = 0 \n" +
                         "       WHERE\n" +
-                        "           (ref_Categories._id = CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END)\n" +
+                        "           (ref_Categories._id = CASE WHEN prod.CategoryId IS NULL THEN t.CategoryId ELSE prod.CategoryId END)\n" +
                         "           AND (Currency = ref_Currencies._id)\n" +
-                        "           AND (DestAccount < 0)\n" +
+                        "           AND (DestAccountId IS NULL)\n" +
                         "           AND (DateTime >= %s)\n" +
                         "           AND (DateTime <= %s)\n" +
                         "           AND ref_Categories.Deleted = 0\n" +
-                        "   ), 0)) AS Fact\n" +
+                        "   ), 0)) / " + divisor + " AS Fact\n" +
                         "FROM ref_Categories, ref_Currencies\n" +
-                        "LEFT OUTER JOIN (SELECT * FROM ref_budget WHERE Deleted = 0) AS c ON ref_Categories._id = c.Category\n" +
+                        "LEFT OUTER JOIN (SELECT * FROM ref_budget WHERE Deleted = 0) AS c ON ref_Categories._id = c.CategoryId\n" +
                         "WHERE ref_Categories.Deleted = 0 AND ref_Currencies.Deleted = 0",
                 String.valueOf(year), String.valueOf(month), String.valueOf(start.getTime()), String.valueOf(end.getTime()));
 

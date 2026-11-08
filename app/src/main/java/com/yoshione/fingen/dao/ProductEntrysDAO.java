@@ -6,8 +6,11 @@ import android.util.Pair;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
+import com.yoshione.fingen.managers.CurrencyScale;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.model.Product;
 import com.yoshione.fingen.model.ProductEntry;
 import com.yoshione.fingen.utils.Translit;
@@ -48,12 +51,12 @@ public class ProductEntrysDAO extends BaseDAO implements AbstractDAO, IDaoInheri
         productEntry.setID(cursor.getLong(mColumnIndexes.get(DBHelper.C_ID)));
         productEntry.setProductID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_PRODUCTID)));
         productEntry.setTransactionID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_TRANSACTIONID)));
-        productEntry.setCategoryID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_CATEGORY_ID)));
-        productEntry.setProjectID(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_PROJECT_ID)));
-        productEntry.setPrice(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_PRICE))).setScale(2, RoundingMode.HALF_UP));
-        productEntry.setQuantity(new BigDecimal(cursor.getDouble(mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_QUANTITY))));
+        productEntry.setCategoryID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_CATEGORY_ID)));
+        productEntry.setProjectID(DbRefs.getRef(cursor, mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_PROJECT_ID)));
+        productEntry.setPrice(CurrencyScale.fromMinor(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_PRICE)),
+                CurrencyScale.forTransaction(mDatabase, productEntry.getTransactionID())));
+        productEntry.setQuantity(CurrencyScale.fromQuantity(cursor.getLong(mColumnIndexes.get(DBHelper.C_LOG_PRODUCTS_QUANTITY))));
 
-        productEntry = (ProductEntry) DBHelper.getSyncDataFromCursor(productEntry, cursor, mColumnIndexes);
 
         return productEntry;
     }
@@ -81,10 +84,10 @@ public class ProductEntrysDAO extends BaseDAO implements AbstractDAO, IDaoInheri
 
     public long getLastCategoryID(String productName) {
         long lastCategoryID = -1;
-        String sql = "SELECT CategoryID\n" +
+        String sql = "SELECT p.CategoryId\n" +
                 "FROM log_Products as p \n" +
-                "LEFT OUTER JOIN log_Transactions t ON CategoryID = Category AND t.[_id] = TransactionID\n" +
-                "INNER JOIN ref_Products rp ON p.[_id] = ProductID\n" +
+                "LEFT OUTER JOIN log_Transactions t ON p.CategoryId = t.CategoryId AND t.[_id] = p.TransactionId\n" +
+                "INNER JOIN ref_Products rp ON rp.[_id] = p.ProductId\n" +
                 "WHERE rp.SearchString = '"+ Translit.toTranslit(productName).toLowerCase().replaceAll("'", "''") + "'\n" +
                 "ORDER BY t.DateTime DESC\n" +
                 "LIMIT 1";
@@ -98,7 +101,7 @@ public class ProductEntrysDAO extends BaseDAO implements AbstractDAO, IDaoInheri
             try {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
-                        lastCategoryID = cursor.getLong(0);
+                        lastCategoryID = DbRefs.getRef(cursor, 0);
                         cursor.moveToNext();
                     }
                 }
@@ -111,9 +114,9 @@ public class ProductEntrysDAO extends BaseDAO implements AbstractDAO, IDaoInheri
 
     public long getLastProjectID(long productEntryID) {
         long lastProjectID = -1;
-        String sql = "SELECT ProjectID\n" +
+        String sql = "SELECT p.ProjectId\n" +
                 "FROM log_Products as p \n" +
-                "LEFT OUTER JOIN log_Transactions t ON ProjectID = Project AND t.[_id] = TransactionID\n" +
+                "LEFT OUTER JOIN log_Transactions t ON p.ProjectId = t.ProjectId AND t.[_id] = p.TransactionId\n" +
                 "WHERE p.[_id] = "+ String.valueOf(productEntryID) + "\n" +
                 "ORDER BY t.DateTime DESC\n" +
                 "LIMIT 1";
@@ -127,7 +130,7 @@ public class ProductEntrysDAO extends BaseDAO implements AbstractDAO, IDaoInheri
             try {
                 if (cursor.moveToFirst()) {
                     while (!cursor.isAfterLast()) {
-                        lastProjectID = cursor.getLong(0);
+                        lastProjectID = DbRefs.getRef(cursor, 0);
                         cursor.moveToNext();
                     }
                 }

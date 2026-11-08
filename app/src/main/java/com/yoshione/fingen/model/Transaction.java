@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.os.Parcel;
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 import java.math.BigDecimal;
@@ -102,7 +103,7 @@ public class Transaction extends BaseModel implements IAbstractModel {
         mAmount = src.getAmount().abs();
         mFromAccountBalance = src.getFromAccountBalance();
         mToAccountBalance = src.getToAccountBalance();
-        mExchangeRate = new BigDecimal(src.getExchangeRate().doubleValue());
+        mExchangeRate = src.getExchangeRate();
         mProjectID = src.getProjectID();
         mSimpleDebtID = src.getSimpleDebtID();
         mLocationID = src.getLocationID();
@@ -420,18 +421,18 @@ public class Transaction extends BaseModel implements IAbstractModel {
         ContentValues values = super.getCV();
 
         values.put(DBHelper.C_LOG_TRANSACTIONS_DATETIME, getDateTime().getTime());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT, getAccountID());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_PAYEE, getPayeeID());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_CATEGORY, getCategoryID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT, getAccountID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TRANSACTIONS_PAYEE, getPayeeID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TRANSACTIONS_CATEGORY, getCategoryID());
         values.put(DBHelper.C_LOG_TRANSACTIONS_AMOUNT, getAmount().doubleValue());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_EXCHANGERATE, getExchangeRate().doubleValue());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_PROJECT, getProjectID());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_SIMPLEDEBT, getSimpleDebtID());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_DEPARTMENT, getDepartmentID());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_LOCATION, getLocationID());
+        values.put(DBHelper.C_LOG_TRANSACTIONS_EXCHANGERATE, getExchangeRate().toPlainString());
+        DbRefs.putRef(values, DBHelper.C_LOG_TRANSACTIONS_PROJECT, getProjectID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TRANSACTIONS_SIMPLEDEBT, getSimpleDebtID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TRANSACTIONS_DEPARTMENT, getDepartmentID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TRANSACTIONS_LOCATION, getLocationID());
         values.put(DBHelper.C_LOG_TRANSACTIONS_COMMENT, getComment());
         values.put(DBHelper.C_LOG_TRANSACTIONS_FILE, getFile());
-        values.put(DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT, getDestAccountID());
+        DbRefs.putRef(values, DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT, getDestAccountID());
         values.put(DBHelper.C_LOG_TRANSACTIONS_AUTOCREATED, isAutoCreated() ? 1 : 0);
         values.put(DBHelper.C_LOG_TRANSACTIONS_LAT, getLat());
         values.put(DBHelper.C_LOG_TRANSACTIONS_LON, getLon());

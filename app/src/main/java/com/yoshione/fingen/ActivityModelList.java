@@ -34,6 +34,10 @@ public class ActivityModelList extends ToolbarActivity implements SearchView.OnQ
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (isFinishing()) {
+            // Redirected to the DB upgrade screen
+            return;
+        }
         mBinding = ActivityModelListBinding.bind(getContentRoot());
         container = mBinding.container;
         if (getIntent().getAction() != null && getIntent().getAction().equals(FgConst.ACT_SHOW_TEMPLATES)) {

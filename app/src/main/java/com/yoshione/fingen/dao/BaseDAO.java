@@ -10,7 +10,10 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.db.IOnConflict;
+import com.yoshione.fingen.db.RunningBalance;
+import com.yoshione.fingen.managers.CurrencyScale;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 import com.yoshione.fingen.interfaces.IDaoInheritor;
 import com.yoshione.fingen.model.Account;
@@ -38,6 +41,7 @@ import com.yoshione.fingen.model.Transaction;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -233,23 +237,6 @@ public class BaseDAO implements AbstractDAO {
         return modelList;
     }
 
-    @Override
-    /*synchronized*/ public long getLastTS() {
-        if (mTableName.isEmpty()) return -1;
-        long ts;
-        Cursor cursor = mDatabase.query(mTableName, new String[]{String.format("IFNULL(MAX(%s), -1) AS %s", DBHelper.C_SYNC_TS, DBHelper.C_SYNC_TS)},
-                null, null, null, null, null);
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            ts = cursor.getLong(0);
-        } else {
-            ts = -1;
-        }
-        cursor.close();
-
-        return ts;
-    }
-
     public long getModelCount() {
         if (mTableName.isEmpty()) return 0;
         int count;
@@ -329,24 +316,6 @@ public class BaseDAO implements AbstractDAO {
         return model;
     }
 
-    /*synchronized*/
-    public long getIDByFBID(String FBID) {
-        if (mTableName.isEmpty() || FBID.isEmpty()) return -1;
-        long id;
-        Cursor cursor = mDatabase.query(mTableName, new String[]{C_ID},
-                String.format("%s = '%s'", DBHelper.C_SYNC_FBID, FBID),
-                null, null, null, null);
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            id = cursor.getLong(mColumnIndexes.get(C_ID));
-        } else {
-            id = -1;
-        }
-        cursor.close();
-
-        return id;
-    }
-
     //regio1 Create
     private IAbstractModel createItem(IAbstractModel model) throws Exception {
         long insertId = createItem(model.getCV(), model.getID(), true);
@@ -356,9 +325,6 @@ public class BaseDAO implements AbstractDAO {
 
     @Override
     public IAbstractModel createModel(IAbstractModel model) throws Exception {
-        if (model.getTS() > 0) {
-            model.setTS(-1);
-        }
         int operation = model.getID() < 0 ? Events.MODEL_ADDED : Events.MODEL_CHANGED;
         IAbstractModel newModel = createItem(model);
         EventBus.getDefault().postSticky(new Events.EventOnModelChanged(Collections.singletonList(newModel), model.getModelType(), operation));
@@ -418,11 +384,72 @@ public class BaseDAO implements AbstractDAO {
         }
     }
 
-    private long insertOrUpdateItem(ContentValues cv, long id, boolean updateDependencies) throws Exception {
-        //Нужно для совместимости. Поле знак удалено из java, но осталось в БД
-        if (mTableName.equals(DBHelper.T_REF_CATEGORIES)) {
-            cv.put(DBHelper.C_REF_CATEGORIES_SIGN, 1);
+    /**
+     * Переводит денежные колонки cv из десятичных значений (так их кладут модели) в минорные единицы валюты счета:
+     * суммы - ×10^знаки, курс - ×10^6, количество - ×10^3.
+     */
+    private void toStorage(ContentValues cv) {
+        switch (mTableName) {
+            case DBHelper.T_REF_ACCOUNTS: {
+                int digits = CurrencyScale.forCurrency(mDatabase, getLongOrDefault(cv, DBHelper.C_REF_ACCOUNTS_CURRENCY));
+                putMinor(cv, DBHelper.C_REF_ACCOUNTS_STARTBALANCE, digits);
+                putMinor(cv, DBHelper.C_REF_ACCOUNTS_CREDITLIMIT, digits);
+                break;
+            }
+            case DBHelper.T_REF_SIMPLEDEBTS: {
+                int digits = CurrencyScale.forCurrency(mDatabase, getLongOrDefault(cv, DBHelper.C_REF_SIMPLEDEBTS_CABBAGE));
+                putMinor(cv, DBHelper.C_REF_SIMPLEDEBTS_START_AMOUNT, digits);
+                break;
+            }
+            case DBHelper.T_LOG_BUDGET: {
+                int digits = CurrencyScale.forCurrency(mDatabase, getLongOrDefault(cv, DBHelper.C_LOG_BUDGET_CURRENCY));
+                putMinor(cv, DBHelper.C_LOG_BUDGET_AMOUNT, digits);
+                break;
+            }
+            case DBHelper.T_LOG_BUDGET_DEBTS: {
+                int digits = CurrencyScale.forDebt(mDatabase, getLongOrDefault(cv, DBHelper.C_LOG_BUDGET_DEBTS_CREDIT));
+                putMinor(cv, DBHelper.C_LOG_BUDGET_DEBTS_AMOUNT, digits);
+                break;
+            }
+            case DBHelper.T_LOG_TRANSACTIONS: {
+                int digits = CurrencyScale.forAccount(mDatabase, getLongOrDefault(cv, DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT));
+                putMinor(cv, DBHelper.C_LOG_TRANSACTIONS_AMOUNT, digits);
+                putScaled(cv, DBHelper.C_LOG_TRANSACTIONS_EXCHANGERATE, CurrencyScale.RATE_DIGITS);
+                break;
+            }
+            case DBHelper.T_LOG_TEMPLATES: {
+                int digits = CurrencyScale.forAccount(mDatabase, getLongOrDefault(cv, DBHelper.C_LOG_TEMPLATES_SRCACCOUNT));
+                putMinor(cv, DBHelper.C_LOG_TEMPLATES_AMOUNT, digits);
+                putScaled(cv, DBHelper.C_LOG_TEMPLATES_EXCHANGERATE, CurrencyScale.RATE_DIGITS);
+                break;
+            }
+            case DBHelper.T_LOG_PRODUCTS: {
+                int digits = CurrencyScale.forTransaction(mDatabase, getLongOrDefault(cv, DBHelper.C_LOG_PRODUCTS_TRANSACTIONID));
+                putMinor(cv, DBHelper.C_LOG_PRODUCTS_PRICE, digits);
+                putScaled(cv, DBHelper.C_LOG_PRODUCTS_QUANTITY, CurrencyScale.QUANTITY_DIGITS);
+                break;
+            }
         }
+    }
+
+    private static long getLongOrDefault(ContentValues cv, String column) {
+        Long value = cv.getAsLong(column);
+        return value == null ? -1 : value;
+    }
+
+    private static void putMinor(ContentValues cv, String column, int digits) {
+        putScaled(cv, column, digits);
+    }
+
+    private static void putScaled(ContentValues cv, String column, int digits) {
+        if (!cv.containsKey(column)) return;
+        String text = cv.getAsString(column);
+        if (text == null) return;
+        cv.put(column, CurrencyScale.toMinor(new BigDecimal(text), digits));
+    }
+
+    private long insertOrUpdateItem(ContentValues cv, long id, boolean updateDependencies) throws Exception {
+        toStorage(cv);
         long result;
 
         //<editor-fold desc="Отменяем изменения в кэше балансов, сделанные предыдущей версией транзакции, если она уже была в БД">
@@ -433,20 +460,24 @@ public class BaseDAO implements AbstractDAO {
                                 DBHelper.C_LOG_TRANSACTIONS_DATETIME, DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT,
                                 DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT, DBHelper.C_LOG_TRANSACTIONS_EXCHANGERATE},
                         DBHelper.C_ID + " = " + String.valueOf(id), null, null, null, null);
-                if (cursor.getCount() > 0) {
-                    cursor.moveToFirst();
-                    double amount = cursor.getDouble(0);
-                    long dateTime = cursor.getLong(1);
-                    long srcAccountID = cursor.getLong(2);
-                    long destAccountID = cursor.getLong(3);
-                    double exRate = cursor.getDouble(4);
-                    updateBalance(true, amount, -1, srcAccountID, id, dateTime);
+                try {
+                    if (cursor.moveToFirst()) {
+                        long amount = cursor.getLong(0);
+                        long dateTime = cursor.getLong(1);
+                        long srcAccountID = cursor.getLong(2);
+                        long destAccountID = DbRefs.getRef(cursor, 3);
+                        long exRate = cursor.getLong(4);
+                        updateBalance(true, amount, -1, srcAccountID, id, dateTime);
 
-                    if (destAccountID >= 0) {
-                        updateBalance(true, amount * exRate, 1, destAccountID, id, dateTime);
+                        if (destAccountID >= 0) {
+                            updateBalance(true, -RunningBalance.destAmountMinor(amount, exRate,
+                                    CurrencyScale.forAccount(mDatabase, srcAccountID),
+                                    CurrencyScale.forAccount(mDatabase, destAccountID)), 1, destAccountID, id, dateTime);
+                        }
                     }
+                } finally {
+                    cursor.close();
                 }
-                cursor.close();
                 //Откатываем все изменения, которые были сделаны этой транзакцией
             }
         }
@@ -462,19 +493,25 @@ public class BaseDAO implements AbstractDAO {
             result = id;
         }
 
+        if (mTableName.equals(DBHelper.T_REF_ACCOUNTS) || mTableName.equals(DBHelper.T_REF_CURRENCIES)) {
+            CurrencyScale.invalidate();
+        }
+
         if (updateDependencies) {
             //<editor-fold desc="Добавляем сумму транзакции к кэшам балансов">
             if (mTableName.equals(DBHelper.T_LOG_TRANSACTIONS)) {
-                double amount = cv.getAsDouble(DBHelper.C_LOG_TRANSACTIONS_AMOUNT);
-                double exRate = cv.getAsDouble(DBHelper.C_LOG_TRANSACTIONS_EXCHANGERATE);
+                long amount = cv.getAsLong(DBHelper.C_LOG_TRANSACTIONS_AMOUNT);
+                long exRate = cv.getAsLong(DBHelper.C_LOG_TRANSACTIONS_EXCHANGERATE);
                 long srcAccountID = cv.getAsLong(DBHelper.C_LOG_TRANSACTIONS_SRCACCOUNT);
-                long destAccountID = cv.getAsLong(DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT);
+                long destAccountID = getLongOrDefault(cv, DBHelper.C_LOG_TRANSACTIONS_DESTACCOUNT);
                 long dateTime = cv.getAsLong(DBHelper.C_LOG_TRANSACTIONS_DATETIME);
 
                 updateBalance(false, amount, 1, srcAccountID, result, dateTime);
 
                 if (destAccountID >= 0) {
-                    updateBalance(false, amount * exRate, -1, destAccountID, result, dateTime);
+                    updateBalance(false, -RunningBalance.destAmountMinor(amount, exRate,
+                            CurrencyScale.forAccount(mDatabase, srcAccountID),
+                            CurrencyScale.forAccount(mDatabase, destAccountID)), -1, destAccountID, result, dateTime);
                 }
             }
             //</editor-fold>
@@ -502,7 +539,10 @@ public class BaseDAO implements AbstractDAO {
         return result;
     }
 
-    void updateBalance(boolean revert, double amount, int mult, long accountId, long transactionID, long dateTime) {
+    /**
+     * @param amount сумма в минорных единицах валюты счета
+     */
+    void updateBalance(boolean revert, long amount, int mult, long accountId, long transactionID, long dateTime) {
         //Учесть измение стартового баланса!!!
         String fieldName;
         if (amount * mult > 0) {
@@ -521,15 +561,15 @@ public class BaseDAO implements AbstractDAO {
 
         String sql;
         if (!revert) {
-            sql = "INSERT OR REPLACE INTO log_Running_Balance (AccountID, TransactionID, DateTimeRB, Income, Expense) VALUES("
+            sql = "INSERT OR REPLACE INTO log_Running_Balance (AccountId, TransactionId, DateTime, Income, Expense) VALUES("
                     + String.valueOf(accountId) + ", " + String.valueOf(transactionID) + ", " + String.valueOf(dateTime) + ", "
-                    + "IFNULL((SELECT Income FROM log_Running_Balance WHERE AccountID = " + String.valueOf(accountId) + " AND DateTimeRB <= " + String.valueOf(dateTime) + " ORDER BY DateTimeRB DESC LIMIT 1), 0), "
-                    + "IFNULL((SELECT Expense FROM log_Running_Balance WHERE AccountID = " + String.valueOf(accountId) + " AND DateTimeRB <= " + String.valueOf(dateTime) + " ORDER BY DateTimeRB DESC LIMIT 1), 0))";
+                    + "IFNULL((SELECT Income FROM log_Running_Balance WHERE AccountId = " + String.valueOf(accountId) + " AND DateTime <= " + String.valueOf(dateTime) + " ORDER BY DateTime DESC LIMIT 1), 0), "
+                    + "IFNULL((SELECT Expense FROM log_Running_Balance WHERE AccountId = " + String.valueOf(accountId) + " AND DateTime <= " + String.valueOf(dateTime) + " ORDER BY DateTime DESC LIMIT 1), 0))";
             mDatabase.execSQL(sql);
         }
 
         sql = "UPDATE log_Running_Balance SET " + fieldName + " = " + fieldName + " + " + String.valueOf(amount * mult)
-                + " WHERE AccountID = " + String.valueOf(accountId) + " AND DateTimeRB >= " + String.valueOf(dateTime);
+                + " WHERE AccountId = " + String.valueOf(accountId) + " AND DateTime >= " + String.valueOf(dateTime);
         mDatabase.execSQL(sql);
     }
 
@@ -545,7 +585,6 @@ public class BaseDAO implements AbstractDAO {
         for (IAbstractModel model : inputModels) {
             cv.clear();
             cv.putAll(contentValues);
-            if (resetTS) cv.put(DBHelper.C_SYNC_TS, -1);
             mDatabase.update(mTableName, cv, String.format("%s = %s", C_ID, String.valueOf(model.getID())), null);
             outputModels.add(getModelById(model.getID()));
         }
@@ -560,12 +599,8 @@ public class BaseDAO implements AbstractDAO {
         int maxDel = DBHelper.getMaxDel(mDatabase, mTableName);
         ContentValues cv = new ContentValues();
         cv.put(C_SYNC_DELETED, ++maxDel);
-        if (resetTS) {
-            cv.put(DBHelper.C_SYNC_TS, -1);
-        } else {
-            cv.put(DBHelper.C_SYNC_TS, model.getTS());
-        }
         mDatabase.update(mTableName, cv, String.format("%s = %s", C_ID, String.valueOf(model.getID())), null);
+        invalidateCurrencyScale();
 
         model.setDeleted(true);
         Events.EventOnModelChanged event = new Events.EventOnModelChanged(Collections.singletonList(model), model.getModelType(), Events.MODEL_DELETED);
@@ -589,11 +624,11 @@ public class BaseDAO implements AbstractDAO {
         for (IAbstractModel model : models) {
             cv.clear();
             cv.put(C_SYNC_DELETED, ++maxDel);
-            if (resetTS) cv.put(DBHelper.C_SYNC_TS, -1);
             mDatabase.update(mTableName, cv, String.format("%s = %s", C_ID, String.valueOf(model.getID())), null);
             model.setDeleted(true);
             deletedModels.add(model);
         }
+        invalidateCurrencyScale();
         if (!isTransactionOpened) {
             mDatabase.setTransactionSuccessful();
             mDatabase.endTransaction();
@@ -607,6 +642,12 @@ public class BaseDAO implements AbstractDAO {
     public void deleteAllModels() {
         List<IAbstractModel> models = getModels("*");
         bulkDeleteModel(models, true);
+    }
+
+    private void invalidateCurrencyScale() {
+        if (mTableName.equals(DBHelper.T_REF_ACCOUNTS) || mTableName.equals(DBHelper.T_REF_CURRENCIES)) {
+            CurrencyScale.invalidate();
+        }
     }
 
     //regio1 Service

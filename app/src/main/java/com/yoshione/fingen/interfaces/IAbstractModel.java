@@ -44,12 +44,6 @@ public interface IAbstractModel extends Parcelable, Comparable<IAbstractModel> {
     void setID(long id);
     int getModelType();
 
-    long getTS();
-    void setTS(long TS);
-
-    String getFBID();
-    void setFBID(String fbid);
-
     boolean isDeleted();
     void setDeleted(boolean deleted);
 

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.yoshione.fingen.ActivityEditTransaction;
 import com.yoshione.fingen.dao.AccountsDAO;
@@ -14,6 +15,7 @@ import com.yoshione.fingen.dao.ProjectsDAO;
 import com.yoshione.fingen.dao.SendersDAO;
 import com.yoshione.fingen.dao.TemplatesDAO;
 import com.yoshione.fingen.dao.TransactionsDAO;
+import com.yoshione.fingen.db.DbUpgradeGate;
 import com.yoshione.fingen.managers.TransactionManager;
 import com.yoshione.fingen.model.Category;
 import com.yoshione.fingen.model.Payee;
@@ -34,10 +36,16 @@ import java.util.Date;
  *
  */
 public class CustomIntentReceiver extends BroadcastReceiver {
+    private static final String TAG = "CustomIntentReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         if (action != null) {
+            if (DbUpgradeGate.needsUpgrade(context)) {
+                Log.w(TAG, "Intent ignored: DB upgrade is pending");
+                return;
+            }
             if (action.equals("com.yoshione.fingen.intent.action.CREATE_SMS")) {
                 String senderName = intent.getStringExtra("sender");
                 long senderID = -1;

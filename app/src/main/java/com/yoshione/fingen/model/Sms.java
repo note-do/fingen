@@ -6,6 +6,7 @@ import android.os.Parcel;
 
 
 import com.yoshione.fingen.DBHelper;
+import com.yoshione.fingen.db.DbRefs;
 import com.yoshione.fingen.interfaces.IAbstractModel;
 
 import java.text.DateFormat;
@@ -52,22 +53,8 @@ public class Sms extends BaseModel implements IAbstractModel {
         this.mDateTime = mDateTime;
     }
 
-    private String getmDateTimeAsStringForSql() {
-
-        @SuppressLint("SimpleDateFormat") DateFormat df = new SimpleDateFormat("yyyyMMdd  HH:mm");
-        return df.format(mDateTime);
-    }
-
-    public void setmDateTimeFromDbString(String mDateTime) {
-
-        @SuppressLint("SimpleDateFormat") DateFormat df = new SimpleDateFormat("yyyyMMdd  HH:mm");
-        Date date = new Date();
-        try {
-            date = df.parse(mDateTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        this.mDateTime = date;
+    public void setmDateTimeFromDb(long utcMillis) {
+        this.mDateTime = new Date(utcMillis);
     }
 
     public long getSenderId() {
@@ -138,8 +125,8 @@ public class Sms extends BaseModel implements IAbstractModel {
     public ContentValues getCV() {
         ContentValues values = super.getCV();
 
-        values.put(DBHelper.C_LOG_INCOMING_SMS_DATETIME, getmDateTimeAsStringForSql());
-        values.put(DBHelper.C_LOG_INCOMING_SMS_SENDER, getSenderId());
+        values.put(DBHelper.C_LOG_INCOMING_SMS_DATETIME, mDateTime.getTime());
+        DbRefs.putRef(values, DBHelper.C_LOG_INCOMING_SMS_SENDER, getSenderId());
         values.put(DBHelper.C_LOG_INCOMING_SMS_BODY, getmBody());
         return values;
     }
