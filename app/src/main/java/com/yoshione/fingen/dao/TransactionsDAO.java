@@ -436,11 +436,11 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                 "   Amount > 0 AS Income,\n " +
                 "   IFNULL(a.Currency = b.Currency AND DestAccount IN(" + filteredAccountsString + "), 0) AS ExcludeTransfer\n" +
                 "FROM log_Transactions AS t\n" +
-                "   LEFT JOIN log_Products prod ON t._id = prod.[TransactionID] \n" +
+                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionID AND prod.Deleted = 0 \n" +
                 "   LEFT OUTER JOIN ref_Accounts AS a ON t.SrcAccount = a._id\n" +
                 "   LEFT OUTER JOIN ref_Accounts AS b ON t.DestAccount = b._id\n" +
                 "WHERE\n" +
-                "   t.Deleted = 0 AND (prod.TransactionID IS NULL OR prod.Deleted = 0)\n" +
+                "   t.Deleted = 0\n" +
                 "   AND (SrcAccount != DestAccount) " + filterSrc
                     .replaceAll("Category","CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END")
                     .replaceAll("Project", "CASE WHEN IFNULL(prod.ProjectID, -1) < 0 THEN t.Project  ELSE prod.ProjectID  END")
@@ -519,7 +519,7 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                 "   d.SearchString   AS DepartmentName,\n" +
                 "   l.SearchString   AS LocationName\n" +
                 "FROM log_Transactions AS t\n" +
-                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionID \n" +
+                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionID AND prod.Deleted = 0 \n" +
                 "   LEFT OUTER JOIN ref_Accounts AS a ON t.SrcAccount = a._id\n" +
                 "   LEFT OUTER JOIN ref_Accounts AS b ON t.DestAccount = b._id\n" +
                 "   LEFT OUTER JOIN ref_Categories AS c ON CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END = c._id\n" +
@@ -528,7 +528,7 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
                 "   LEFT OUTER JOIN ref_Projects AS pr ON CASE WHEN IFNULL(prod.ProjectID, -1) < 0 THEN t.Project ELSE prod.ProjectID END = pr._id\n" +
                 "   LEFT OUTER JOIN ref_SimpleDebts AS s ON t.SimpleDebt = s._id\n" +
                 "   LEFT OUTER JOIN ref_Departments AS d ON t.Department = d._id\n" +
-                "WHERE t.Deleted = 0 AND (prod.TransactionID IS NULL OR prod.Deleted = 0)\n" +
+                "WHERE t.Deleted = 0\n" +
                 "   AND (SrcAccount != DestAccount) " + filterSrc
                     .replaceAll("Category","CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END")
                     .replaceAll("Project", "CASE WHEN IFNULL(prod.ProjectID, -1) < 0 THEN t.Project  ELSE prod.ProjectID  END")
@@ -603,7 +603,7 @@ public class TransactionsDAO extends BaseDAO implements AbstractDAO, IDaoInherit
         sql = "CREATE TEMP TABLE " + DBHelper.T_SEARCH_TRANSACTIONS + " AS \n" +
                 "SELECT t.*\n" +
                 "FROM log_Transactions AS t " +
-                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionID \n" +
+                "   LEFT JOIN log_Products prod ON t._id = prod.TransactionID AND prod.Deleted = 0 \n" +
                 "   LEFT OUTER JOIN ref_Accounts    AS a  ON t.SrcAccount   = a._id\n" +
                 "   LEFT OUTER JOIN ref_Categories AS c ON CASE WHEN IFNULL(prod.CategoryID, -1) < 0 THEN t.Category ELSE prod.CategoryID END = c._id\n" +
 //                "   LEFT OUTER JOIN ref_Categories  AS c  ON t.Category     = c._id\n" +
