@@ -124,7 +124,9 @@ public class FixtureDbTest {
         SQLiteDatabase db = DBHelper.getInstance(context).getReadableDatabase();
         assertEquals(0, count(db, "SELECT COUNT(*) FROM log_Transactions WHERE DateTime > " + endOfAnchorDay
                 + " OR DateTime < " + beforeSpan));
-        assertEquals(0, count(db, "SELECT COUNT(*) FROM log_Incoming_SMS WHERE DateTime > " + endOfAnchorDay));
+        // SMS dates are text "yyyyMMdd  HH:mm"
+        String anchorDay = new java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(new java.util.Date(spec.anchorMillis));
+        assertEquals(0, count(db, "SELECT COUNT(*) FROM log_Incoming_SMS WHERE SUBSTR(DateTime, 1, 8) > '" + anchorDay + "'"));
     }
 
     @Test

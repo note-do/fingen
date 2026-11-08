@@ -88,6 +88,22 @@ Android-приложение учёта доходов и расходов. Па
 - Суммы сводки, отчётов и план/факт бюджета (`TransactionsDAO.createTempTransactionsTable`, `createSearchTransactionsTable`, `CategoriesDAO`) берутся через `LEFT JOIN log_Products`: транзакция без строки товара учитывается со своей суммой (`IFNULL(prod.Price*prod.Quantity, t.Amount)`). Тест — `TransactionsWithoutProductsTest`.
 - Тесты ДАО — проверка сохранения счетов и транзакций; при падении NPE в `DBHelper.updateFullNames` или `createItem` смотреть `SearchString` и закрытие транзакции.
 
+## Тестовые фикстуры
+
+Код — `app/src/androidTest/java/com/yoshione/fingen/fixture/`, готовые базы — `app/src/androidTest/assets/fixtures/<имя>.db` (схема версии 35, `DATABASE_VERSION`). Тесты фикстуры вынесены в отдельный прогон и в основной не входят (команды — в «Сборка и тесты»). Любой из них заменяет `fingen.db` приложения под тестом.
+
+- Генератор один: `FixtureDb.build(ctx, Spec)` — чистая схема через `DBHelper.onCreate`, данные через DAO приложения (`createModel` и т. д.), затем `FixtureDb.verify(ctx, spec)` (счётчики, внешние ключи, `log_Products`, суммы) и, при `coverSummaryPeriods`, `verifySummaryPeriods`. `Spec` — количества по таблицам, `seed`, `anchorMillis`, `spanDays`. Одинаковый `seed` и день якоря дают одинаковые данные.
+- Даты только от текущей даты устройства (локальная зона): `anchorMillis` по умолчанию — текущее время, транзакции идут назад от дня якоря, даты SMS и месяцы бюджета — тоже. Тесты не должны зависеть от конкретной даты.
+- Варианты (`FixtureDb.VARIANTS`, `FixtureDb.variantSpec(имя)`), тест берёт готовый через `FixtureDb.copyFixture(ctx, имя)`, без генерации на лету:
+  - `summary` (`Spec.summary()`): 90 транзакций (6 удалённых, 6 с разбивкой), остальное как в `default100`; первые 16 транзакций — по доходу и расходу в каждом периоде вкладки Summary;
+  - `default100` (`new Spec()`): по ~100 объектов на тип (24 счёта, 100 получателей, 100 транзакций, из них 8 удалённых, 100 бюджетов, 30 шаблонов, 100 SMS, 100 маркеров парсера);
+  - `small` (`Spec.small()`): 2 счёта, 5 транзакций (1 удалённая), по несколько строк остального — для быстрых тестов.
+- Периоды Summary (`FragmentSummary`, границы — `DateRangeFilter.getRangeStart/getRangeEnd`; неделя с понедельника, если в настройках не выбрано воскресенье; период — полный календарный, а не «до сегодня»): сегодня, вчера, эта и прошлая неделя, этот и прошлый месяц, этот и прошлый год. Вариант `summary` кладёт транзакции в середину первого дня каждого периода (границы считает сам `DateRangeFilter`). Логически пустые периоды не подгоняются: в понедельник «эта неделя» — только сегодня, 1-го числа «этот месяц» — только сегодня, 1 января «этот год» — только сегодня.
+- Привязка к дню: варианты в ассетах привязаны ко дню сборки (даты «старые» на следующий день). Периоды Summary у сохранённой базы заполнены только в день сборки; тест `copyFixture_summary_periodsHaveDataOnTheDayItWasBuilt` в другой день пропускается (`Assume`), а `build_summarySpec_everySummaryPeriodHasIncomeAndExpense` строит базу на лету и проверяет периоды от текущего дня (в том числе через `TransactionsDAO.getSummaryGroupedSumsRx` — те же суммы, что в `FragmentSummary`). Остальные проверки от даты не зависят.
+- Новый вариант или обновление: добавить имя в `FixtureDb.VARIANTS` и ветку в `variantSpec`, затем
+  `./gradlew connectedProdDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.yoshione.fingen.fixture.FixtureVariantsExportTest -Pandroid.testInstrumentationRunnerArguments.exportFixtures=true` (без `exportFixtures=true` тест пропускается); файлы появляются в `/storage/emulated/0/Download/fingen_fixtures/` (MediaStore, переживают удаление приложения). Затем `adb -s emulator-5554 pull /storage/emulated/0/Download/fingen_fixtures/<имя>.db app/src/androidTest/assets/fixtures/<имя>.db`, прогон фикстуры и коммит ассетов.
+- Фикстуры версии 35 можно использовать как основу миграционных фикстур (`db/DatabaseMigrationTest` пока на SQL-фикстурах 16..34).
+
 ## Роль оркестратора
 
 Основная сессия разбирает задачу, решает, кому её отдать, и запускает субагента инструментом Agent (`subagent_type` = имя агента из `.claude/agents/`). Сама код не пишет, если задача укладывается в одного субагента.
@@ -135,7 +151,8 @@ export JAVA_HOME=/opt/homebrew/opt/openjdk@25/libexec/openjdk.jdk/Contents/Home
 
 - `./gradlew assembleDebug` — сборка debug APK (`app/build/outputs/apk/prod/debug/app-prod-debug.apk`).
 - `./gradlew testProdDebugUnitTest` — юнит-тесты (`app/src/test`). Пока тестов нет, задача `NO-SOURCE`.
-- `./gradlew connectedProdDebugAndroidTest` — инструментальные тесты, нужны устройство или эмулятор (`emulator-5554`, AVD `Medium_Phone_API_37.0`). Прогон удаляет установленное приложение с устройства.
+- `./gradlew connectedProdDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.notPackage=com.yoshione.fingen.fixture` — основной прогон инструментальных тестов, без тестов фикстуры; нужны устройство или эмулятор (`emulator-5554`, AVD `Medium_Phone_API_37.0`). Прогон удаляет установленное приложение с устройства. Без `notPackage` в прогон попадут и тесты фикстуры. Если задан `class=...`, `notPackage` не действует (класс из `fixture` запустится).
+- `./gradlew connectedProdDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.package=com.yoshione.fingen.fixture` — отдельный прогон тестов фикстуры (см. «Тестовые фикстуры»).
 - `./gradlew lintDebug` — lint.
 
 Android Studio — только редактор. Сборка и тесты идут через Gradle в терминале.
